@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   await connectDB();
   const { full_name, email, password, user_type } = await req.json();
   const existing = await User.findOne({ email });
-  if (existing) return NextResponse.json({ error: 'User exists' }, { status: 409 });
+  if (existing) return NextResponse.json({ error: 'A user with this email already exists.' }, { status: 409 });
 
   const password_hash = await hashPassword(password);
   const user = await User.create({ full_name, email, password_hash, user_type });

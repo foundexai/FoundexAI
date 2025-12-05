@@ -1,42 +1,61 @@
-import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
 import Startup from '@/lib/models/Startup';
+import { verifyToken } from '@/lib/auth';
 
-function getUserId(req: Request) {
-  const cookie = req.headers.get('cookie') || '';
-  const token = cookie.split('token=')[1];
-  if (!token) throw new Error('No token');
-  const payload: any = verifyToken(token);
-  return payload.id;
-}
 
-export async function GET(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    const userId = getUserId(req);
-    const startup = await Startup.findOne({ user_id: new mongoose.Types.ObjectId(userId) });
-    return NextResponse.json({ startup });
-  } catch (err) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const token = req.headers.get('Authorization')?.split(' ')[1];
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = await verifyToken(token);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const { user } = decoded;
+
+    const { company_name, business_description } = await req.json();
+
+    if (!company_name || !business_description) {
+      return NextResponse.json({ error: 'Company name and business description are required' }, { status: 400 });
+    }
+
+    const newStartup = await Startup.create({
+      user_id: user._id, // Use user._id which is standard for MongoDB documents
+      company_name,
+      business_description,
+    });
+
+    return NextResponse.json({ startup: newStartup }, { status: 201 });
+  } catch (error) {
+    console.error('Error creating startup:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     await connectDB();
-    const userId = getUserId(req);
-    const data = await req.json();
-    let startup = await Startup.findOne({ user_id: new mongoose.Types.ObjectId(userId) });
-    if (startup) {
-      Object.assign(startup, data);
-      await startup.save();
-    } else {
-      startup = await Startup.create({ user_id: new mongoose.Types.ObjectId(userId), ...data });
+    const token = req.headers.get('Authorization')?.split(' ')[1];
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    return NextResponse.json({ startup });
-  } catch (err) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const decoded = await verifyToken(token);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const { user } = decoded;
+
+    const userStartups = await Startup.find({ user_id: user._id }); // Use user._id for the query
+
+    return NextResponse.json({ startups: userStartups });
+  } catch (error) {
+    console.error('Error fetching startups:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

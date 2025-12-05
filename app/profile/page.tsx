@@ -6,9 +6,30 @@ import { uploadImage } from "@/lib/upload";
 import ProfileForm from "@/components/ProfileForm";
 import { toast } from "sonner";
 
+interface Startup {
+  _id: string;
+  company_name: string;
+  business_description: string;
+  sector?: string;
+  mission?: string;
+  vision?: string;
+  business_model?: string;
+  legal_structure?: string;
+  website_url?: string;
+  funding_stage?: string;
+  funding_amount?: number;
+  monthly_burn?: number;
+  cac?: number;
+  ltv?: number;
+  readiness_score?: number;
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [startups, setStartups] = useState<Startup[]>([]);
+  const [editingStartup, setEditingStartup] = useState<Startup | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [profile, setProfile] = useState({
     full_name: "",
     company_name: "",
@@ -24,11 +45,51 @@ export default function ProfilePage() {
   });
   const [uploading, setUploading] = useState(false);
 
+  const fetchStartups = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const startupsRes = await fetch('/api/startups', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (startupsRes.ok) {
+      const startupsData = await startupsRes.json();
+      setStartups(startupsData.startups || []);
+    }
+  };
+
+  const handleDeleteStartup = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this startup?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const res = await fetch(`/api/startups/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (res.ok) {
+      toast.success('Startup deleted successfully!');
+      fetchStartups();
+    } else {
+      toast.error('Failed to delete startup');
+    }
+  };
+
   const handleSave = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Not authenticated');
+      return;
+    }
     try {
       const res = await fetch('/api/investor-profiles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(profile)
       });
       if (res.ok) {
@@ -73,14 +134,27 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch('/api/auth/me');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/');
+        return;
+      }
+      const res = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
 
         if (data.user.user_type === 'investor') {
           // Load investor profile
-          const profileRes = await fetch('/api/investor-profiles');
+          const profileRes = await fetch('/api/investor-profiles', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
           if (profileRes.ok) {
             const profileData = await profileRes.json();
             if (profileData.profile) {
@@ -91,8 +165,16 @@ export default function ProfilePage() {
             }
           }
         } else {
-          // Founders: stay on profile page (they can view/edit their startup profile here)
-          // No redirect needed - founders can access their profile
+          // Founders: fetch startups
+          const startupsRes = await fetch('/api/startups', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (startupsRes.ok) {
+            const startupsData = await startupsRes.json();
+            setStartups(startupsData.startups || []);
+          }
         }
       } else {
         router.push('/');
@@ -121,21 +203,11 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">
+      <main className="py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-8">
             {user?.user_type === 'investor' ? 'My Investor Profile' : 'My Startup Profile'}
           </h1>
-          <div className="flex items-center">
-            <span className="mr-4">{user?.full_name || 'User'}</span>
-            <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
-              {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
-          </div>
-        </div>
-      </header>
-      <main className="py-10">
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           {user?.user_type === 'investor' ? (
             // Investor Profile Form
             <div className="bg-white p-8 rounded-lg shadow">
@@ -301,8 +373,61 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            // Founder Profile Form (using ProfileForm component)
-            <ProfileForm />
+            // Founder Startups Management
+            <div className="bg-white p-8 rounded-lg shadow">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">My Startups</h2>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+                >
+                  Add New Startup
+                </button>
+              </div>
+              {startups.length === 0 ? (
+                <p className="text-gray-500">No startups yet. Click "Add New Startup" to get started.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {startups.map((startup) => (
+                    <div key={startup._id} className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="font-bold text-lg mb-2">{startup.company_name}</h3>
+                      <p className="text-gray-600 text-sm mb-4">{startup.business_description}</p>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => setEditingStartup(startup)}
+                          className="text-yellow-500 hover:text-yellow-600"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStartup(startup._id)}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {(editingStartup || showAddForm) && (
+                <div className="mt-8">
+                  <ProfileForm
+                    startup={editingStartup}
+                    onSave={() => {
+                      setEditingStartup(null);
+                      setShowAddForm(false);
+                      // Refresh startups
+                      fetchStartups();
+                    }}
+                    onCancel={() => {
+                      setEditingStartup(null);
+                      setShowAddForm(false);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           )}
        </div>
      </main>

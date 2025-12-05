@@ -4,15 +4,23 @@ import { connectDB } from '@/lib/db';
 import User from '@/lib/models/User';
 
 export async function GET(req: Request) {
-  const cookie = req.headers.get('cookie') || '';
-  const token = cookie.split('token=')[1];
-  if (!token) return NextResponse.json(null, { status: 401 });
   try {
-    const payload:any = verifyToken(token);
-    await connectDB();
-    const user = await User.findById(payload.id).select('-password_hash');
-    return NextResponse.json({ user });
-  } catch (err) {
-    return NextResponse.json(null, { status: 401 });
+    const token = req.headers.get('Authorization')?.split(' ')[1];
+
+    if (!token) {
+      return NextResponse.json({ error: 'Authentication token not provided.' }, { status: 401 });
+    }
+
+    const decoded = await verifyToken(token);
+
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token.' }, { status: 401 });
+    }
+    
+    return NextResponse.json({ user: decoded.user });
+
+  } catch (error) {
+    console.error('Error verifying token or fetching user:', error);
+    return NextResponse.json({ error: 'Session expired or token is invalid.' }, { status: 401 });
   }
 }

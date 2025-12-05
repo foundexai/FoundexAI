@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import { MobileMenuProvider } from "@/context/MobileMenuContext";
+import Header from "@/components/Header";
+
+const inter = Inter({ subsets: ["latin"] });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,10 +31,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${inter.className} w-full `}>
+        <AuthProvider>
+          <MobileMenuProvider>
+            <Header />
+            {children}
+          </MobileMenuProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

@@ -5,11 +5,14 @@ import { verifyToken } from '@/lib/auth';
 import InvestorProfile from '@/lib/models/InvestorProfile';
 
 function getUserId(req: Request) {
-  const cookie = req.headers.get('cookie') || '';
-  const token = cookie.split('token=')[1];
+  let token = req.headers.get('Authorization')?.split(' ')[1];
+  if (!token) {
+    const cookie = req.headers.get('cookie') || '';
+    token = cookie.split('token=')[1];
+  }
   if (!token) throw new Error('No token');
   const payload: any = verifyToken(token);
-  return payload.id;
+  return payload.user.id;
 }
 
 export async function GET(req: Request) {

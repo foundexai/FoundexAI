@@ -2,45 +2,60 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-export default function ProfileForm() {
+interface ProfileFormProps {
+  startup?: any;
+  onSave?: () => void;
+  onCancel?: () => void;
+}
+
+export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormProps) {
+  const [startupId, setStartupId] = useState<string | null>(startup?._id || null);
   const [form, setForm] = useState({
-    company_name: "",
-    sector: "",
-    mission: "",
-    vision: "",
-    business_description: "",
-    business_model: "",
-    legal_structure: "",
-    website_url: "",
-    funding_stage: "Pre-seed",
-    funding_amount: 0,
-    monthly_burn: 0,
-    cac: 0,
-    ltv: 0,
-    readiness_score: 0
+    company_name: startup?.company_name || "",
+    sector: startup?.sector || "",
+    mission: startup?.mission || "",
+    vision: startup?.vision || "",
+    business_description: startup?.business_description || "",
+    business_model: startup?.business_model || "",
+    legal_structure: startup?.legal_structure || "",
+    website_url: startup?.website_url || "",
+    funding_stage: startup?.funding_stage || "Pre-seed",
+    funding_amount: startup?.funding_amount || 0,
+    monthly_burn: startup?.monthly_burn || 0,
+    cac: startup?.cac || 0,
+    ltv: startup?.ltv || 0,
+    readiness_score: startup?.readiness_score || 0
   });
 
   useEffect(() => {
     async function load() {
-      const r = await fetch('/api/startups');
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const r = await fetch('/api/startups', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       if (r.ok) {
         const data = await r.json();
-        if (data.startup) {
+        if (data.startups && data.startups.length > 0) {
+          const startup = data.startups[0]; // Assuming first startup
+          setStartupId(startup._id);
           setForm({
-            company_name: data.startup.company_name || "",
-            sector: data.startup.sector || "",
-            mission: data.startup.mission || "",
-            vision: data.startup.vision || "",
-            business_description: data.startup.business_description || "",
-            business_model: data.startup.business_model || "",
-            legal_structure: data.startup.legal_structure || "",
-            website_url: data.startup.website_url || "",
-            funding_stage: data.startup.funding_stage || "Pre-seed",
-            funding_amount: data.startup.funding_amount || 0,
-            monthly_burn: data.startup.monthly_burn || 0,
-            cac: data.startup.cac || 0,
-            ltv: data.startup.ltv || 0,
-            readiness_score: data.startup.readiness_score || 0
+            company_name: startup.company_name || "",
+            sector: startup.sector || "",
+            mission: startup.mission || "",
+            vision: startup.vision || "",
+            business_description: startup.business_description || "",
+            business_model: startup.business_model || "",
+            legal_structure: startup.legal_structure || "",
+            website_url: startup.website_url || "",
+            funding_stage: startup.funding_stage || "Pre-seed",
+            funding_amount: startup.funding_amount || 0,
+            monthly_burn: startup.monthly_burn || 0,
+            cac: startup.cac || 0,
+            ltv: startup.ltv || 0,
+            readiness_score: startup.readiness_score || 0
           });
         }
       }
@@ -50,10 +65,29 @@ export default function ProfileForm() {
 
   async function save(e: any) {
     e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Not authenticated');
+      return;
+    }
     try {
-      const res = await fetch('/api/startups', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      let url = '/api/startups';
+      let method = 'POST';
+      if (startupId) {
+        url = `/api/startups/${startupId}`;
+        method = 'PUT';
+      }
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(form)
+      });
       if (res.ok) {
         toast.success('Profile saved successfully!');
+        onSave?.();
       } else {
         toast.error('Failed to save profile');
       }
@@ -222,12 +256,23 @@ export default function ProfileForm() {
           <div className="text-sm text-gray-600">
             Readiness Score: <span className="font-bold text-yellow-600">{form.readiness_score}%</span>
           </div>
-          <button
-            className="bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition-colors"
-            type="submit"
-          >
-            Save Profile
-          </button>
+          <div className="flex space-x-4">
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              className="bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition-colors"
+              type="submit"
+            >
+              Save Profile
+            </button>
+          </div>
         </div>
       </form>
     </div>

@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 
+import { toast } from "sonner";
+
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({ full_name: "", email: "", password: "", user_type: "founder" });
@@ -19,9 +21,13 @@ export default function Home() {
       body: body
     });
     if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      toast.success(isLogin ? 'Login successful!' : 'Registration successful!');
       window.location.href = '/dashboard';
     } else {
-      alert('Error');
+      const data = await res.json();
+      toast.error(data.error || 'An error occurred.');
     }
   }
 
@@ -29,15 +35,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans">
-      <header className="p-6">
-        <div className="flex items-center">
-          <div className="text-2xl font-bold text-gray-800">FoundexAI</div>
-        </div>
-      </header>
       <main className="flex-grow flex items-center justify-center">
         <div className="w-full max-w-md p-8">
           <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">{isLogin ? 'Sign In' : 'Sign Up'}</h1>
-          
+
           <form onSubmit={handleSubmit}>
             {!isLogin && (
               <div className="relative mb-4">
