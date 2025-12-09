@@ -63,7 +63,7 @@ const NameStep = ({ idea, onComplete }: { idea: string, onComplete: (name: strin
   );
 };
 
-export default function Onboarding({ onComplete }: { onComplete: (name: string, idea: string) => void }) {
+export default function Onboarding({ onComplete, onClose }: { onComplete: (name: string, idea: string) => void, onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [idea, setIdea] = useState('');
 
@@ -72,8 +72,17 @@ export default function Onboarding({ onComplete }: { onComplete: (name: string, 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/25 bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white p-10 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all">
+    <div className="fixed inset-0 bg-black/50 bg-opacity-60 flex items-center justify-center z-50 p-4">
+      <div className="bg-white p-10 rounded-xl shadow-2xl w-full max-w-2xl transform transition-all relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="Close modal"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
         {step === 1 && <IdeaStep setIdea={setIdea} nextStep={() => setStep(2)} />}
         {step === 2 && <NameStep idea={idea} onComplete={handleNameSubmit} />}
       </div>

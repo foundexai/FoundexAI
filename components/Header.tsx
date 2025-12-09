@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useMobileMenu } from "@/context/MobileMenuContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -13,11 +14,30 @@ export default function Header() {
   const { user, logout } = useAuth();
   const { toggle } = useMobileMenu();
   const router = useRouter();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
     logout();
     router.push('/');
   };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
     <header className="w-full bg-black/40 shadow-md">
@@ -36,8 +56,8 @@ export default function Header() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341A6.002 6.002 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
               </button>
-              <div className="relative group">
-                <button className="flex items-center space-x-2 text-white hover:text-gray-300">
+              <div className="relative" ref={dropdownRef}>
+                <button onClick={toggleDropdown} className="flex items-center space-x-2 text-white hover:text-gray-300">
                   <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
                     {user.full_name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
@@ -46,7 +66,7 @@ export default function Header() {
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                <div className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 ${isDropdownOpen ? 'block' : 'hidden'}`}>
                   <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
                   <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign Out</button>
                 </div>
@@ -67,13 +87,13 @@ export default function Header() {
             </svg>
           </button>
           {user ? (
-            <div className="relative group">
-              <button className="flex items-center space-x-2 text-white">
+            <div className="relative" ref={dropdownRef}>
+              <button onClick={toggleDropdown} className="flex items-center space-x-2 text-white">
                 <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
                   {user.full_name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+              <div className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 ${isDropdownOpen ? 'block' : 'hidden'}`}>
                 <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</Link>
                 <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
                 <span className="block px-4 py-2 text-sm text-gray-400 cursor-not-allowed opacity-50">Investors</span>

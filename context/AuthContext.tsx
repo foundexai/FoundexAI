@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useEffect, useContext, ReactNode, useCallback } from 'react';
+import { toast } from 'sonner';
 
 interface User {
   id: string;
@@ -59,6 +60,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.removeItem('token');
       setToken(null);
       setUser(null);
+
+      // Show user-friendly toast message for network errors
+      toast.error('Network connection failed. Please check your internet connection and try again.');
     } finally {
       setLoading(false);
     }

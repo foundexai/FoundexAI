@@ -5,18 +5,18 @@ import { verifyToken } from '@/lib/auth';
 import Task from '@/lib/models/Task';
 import Startup from '@/lib/models/Startup';
 
-function getUserId(req: Request) {
-  const cookie = req.headers.get('cookie') || '';
-  const token = cookie.split('token=')[1];
-  if (!token) throw new Error('No token');
-  const payload: any = verifyToken(token);
-  return payload.id;
+async function getUserId(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) throw new Error('No token');
+  const token = authHeader.split(' ')[1];
+  const payload: any = await verifyToken(token);
+  return payload.user._id;
 }
 
 export async function GET(req: Request) {
   try {
     await connectDB();
-    const userId = getUserId(req);
+    const userId = await getUserId(req);
     const startup = await Startup.findOne({ user_id: new mongoose.Types.ObjectId(userId) });
     if (!startup) return NextResponse.json({ tasks: [] });
     const tasks = await Task.find({ startup_id: startup._id });
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const userId = getUserId(req);
+    const userId = await getUserId(req);
     const startup = await Startup.findOne({ user_id: new mongoose.Types.ObjectId(userId) });
     if (!startup) return NextResponse.json({ error: 'No startup' }, { status: 400 });
     const data = await req.json();
