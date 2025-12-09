@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { uploadImage } from "@/lib/upload";
 import ProfileForm from "@/components/ProfileForm";
 import { toast } from "sonner";
+import { User, Pencil, Trash2, Plus, Save, UploadCloud } from 'lucide-react';
 
 interface Startup {
   _id: string;
@@ -202,42 +203,52 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-yellow-50">
       <main className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-8">
-            {user?.user_type === 'investor' ? 'My Investor Profile' : 'My Startup Profile'}
-          </h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              {user?.user_type === 'investor' ? 'My Investor Profile' : 'My Startups'}
+            </h1>
+            {user?.user_type === 'founder' && !showAddForm && !editingStartup && startups.length > 0 && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 flex items-center gap-2 transition-colors"
+              >
+                <Plus className="h-5 w-5" />
+                Add New Startup
+              </button>
+            )}
+          </div>
+
           {user?.user_type === 'investor' ? (
             // Investor Profile Form
-            <div className="bg-white p-8 rounded-lg shadow">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="md:col-span-1 flex flex-col items-center">
-                  <div className="relative w-40 h-40 mb-4">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div className="md:col-span-1 flex flex-col items-center text-center">
+                  <div className="relative w-48 h-48 mb-6">
                     {profile.profile_image_url ? (
                       <img
                         src={profile.profile_image_url}
                         alt="Profile"
-                        className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
+                        className="w-48 h-48 rounded-full object-cover border-4 border-white shadow-lg"
                       />
                     ) : (
-                      <div className="w-40 h-40 bg-gray-200 rounded-full flex items-center justify-center">
-                        <svg className="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.437 4h3.126a2 2 0 011.92.89l.812 1.22a2 2 0 001.664.89H20a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
+                      <div className="w-48 h-48 bg-gray-100 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                        <User className="w-24 h-24 text-gray-400" />
                       </div>
                     )}
                     {uploading && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
                       </div>
                     )}
                   </div>
-                  <label className="cursor-pointer">
-                    <span className="text-sm text-yellow-600 hover:text-yellow-700 font-medium">
-                      {profile.profile_image_url ? 'Change photo' : 'Upload photo'}
-                    </span>
+                  <label className="cursor-pointer bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                    <div className="flex items-center gap-2">
+                      <UploadCloud className="h-6 w-6" />
+                      <span>{profile.profile_image_url ? 'Change Photo' : 'Upload Photo'}</span>
+                    </div>
                     <input
                       type="file"
                       accept="image/*"
@@ -246,46 +257,45 @@ export default function ProfilePage() {
                       disabled={uploading}
                     />
                   </label>
-                  <p className="text-xs text-gray-500 mt-2 text-center">
-                    Allowed formats: JPG, JPEG, PNG<br />
-                    Max file size: 2MB
+                  <p className="text-sm text-gray-500 mt-4">
+                    JPG, PNG up to 2MB
                   </p>
                 </div>
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                     <input
                       type="text"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       placeholder="Enter full name"
                       value={profile.full_name}
                       onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Company name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
                     <input
                       type="text"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       placeholder="Enter company name"
                       value={profile.company_name}
                       onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Website</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
                     <input
                       type="text"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
-                      placeholder="Enter website"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
+                      placeholder="https://example.com"
                       value={profile.website_url}
                       onChange={(e) => setProfile({ ...profile, website_url: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Stage Focus</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stage Focus</label>
                     <select
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       value={profile.stage_focus}
                       onChange={(e) => setProfile({ ...profile, stage_focus: e.target.value })}
                     >
@@ -296,40 +306,40 @@ export default function ProfilePage() {
                       <option value="Growth">Growth</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Thesis</label>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Thesis</label>
                     <textarea
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       placeholder="Enter investment thesis"
-                      rows={3}
+                      rows={4}
                       value={profile.thesis}
                       onChange={(e) => setProfile({ ...profile, thesis: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Geography</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Geography</label>
                     <input
                       type="text"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
-                      placeholder="e.g., North America, Europe, Global"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
+                      placeholder="e.g., North America"
                       value={profile.geography}
                       onChange={(e) => setProfile({ ...profile, geography: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Phone number</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                     <input
                       type="tel"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       placeholder="Enter phone number"
                       value={profile.phone_number}
                       onChange={(e) => setProfile({ ...profile, phone_number: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Type of Company</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Type of Company</label>
                     <select
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       value={profile.company_type}
                       onChange={(e) => setProfile({ ...profile, company_type: e.target.value })}
                     >
@@ -342,20 +352,20 @@ export default function ProfilePage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">LinkedIn URL</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
                     <input
                       type="url"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       placeholder="https://linkedin.com/in/yourprofile"
                       value={profile.linkedin_url}
                       onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Official email</label>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Official email</label>
                     <input
                       type="email"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm placeholder:text-gray-500 text-gray-700"
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent sm:text-sm"
                       placeholder="Enter official email"
                       value={profile.official_email}
                       onChange={(e) => setProfile({ ...profile, official_email: e.target.value })}
@@ -363,47 +373,51 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-8 text-right">
+              <div className="mt-10 flex justify-end">
                 <button
                   onClick={handleSave}
-                  className="bg-yellow-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-yellow-600 transition-colors"
+                  className="bg-yellow-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-yellow-600 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center gap-2"
                 >
+                  <Save className="h-5 w-5" />
                   Save Profile
                 </button>
               </div>
             </div>
           ) : (
             // Founder Startups Management
-            <div className="bg-white p-8 rounded-lg shadow">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">My Startups</h2>
-                <button
-                  onClick={() => setShowAddForm(true)}
-                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
-                >
-                  Add New Startup
-                </button>
-              </div>
-              {startups.length === 0 ? (
-                <p className="text-gray-500">No startups yet. Click "Add New Startup" to get started.</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <>
+              {startups.length === 0 && !showAddForm ? (
+                <div className="text-center bg-white p-16 rounded-lg shadow-lg">
+                  <h3 className="text-2xl font-semibold text-gray-800">No Startups Yet</h3>
+                  <p className="text-gray-500 mt-4 mb-8">Click "Add New Startup" to get started on your journey.</p>
+                  <button
+                    onClick={() => setShowAddForm(true)}
+                    className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 flex items-center gap-2 mx-auto transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+                  >
+                    <Plus className="h-6 w-6" />
+                    Add New Startup
+                  </button>
+                </div>
+              ) : !editingStartup && !showAddForm && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {startups.map((startup) => (
-                    <div key={startup._id} className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-bold text-lg mb-2">{startup.company_name}</h3>
-                      <p className="text-gray-600 text-sm mb-4">{startup.business_description}</p>
-                      <div className="flex justify-between">
+                    <div key={startup._id} className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col hover:shadow-xl transition-shadow duration-300">
+                      <h3 className="font-bold text-xl mb-3 text-gray-900">{startup.company_name}</h3>
+                      <p className="text-gray-600 mb-6 grow">{startup.business_description}</p>
+                      <div className="flex justify-end gap-3 mt-auto">
                         <button
                           onClick={() => setEditingStartup(startup)}
-                          className="text-yellow-500 hover:text-yellow-600"
+                          className="text-gray-500 hover:text-yellow-600 p-2 rounded-full transition-colors duration-300"
+                          title="Edit Startup"
                         >
-                          Edit
+                          <Pencil className="h-6 w-6" />
                         </button>
                         <button
                           onClick={() => handleDeleteStartup(startup._id)}
-                          className="text-red-500 hover:text-red-600"
+                          className="text-gray-500 hover:text-red-600 p-2 rounded-full transition-colors duration-300"
+                          title="Delete Startup"
                         >
-                          Delete
+                          <Trash2 className="h-6 w-6" />
                         </button>
                       </div>
                     </div>
@@ -411,13 +425,12 @@ export default function ProfilePage() {
                 </div>
               )}
               {(editingStartup || showAddForm) && (
-                <div className="mt-8">
+                <div className="bg-white p-8 rounded-lg shadow-lg">
                   <ProfileForm
                     startup={editingStartup}
                     onSave={() => {
                       setEditingStartup(null);
                       setShowAddForm(false);
-                      // Refresh startups
                       fetchStartups();
                     }}
                     onCancel={() => {
@@ -427,10 +440,10 @@ export default function ProfilePage() {
                   />
                 </div>
               )}
-            </div>
+            </>
           )}
-       </div>
-     </main>
-   </div>
- );
+        </div>
+      </main>
+    </div>
+  );
 }

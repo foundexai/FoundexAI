@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { Check, Trash2, Undo } from 'lucide-react';
 
 interface Task {
@@ -10,12 +12,20 @@ interface Task {
 }
 
 export default function TasksPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: '', category: 'Operations' });
 
   useEffect(() => {
-    loadTasks();
-  }, []);
+    if (!loading && !user) {
+      router.push('/');
+      return;
+    }
+    if (user) {
+      loadTasks();
+    }
+  }, [user, loading, router]);
 
   async function loadTasks() {
     const token = localStorage.getItem('token');
@@ -82,7 +92,7 @@ export default function TasksPage() {
           <form onSubmit={addTask}>
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
               <input 
-                className="flex-grow border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 transition-shadow placeholder:text-gray-600 text-gray-800"
+                className="grow border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-500 transition-shadow placeholder:text-gray-600 text-gray-800"
                 placeholder="Task Title" 
                 value={newTask.title} 
                 onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} 

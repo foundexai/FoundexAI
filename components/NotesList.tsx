@@ -78,7 +78,7 @@ export default function NotesList() {
               ))}
             </div>
             <h3 className="font-semibold text-gray-800 mb-1">{note.title}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2 mb-2 flex-grow">{note.content}</p>
+            <p className="text-sm text-gray-600 line-clamp-2 mb-2 grow">{note.content}</p>
             <div className="flex justify-between items-center mt-auto">
               <p className="text-xs text-gray-400">{new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
               <button onClick={() => handleDelete(note._id)} className="text-gray-400 hover:text-red-500">

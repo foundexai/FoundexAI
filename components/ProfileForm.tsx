@@ -98,7 +98,7 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4">Startup Profile</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-800">Startup Profile</h2>
       <form onSubmit={save} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
