@@ -8,8 +8,14 @@ interface ProfileFormProps {
   onCancel?: () => void;
 }
 
-export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormProps) {
-  const [startupId, setStartupId] = useState<string | null>(startup?._id || null);
+export default function ProfileForm({
+  startup,
+  onSave,
+  onCancel,
+}: ProfileFormProps) {
+  const [startupId, setStartupId] = useState<string | null>(
+    startup?._id || null
+  );
   const [form, setForm] = useState({
     company_name: startup?.company_name || "",
     sector: startup?.sector || "",
@@ -24,16 +30,16 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
     monthly_burn: startup?.monthly_burn || 0,
     cac: startup?.cac || 0,
     ltv: startup?.ltv || 0,
-    readiness_score: startup?.readiness_score || 0
+    readiness_score: startup?.readiness_score || 0,
   });
 
   useEffect(() => {
     async function load() {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) return;
-      const r = await fetch('/api/startups', {
+      const r = await fetch("/api/startups", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (r.ok) {
@@ -55,7 +61,7 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
             monthly_burn: startup.monthly_burn || 0,
             cac: startup.cac || 0,
             ltv: startup.ltv || 0,
-            readiness_score: startup.readiness_score || 0
+            readiness_score: startup.readiness_score || 0,
           });
         }
       }
@@ -65,67 +71,77 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
 
   async function save(e: any) {
     e.preventDefault();
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      toast.error('Not authenticated');
+      toast.error("Not authenticated");
       return;
     }
     try {
-      let url = '/api/startups';
-      let method = 'POST';
+      let url = "/api/startups";
+      let method = "POST";
       if (startupId) {
         url = `/api/startups/${startupId}`;
-        method = 'PUT';
+        method = "PUT";
       }
       const res = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
       if (res.ok) {
-        toast.success('Profile saved successfully!');
+        toast.success("Profile saved successfully!");
         onSave?.();
       } else {
-        toast.error('Failed to save profile');
+        toast.error("Failed to save profile");
       }
     } catch (error) {
-      toast.error('Error saving profile');
+      toast.error("Error saving profile");
     }
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Startup Profile</h2>
-      <form onSubmit={save} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="glass-card p-8 rounded-3xl border border-white/50">
+      <h2 className="text-xl font-bold mb-6 text-gray-900">Startup Profile</h2>
+      <form onSubmit={save} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Company Name
+            </label>
             <input
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               placeholder="Company Name"
               value={form.company_name}
-              onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, company_name: e.target.value })
+              }
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sector</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Sector
+            </label>
             <input
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               placeholder="e.g., FinTech, HealthTech"
               value={form.sector}
               onChange={(e) => setForm({ ...form, sector: e.target.value })}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Business Model</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Business Model
+            </label>
             <select
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               value={form.business_model}
-              onChange={(e) => setForm({ ...form, business_model: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, business_model: e.target.value })
+              }
             >
               <option value="">Select business model</option>
               <option value="B2B">B2B</option>
@@ -136,11 +152,15 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Legal Structure</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Legal Structure
+            </label>
             <select
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               value={form.legal_structure}
-              onChange={(e) => setForm({ ...form, legal_structure: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, legal_structure: e.target.value })
+              }
             >
               <option value="">Select legal structure</option>
               <option value="Sole Proprietorship">Sole Proprietorship</option>
@@ -151,21 +171,29 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Website URL
+            </label>
             <input
               type="url"
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               placeholder="https://yourcompany.com"
               value={form.website_url}
-              onChange={(e) => setForm({ ...form, website_url: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, website_url: e.target.value })
+              }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Funding Stage</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Funding Stage
+            </label>
             <select
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               value={form.funding_stage}
-              onChange={(e) => setForm({ ...form, funding_stage: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, funding_stage: e.target.value })
+              }
             >
               <option value="Pre-seed">Pre-seed</option>
               <option value="Seed">Seed</option>
@@ -176,9 +204,11 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Mission</label>
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Mission
+          </label>
           <textarea
-            className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+            className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
             placeholder="Company mission"
             rows={3}
             value={form.mission}
@@ -187,9 +217,11 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Vision</label>
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Vision
+          </label>
           <textarea
-            className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+            className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
             placeholder="Company vision"
             rows={3}
             value={form.vision}
@@ -198,76 +230,99 @@ export default function ProfileForm({ startup, onSave, onCancel }: ProfileFormPr
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Business Description</label>
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Business Description
+          </label>
           <textarea
-            className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+            className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
             placeholder="Detailed business description"
             rows={4}
             value={form.business_description}
-            onChange={(e) => setForm({ ...form, business_description: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, business_description: e.target.value })
+            }
             required
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Funding Amount ($)</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Funding Amount ($)
+            </label>
             <input
               type="number"
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               placeholder="0"
-              value={form.funding_amount || ''}
-              onChange={(e) => setForm({ ...form, funding_amount: Number(e.target.value) })}
+              value={form.funding_amount || ""}
+              onChange={(e) =>
+                setForm({ ...form, funding_amount: Number(e.target.value) })
+              }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Burn ($)</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Monthly Burn ($)
+            </label>
             <input
               type="number"
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               placeholder="0"
-              value={form.monthly_burn || ''}
-              onChange={(e) => setForm({ ...form, monthly_burn: Number(e.target.value) })}
+              value={form.monthly_burn || ""}
+              onChange={(e) =>
+                setForm({ ...form, monthly_burn: Number(e.target.value) })
+              }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">CAC ($)</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              CAC ($)
+            </label>
             <input
               type="number"
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               placeholder="0"
-              value={form.cac || ''}
-              onChange={(e) => setForm({ ...form, cac: Number(e.target.value) })}
+              value={form.cac || ""}
+              onChange={(e) =>
+                setForm({ ...form, cac: Number(e.target.value) })
+              }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">LTV ($)</label>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              LTV ($)
+            </label>
             <input
               type="number"
-              className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-gray-500 text-gray-700 w-full"
+              className="border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 placeholder:text-gray-400 text-gray-800 w-full transition-all"
               placeholder="0"
-              value={form.ltv || ''}
-              onChange={(e) => setForm({ ...form, ltv: Number(e.target.value) })}
+              value={form.ltv || ""}
+              onChange={(e) =>
+                setForm({ ...form, ltv: Number(e.target.value) })
+              }
             />
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-600">
-            Readiness Score: <span className="font-bold text-yellow-600">{form.readiness_score}%</span>
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100/50">
+          <div className="text-sm text-gray-600 font-medium">
+            Readiness Score:{" "}
+            <span className="font-bold text-yellow-600 text-lg">
+              {form.readiness_score}%
+            </span>
           </div>
           <div className="flex space-x-4">
             {onCancel && (
               <button
                 type="button"
                 onClick={onCancel}
-                className="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors"
+                className="bg-white/50 text-gray-600 font-bold py-3 px-6 rounded-xl hover:bg-white hover:text-gray-800 transition-all border border-gray-200 shadow-sm"
               >
                 Cancel
               </button>
             )}
             <button
-              className="bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition-colors"
+              className="bg-yellow-500 text-white font-bold py-3 px-8 rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/40"
               type="submit"
             >
               Save Profile

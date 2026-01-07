@@ -1,30 +1,31 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define protected routes
   const protectedRoutes = [
-    '/profile',
-    '/startup-profile',
-    '/dashboard',
-    '/dashboard/tasks',
-    '/dashboard/notes',
+    "/profile",
+    "/startup-profile",
+    "/dashboard",
+    "/dashboard/tasks",
+    "/dashboard/notes",
   ];
 
   // Check if the current path is protected
-  const isProtectedRoute = protectedRoutes.some(route =>
+  const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
   if (isProtectedRoute) {
     // Check for authentication token in cookies
-    const token = request.cookies.get('token')?.value;
+    const token = request.cookies.get("token")?.value;
 
     if (!token) {
-      // Redirect to login page
-      const loginUrl = new URL('/', request.url);
+      // Redirect to login page with callbackUrl
+      const loginUrl = new URL("/", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
 
@@ -36,9 +37,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/profile/:path*',
-    '/startup-profile/:path*',
-    '/dashboard/:path*',
-  ],
+  matcher: ["/profile/:path*", "/startup-profile/:path*", "/dashboard/:path*"],
 };

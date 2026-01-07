@@ -1,7 +1,9 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { Trash2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface Note {
   _id: string;
@@ -11,103 +13,144 @@ interface Note {
   createdAt: string;
 }
 
-const availableTags = ['Weekly', 'Monthly', 'Product', 'Business', 'Personal'];
+const availableTags = ["Weekly", "Monthly", "Product", "Business", "Personal"];
 
 export default function NotesPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [notes, setNotes] = useState<Note[]>([]);
-  const [newNote, setNewNote] = useState({ title: '', content: '', tags: [] as string[] });
+  const [newNote, setNewNote] = useState({
+    title: "",
+    content: "",
+    tags: [] as string[],
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadNotes();
-  }, []);
+    if (!loading && !user) {
+      router.push("/");
+      return;
+    }
+    if (user) {
+      loadNotes();
+    }
+  }, [user, loading, router]);
 
   async function loadNotes() {
-    const token = localStorage.getItem('token');
+    setIsLoading(true);
+    const token = localStorage.getItem("token");
     if (!token) return;
-    const r = await fetch('/api/notes', {
+    const r = await fetch("/api/notes", {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (r.ok) {
       const data = await r.json();
       setNotes(data.notes);
     }
+    setIsLoading(false);
   }
 
   async function addNote(e: any) {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    await fetch('/api/notes', { 
-      method: 'POST', 
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }, 
-      body: JSON.stringify(newNote) 
+    const token = localStorage.getItem("token");
+    await fetch("/api/notes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(newNote),
     });
-    setNewNote({ title: '', content: '', tags: [] });
+    setNewNote({ title: "", content: "", tags: [] });
     loadNotes();
   }
 
   async function deleteNote(id: string) {
-    if (!confirm('Are you sure you want to delete this note?')) return;
-    const token = localStorage.getItem('token');
+    if (!confirm("Are you sure you want to delete this note?")) return;
+    const token = localStorage.getItem("token");
     await fetch(`/api/notes/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     loadNotes();
   }
 
   const handleTaggleTag = (tag: string) => {
-    setNewNote(prev => ({...prev, tags: prev.tags.includes(tag) ? prev.tags.filter(t => t !== tag) : [...prev.tags, tag]}));
+    setNewNote((prev) => ({
+      ...prev,
+      tags: prev.tags.includes(tag)
+        ? prev.tags.filter((t) => t !== tag)
+        : [...prev.tags, tag],
+    }));
+  };
+
+  if (loading || isLoading) {
+    return (
+      <main className="w-full flex-1 p-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <Skeleton className="h-10 w-48 bg-gray-200" />
+          <div className="glass-card p-6 rounded-2xl border border-white/50 h-64"></div>
+          <div className="glass-card p-6 rounded-2xl border border-white/50 h-96"></div>
+        </div>
+      </main>
+    );
   }
 
   return (
     <main className="w-full flex-1 p-8 bg-gray-50">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Notes</h1>
-        
-        <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Note</h2>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">
+          Notes
+        </h1>
+
+        <div className="glass-card p-8 rounded-3xl border border-white/50 mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Add New Note</h2>
           <form onSubmit={addNote}>
-            <input 
-              className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:ring-2 focus:ring-yellow-500 transition-shadow placeholder:text-gray-600 text-gray-800"
-              placeholder="Note Title" 
-              value={newNote.title} 
-              onChange={(e) => setNewNote({ ...newNote, title: e.target.value })} 
+            <input
+              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800"
+              placeholder="Note Title"
+              value={newNote.title}
+              onChange={(e) =>
+                setNewNote({ ...newNote, title: e.target.value })
+              }
               required
             />
-            <textarea 
-              className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:ring-2 focus:ring-yellow-500 transition-shadow placeholder:text-gray-600 text-gray-800"
-              placeholder="Content" 
-              value={newNote.content} 
-              onChange={(e) => setNewNote({ ...newNote, content: e.target.value })} 
+            <textarea
+              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800"
+              placeholder="Content"
+              value={newNote.content}
+              onChange={(e) =>
+                setNewNote({ ...newNote, content: e.target.value })
+              }
               required
             />
-            <div className="mb-4">
-              <h3 className="text-lg font-medium text-gray-800 mb-2">Tags</h3>
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">
+                Tags
+              </h3>
               <div className="flex flex-wrap gap-2">
-                {availableTags.map(tag => (
+                {availableTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => handleTaggleTag(tag)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      newNote.tags.includes(tag) 
-                        ? 'bg-yellow-400 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}>
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                      newNote.tags.includes(tag)
+                        ? "bg-yellow-400 text-white shadow-md shadow-yellow-400/30"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
                     {tag}
                   </button>
                 ))}
               </div>
             </div>
-            <button 
-              className="w-full bg-yellow-400 text-white p-3 rounded-lg hover:bg-yellow-500 transition-colors font-semibold"
+            <button
+              className="w-full bg-yellow-500 text-white p-4 rounded-xl hover:bg-yellow-600 transition-all font-bold shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/40"
               type="submit"
             >
               Add Note
@@ -115,33 +158,52 @@ export default function NotesPage() {
           </form>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Note List</h2>
+        <div className="glass-card p-8 rounded-3xl border border-white/50">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Note List</h2>
           <ul className="space-y-4">
             {notes.map((note) => (
-              <li key={note._id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <li
+                key={note._id}
+                className="p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/60 hover:border-yellow-500/30 transition-all group"
+              >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900">{note.title}</h3>
-                    <p className="text-gray-700 my-2">{note.content}</p>
+                    <h3 className="font-bold text-lg text-gray-900 mb-2">
+                      {note.title}
+                    </h3>
+                    <p className="text-gray-600 mb-4 leading-relaxed">
+                      {note.content}
+                    </p>
                   </div>
-                  <button 
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  <button
+                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                     onClick={() => deleteNote(note._id)}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                    <Trash2 size={18} />
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-3">
                   {note.tags.map((tag) => (
-                    <span key={tag} className="px-2 py-0.5 text-xs font-medium rounded-md bg-gray-200 text-gray-800">
+                    <span
+                      key={tag}
+                      className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gray-100/80 text-gray-600 border border-gray-200"
+                    >
                       {tag}
                     </span>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-2">{new Date(note.createdAt).toLocaleDateString()}</p>
+                <p className="text-xs text-gray-400 font-medium">
+                  {new Date(note.createdAt).toLocaleDateString(undefined, {
+                    dateStyle: "long",
+                  })}
+                </p>
               </li>
             ))}
+            {notes.length === 0 && (
+              <div className="text-center py-10 text-gray-400">
+                No notes found.
+              </div>
+            )}
           </ul>
         </div>
       </div>

@@ -1,7 +1,14 @@
 "use client";
 
-import React, { createContext, useState, useEffect, useContext, ReactNode, useCallback } from 'react';
-import { toast } from 'sonner';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+  useCallback,
+} from "react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -39,9 +46,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
-      const res = await fetch('/api/auth/me', {
+      const res = await fetch("/api/auth/me", {
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
 
@@ -49,20 +56,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const data = await res.json();
         setUser(data.user);
       } else {
-        console.error('Failed to fetch user data. Token might be invalid or expired.');
+        console.error(
+          "Failed to fetch user data. Token might be invalid or expired."
+        );
         // If fetching user fails, clear the token and user state
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
         setToken(null);
         setUser(null);
       }
     } catch (error) {
-      console.error('Error fetching user:', error);
-      localStorage.removeItem('token');
+      console.error("Error fetching user:", error);
+      localStorage.removeItem("token");
       setToken(null);
       setUser(null);
 
       // Show user-friendly toast message for network errors
-      toast.error('Network connection failed. Please check your internet connection and try again.');
+      toast.error(
+        "Network connection failed. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -70,7 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Load token from localStorage on initial mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
       fetchUser(storedToken);
@@ -80,20 +91,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [fetchUser]);
 
   const login = (newToken: string) => {
-    localStorage.setItem('token', newToken);
+    setLoading(true);
+    localStorage.setItem("token", newToken);
     setToken(newToken);
     fetchUser(newToken); // Fetch user immediately after login
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error("Logout failed:", e);
+    }
+    localStorage.removeItem("token");
     setToken(null);
     setUser(null);
-    window.location.href = '/'; // Redirect to login page after logout
+    window.location.href = "/";
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, refreshUser: () => fetchUser(token) }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        logout,
+        refreshUser: () => fetchUser(token),
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -102,7 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
