@@ -74,9 +74,12 @@ export default function Header() {
           </Link>
         </div>
         <nav className="hidden md:flex items-center space-x-8">
-          <span className="text-sm font-bold text-gray-400 uppercase tracking-widest cursor-not-allowed opacity-60 hover:opacity-80 transition-opacity">
+          <Link
+            href="/dashboard/investors"
+            className="text-sm font-bold text-gray-700 uppercase tracking-widest cursor-pointer opacity-60 hover:opacity-80 transition-opacity"
+          >
             Investors
-          </span>
+          </Link>
           <span className="text-sm font-bold text-gray-400 uppercase tracking-widest cursor-not-allowed opacity-60 hover:opacity-80 transition-opacity">
             Founders
           </span>

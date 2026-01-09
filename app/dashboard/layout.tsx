@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   MessageSquare,
+  Users,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -58,6 +59,13 @@ export default function DashboardLayout({
               >
                 <FileText className="h-5 w-5" />
                 <span>Notes</span>
+              </Link>
+              <Link
+                href="/dashboard/investors"
+                className="flex items-center space-x-3 text-gray-500 hover:text-gray-700"
+              >
+                <Users className="h-5 w-5" />
+                <span>Investors</span>
               </Link>
               <div className="p-4 bg-yellow-400 rounded-lg text-center">
                 <p className="font-bold">FoundexAI</p>
