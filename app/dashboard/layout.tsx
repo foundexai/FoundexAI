@@ -94,8 +94,8 @@ export default function DashboardLayout({
           </div>
           <div className="p-6 border-t border-gray-200 dark:border-zinc-800">
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 window.location.href = "/";
               }}
               className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 w-full dark:text-gray-400 dark:hover:text-gray-200"
@@ -163,8 +163,8 @@ export default function DashboardLayout({
           </nav>
           <div className="p-6 border-t border-gray-200 dark:border-zinc-800">
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 window.location.href = "/";
               }}
               className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 w-full dark:text-gray-400 dark:hover:text-gray-200"

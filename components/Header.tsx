@@ -28,9 +28,9 @@ export default function Header() {
   const desktopDropdownRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/";
   };
 
   const toggleDesktopDropdown = () => {

@@ -63,7 +63,7 @@ function AuthForm() {
         toast.success(
           isLogin ? "Welcome back!" : "Account created successfully!"
         );
-        router.push(callbackUrl);
+        window.location.href = callbackUrl;
       } else {
         if (res.status === 500) {
           toast.error("Server error. Please try again later.");
