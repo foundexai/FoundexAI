@@ -56,24 +56,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const data = await res.json();
         setUser(data.user);
       } else {
-        console.error(
-          "Failed to fetch user data. Token might be invalid or expired."
-        );
-        // If fetching user fails, clear the token and user state
-        localStorage.removeItem("token");
-        setToken(null);
-        setUser(null);
+        // Only clear token if we get an authentication error
+        if (res.status === 401 || res.status === 403) {
+          console.error(
+            "Failed to fetch user data. Token might be invalid or expired."
+          );
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
+        } else {
+          console.error(
+            "Failed to fetch user data, but keeping session.",
+            res.status
+          );
+          // On other errors (500, etc), keep the token.
+          // We might want to try again later or let the user refresh.
+        }
       }
     } catch (error) {
       console.error("Error fetching user:", error);
-      localStorage.removeItem("token");
-      setToken(null);
-      setUser(null);
+      // Do NOT clear token on network error.
+      // This prevents "logout" when user loses connection momentarily.
 
-      // Show user-friendly toast message for network errors
-      toast.error(
-        "Network connection failed. Please check your internet connection and try again."
-      );
+      // We can keep the user state if we had it, or just let it fail silently
+      // The middleware will still protect routes if the cookie is invalid.
+
+      toast.error("Checking session... please wait.");
     } finally {
       setLoading(false);
     }
