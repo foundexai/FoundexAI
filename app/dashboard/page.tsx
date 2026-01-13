@@ -238,11 +238,11 @@ export default function Dashboard() {
       {!currentStartup && !loading && !isFetching ? (
         // Empty State
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-          <div className="glass-card p-10 rounded-3xl border border-white/50 max-w-md w-full relative overflow-hidden">
+          <div className="glass-card p-10 rounded-3xl border border-white/50 max-w-md w-full relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500"></div>
-            <div className="w-20 h-20 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3 transition-transform hover:rotate-6 duration-300">
+            <div className="w-20 h-20 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3 transition-transform hover:rotate-6 duration-300 dark:bg-yellow-900/20">
               <svg
-                className="w-10 h-10 text-yellow-600"
+                className="w-10 h-10 text-yellow-600 dark:text-yellow-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -255,16 +255,16 @@ export default function Dashboard() {
                 />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight dark:text-white">
               Start Your Journey
             </h2>
-            <p className="text-gray-500 mb-8 leading-relaxed">
+            <p className="text-gray-500 mb-8 leading-relaxed dark:text-gray-400">
               Create your first startup profile to unlock the FoundexAI
               dashboard and tools.
             </p>
             <button
               onClick={() => setShowOnboarding(true)}
-              className="w-full bg-gray-900 text-white px-6 py-4 rounded-xl font-bold hover:bg-black transition-all shadow-xl shadow-gray-200 hover:shadow-2xl hover:-translate-y-1 transform duration-200"
+              className="w-full bg-gray-900 text-white px-6 py-4 rounded-xl font-bold hover:bg-black transition-all shadow-xl shadow-gray-200 hover:shadow-2xl hover:-translate-y-1 transform duration-200 dark:bg-white dark:text-black dark:shadow-none dark:hover:bg-gray-200"
             >
               Create Startup Profile
             </button>
@@ -274,34 +274,34 @@ export default function Dashboard() {
         // Dashboard View
         <div className="space-y-8 animate-in fade-in duration-700">
           {/* Header Section */}
-          <div className="glass-card rounded-3xl p-8 md:p-10 border border-white/50 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-yellow-200/40 to-orange-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60 -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-100/30 rounded-full mix-blend-multiply filter blur-3xl opacity-40 translate-y-1/2 -translate-x-1/2"></div>
+          <div className="glass-card rounded-3xl p-8 md:p-10 border border-white/50 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-yellow-200/40 to-orange-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60 -translate-y-1/2 translate-x-1/3 dark:from-yellow-900/20 dark:to-orange-900/20 dark:opacity-30"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-100/30 rounded-full mix-blend-multiply filter blur-3xl opacity-40 translate-y-1/2 -translate-x-1/2 dark:bg-yellow-900/10"></div>
 
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
               <div className="md:col-span-2 space-y-6">
-                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm">
+                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
                   {currentStartup.sector || "Technology"}
                 </div>
-                <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight">
+                <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight dark:text-white">
                   {currentStartup.company_name}
                 </h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                  <div className="group p-5 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 transition-all duration-300">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <div className="group p-5 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 transition-all duration-300 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10">
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2 dark:text-gray-500">
                       <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
                       Mission
                     </h3>
-                    <p className="text-sm text-gray-700 leading-relaxed font-medium group-hover:text-gray-900 transition-colors">
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium group-hover:text-gray-900 transition-colors dark:text-gray-300 dark:group-hover:text-white">
                       {currentStartup.mission || "No mission defined."}
                     </p>
                   </div>
-                  <div className="group p-5 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 transition-all duration-300">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <div className="group p-5 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 transition-all duration-300 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10">
+                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2 dark:text-gray-500">
                       <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
                       Vision
                     </h3>
-                    <p className="text-sm text-gray-700 leading-relaxed font-medium group-hover:text-gray-900 transition-colors">
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium group-hover:text-gray-900 transition-colors dark:text-gray-300 dark:group-hover:text-white">
                       {currentStartup.vision || "No vision defined."}
                     </p>
                   </div>
@@ -390,16 +390,16 @@ function DescriptionBlock({
   }
 
   return (
-    <div className="glass-card p-8 rounded-3xl border border-white/50">
+    <div className="glass-card p-8 rounded-3xl border border-white/50 dark:bg-zinc-900/60 dark:border-zinc-800">
       <div className="flex justify-between items-start mb-6">
-        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 dark:text-white">
           <span className="w-2 h-8 bg-yellow-500 rounded-full"></span>
           Business Description
         </h3>
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-50 rounded-lg"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-50 rounded-lg dark:hover:bg-white/10 dark:hover:text-gray-300"
           >
             <Pencil className="w-4 h-4" />
           </button>
@@ -410,14 +410,14 @@ function DescriptionBlock({
                 setIsEditing(false);
                 setDescription(startup.business_description);
               }}
-              className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-lg"
+              className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-lg dark:text-gray-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
             >
               <X className="w-4 h-4" />
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors"
+              className="text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
             >
               <Save className="w-4 h-4" />
             </button>
@@ -429,10 +429,10 @@ function DescriptionBlock({
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all min-h-[120px]"
+          className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all min-h-[120px] dark:bg-black/50 dark:border-zinc-700 dark:text-gray-200"
         />
       ) : (
-        <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+        <p className="text-gray-600 leading-relaxed whitespace-pre-wrap dark:text-gray-300">
           {description}
         </p>
       )}

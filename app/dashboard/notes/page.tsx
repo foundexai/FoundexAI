@@ -90,28 +90,30 @@ export default function NotesPage() {
 
   if (loading || isLoading) {
     return (
-      <main className="w-full flex-1 p-8 bg-gray-50">
+      <main className="w-full flex-1 p-8 bg-gray-50 dark:bg-transparent">
         <div className="max-w-4xl mx-auto space-y-8">
-          <Skeleton className="h-10 w-48 bg-gray-200" />
-          <div className="glass-card p-6 rounded-2xl border border-white/50 h-64"></div>
-          <div className="glass-card p-6 rounded-2xl border border-white/50 h-96"></div>
+          <Skeleton className="h-10 w-48 bg-gray-200 dark:bg-zinc-800" />
+          <div className="glass-card p-6 rounded-2xl border border-white/50 h-64 dark:border-zinc-800"></div>
+          <div className="glass-card p-6 rounded-2xl border border-white/50 h-96 dark:border-zinc-800"></div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="w-full flex-1 p-8 bg-gray-50">
+    <main className="w-full flex-1 p-8 bg-gray-50 dark:bg-transparent">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight dark:text-white">
           Notes
         </h1>
 
-        <div className="glass-card p-8 rounded-3xl border border-white/50 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Add New Note</h2>
+        <div className="glass-card p-8 rounded-3xl border border-white/50 mb-8 dark:border-zinc-800">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 dark:text-white">
+            Add New Note
+          </h2>
           <form onSubmit={addNote}>
             <input
-              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800"
+              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800 dark:bg-zinc-900/50 dark:border-zinc-700 dark:text-white dark:placeholder:text-gray-500"
               placeholder="Note Title"
               value={newNote.title}
               onChange={(e) =>
@@ -120,7 +122,7 @@ export default function NotesPage() {
               required
             />
             <textarea
-              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800"
+              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800 dark:bg-zinc-900/50 dark:border-zinc-700 dark:text-white dark:placeholder:text-gray-500"
               placeholder="Content"
               value={newNote.content}
               onChange={(e) =>
@@ -129,7 +131,7 @@ export default function NotesPage() {
               required
             />
             <div className="mb-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">
                 Tags
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -140,8 +142,8 @@ export default function NotesPage() {
                     onClick={() => handleTaggleTag(tag)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                       newNote.tags.includes(tag)
-                        ? "bg-yellow-400 text-white shadow-md shadow-yellow-400/30"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-yellow-400 text-white shadow-md shadow-yellow-400/30 dark:text-black"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-400 dark:hover:bg-zinc-700"
                     }`}
                   >
                     {tag}
@@ -150,7 +152,7 @@ export default function NotesPage() {
               </div>
             </div>
             <button
-              className="w-full bg-yellow-500 text-white p-4 rounded-xl hover:bg-yellow-600 transition-all font-bold shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/40"
+              className="w-full bg-yellow-500 text-white p-4 rounded-xl hover:bg-yellow-600 transition-all font-bold shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/40 dark:text-black"
               type="submit"
             >
               Add Note
@@ -158,25 +160,27 @@ export default function NotesPage() {
           </form>
         </div>
 
-        <div className="glass-card p-8 rounded-3xl border border-white/50">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Note List</h2>
+        <div className="glass-card p-8 rounded-3xl border border-white/50 dark:border-zinc-800">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 dark:text-white">
+            Note List
+          </h2>
           <ul className="space-y-4">
             {notes.map((note) => (
               <li
                 key={note._id}
-                className="p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/60 hover:border-yellow-500/30 transition-all group"
+                className="p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/60 hover:border-yellow-500/30 transition-all group dark:bg-zinc-900/40 dark:border-zinc-800"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-2">
+                    <h3 className="font-bold text-lg text-gray-900 mb-2 dark:text-white">
                       {note.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
+                    <p className="text-gray-600 mb-4 leading-relaxed dark:text-gray-300">
                       {note.content}
                     </p>
                   </div>
                   <button
-                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-red-900/20"
                     onClick={() => deleteNote(note._id)}
                   >
                     <Trash2 size={18} />
@@ -186,13 +190,13 @@ export default function NotesPage() {
                   {note.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gray-100/80 text-gray-600 border border-gray-200"
+                      className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gray-100/80 text-gray-600 border border-gray-200 dark:bg-zinc-800 dark:text-gray-400 dark:border-zinc-700"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 font-medium">
+                <p className="text-xs text-gray-400 font-medium dark:text-gray-600">
                   {new Date(note.createdAt).toLocaleDateString(undefined, {
                     dateStyle: "long",
                   })}
@@ -200,7 +204,7 @@ export default function NotesPage() {
               </li>
             ))}
             {notes.length === 0 && (
-              <div className="text-center py-10 text-gray-400">
+              <div className="text-center py-10 text-gray-400 dark:text-gray-500">
                 No notes found.
               </div>
             )}

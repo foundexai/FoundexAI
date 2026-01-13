@@ -112,18 +112,18 @@ export default function TasksList() {
   return (
     <div
       id="tasks"
-      className="glass-card p-6 rounded-2xl border border-white/50 relative overflow-hidden"
+      className="glass-card p-6 rounded-2xl border border-white/50 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800"
     >
       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-        <CheckCircle2 className="w-32 h-32 text-gray-900" />
+        <CheckCircle2 className="w-32 h-32 text-gray-900 dark:text-white" />
       </div>
 
       <div className="flex justify-between items-center mb-6 relative z-10">
-        <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+        <h2 className="text-xl font-bold text-gray-900 tracking-tight dark:text-white">
           Tasks
         </h2>
         <Link href="/dashboard/tasks">
-          <span className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full">
+          <span className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full dark:hover:bg-white/10 dark:hover:text-gray-300">
             <ArrowUpRight className="h-5 w-5" />
           </span>
         </Link>
@@ -135,7 +135,7 @@ export default function TasksList() {
             <span
               className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${
                 categoryColors[category] || "bg-gray-100 text-gray-800"
-              }`}
+              } dark:opacity-90`}
             >
               {category}
             </span>
@@ -144,7 +144,7 @@ export default function TasksList() {
                 <li key={task._id} className="flex items-start gap-3 group">
                   <button
                     onClick={() => toggleTask(task._id, task.status)}
-                    className="mt-0.5 text-gray-300 hover:text-green-500 transition-colors flex-shrink-0"
+                    className="mt-0.5 text-gray-300 hover:text-green-500 transition-colors flex-shrink-0 dark:text-gray-600 dark:hover:text-green-400"
                   >
                     {task.status === "completed" ? (
                       <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -155,8 +155,8 @@ export default function TasksList() {
                   <span
                     className={`text-sm font-medium transition-all ${
                       task.status === "completed"
-                        ? "line-through text-gray-400"
-                        : "text-gray-700 group-hover:text-gray-900"
+                        ? "line-through text-gray-400 dark:text-gray-600"
+                        : "text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white"
                     }`}
                   >
                     {task.title}
@@ -168,7 +168,9 @@ export default function TasksList() {
         ))}
         {tasks.length === 0 && (
           <div className="text-center py-10">
-            <p className="text-gray-400 text-sm">No tasks yet.</p>
+            <p className="text-gray-400 text-sm dark:text-gray-500">
+              No tasks yet.
+            </p>
           </div>
         )}
       </div>
