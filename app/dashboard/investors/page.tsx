@@ -76,12 +76,25 @@ export default function InvestorsPage() {
       return;
     }
 
+    // Check if it's a mock investor
+    const isMock = MOCK_INVESTORS.some((inv) => inv.id === id);
+
     const isCurrentlySaved = savedInvestorIds.includes(id);
     const newSavedIds = isCurrentlySaved
       ? savedInvestorIds.filter((savedId) => savedId !== id)
       : [...savedInvestorIds, id];
 
-    setSavedInvestorIds(newSavedIds); // Optimistic
+    setSavedInvestorIds(newSavedIds); // Optimistic / Local update
+
+    // If mock, we stop here (local state only)
+    if (isMock) {
+      toast.success(
+        isCurrentlySaved
+          ? "Removed from favorites"
+          : "Saved to favorites (Session only)",
+      );
+      return;
+    }
 
     try {
       const res = await fetch("/api/investors/save", {

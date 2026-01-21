@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useMobileMenu } from "@/context/MobileMenuContext";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   CheckCheck,
@@ -19,6 +20,15 @@ export default function DashboardLayout({
 }) {
   const { user, logout } = useAuth();
   const { isOpen: isSidebarOpen, close: closeSidebar } = useMobileMenu();
+  const pathname = usePathname();
+
+  const getLinkClass = (path: string, exact = false) => {
+    const isActive = exact ? pathname === path : pathname.startsWith(path);
+
+    return isActive
+      ? "flex items-center space-x-3 text-gray-900 font-bold bg-gray-100/50 rounded-xl px-3 py-2 transition-all dark:text-white dark:bg-white/10"
+      : "flex items-center space-x-3 text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-50 rounded-xl px-3 py-2 transition-all dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5";
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -38,10 +48,10 @@ export default function DashboardLayout({
           } transition-transform duration-300 ease-in-out md:hidden flex flex-col justify-between dark:bg-zinc-900 dark:border-r dark:border-zinc-800`}
         >
           <div className="p-6 pt-24">
-            <nav className="space-y-6">
+            <nav className="space-y-2">
               <Link
                 href="/dashboard"
-                className="flex items-center space-x-3 text-gray-700 font-semibold hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
+                className={getLinkClass("/dashboard", true)}
               >
                 <LayoutDashboard className="h-5 w-5" />
                 <span>Overview</span>
@@ -49,12 +59,12 @@ export default function DashboardLayout({
 
               <Link
                 href="/dashboard/investors"
-                className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className={getLinkClass("/dashboard/investors")}
               >
                 <Users className="h-5 w-5" />
                 <span>Investors</span>
               </Link>
-              <div className="p-4 bg-yellow-400 rounded-lg text-center dark:bg-yellow-500/90">
+              <div className="p-4 bg-yellow-400 rounded-lg text-center dark:bg-yellow-500/90 my-4">
                 <p className="font-bold text-gray-900">FoundexAI</p>
                 <p className="text-sm mb-4 text-gray-800">
                   Get access to all features and functions
@@ -63,16 +73,18 @@ export default function DashboardLayout({
                   Get Pro
                 </button>
               </div>
+              {/* Commented out Messages link
               <a
                 href="#"
-                className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="flex items-center space-x-3 text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-50 rounded-xl px-3 py-2 transition-all dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5"
               >
                 <MessageSquare className="h-5 w-5" />
                 <span>Messages</span>
               </a>
+*/}
               <Link
                 href="/profile"
-                className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="flex items-center space-x-3 text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-50 rounded-xl px-3 py-2 transition-all dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5"
               >
                 <Settings className="h-5 w-5" />
                 <span>Settings</span>
@@ -85,7 +97,7 @@ export default function DashboardLayout({
                 await logout();
                 window.location.href = "/";
               }}
-              className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 w-full dark:text-gray-400 dark:hover:text-gray-200"
+              className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 w-full dark:text-gray-400 dark:hover:text-gray-200 px-3 py-2"
             >
               <LogOut className="h-5 w-5" />
               <span>Sign Out</span>
@@ -105,15 +117,15 @@ export default function DashboardLayout({
             </div>
             <Link
               href="/dashboard"
-              className="text-xl font-black text-gray-900 tracking-tighter hover:opacity-80 transition-opacity dark:text-white"
+              className="text-3xl font-black text-gray-900 tracking-tighter hover:opacity-80 transition-opacity dark:text-white"
             >
               FoundexAI
             </Link>
           </div>
-          <nav className="px-6 space-y-6 flex-1 mt-6">
+          <nav className="px-4 space-y-2 flex-1 mt-6">
             <Link
               href="/dashboard"
-              className="flex items-center space-x-3 text-gray-700 font-semibold hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
+              className={getLinkClass("/dashboard", true)}
             >
               <LayoutDashboard className="h-5 w-5" />
               <span>Overview</span>
@@ -121,12 +133,12 @@ export default function DashboardLayout({
 
             <Link
               href="/dashboard/investors"
-              className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className={getLinkClass("/dashboard/investors")}
             >
               <Users className="h-5 w-5" />
               <span>Investors</span>
             </Link>
-            <div className="p-4 bg-yellow-400 rounded-lg text-center dark:bg-yellow-500/90">
+            <div className="p-4 bg-yellow-400 rounded-lg text-center dark:bg-yellow-500/90 my-4 mx-2">
               <p className="font-bold text-gray-900">FoundexAI</p>
               <p className="text-sm mb-4 text-gray-800">
                 Get access to all features and functions
@@ -135,16 +147,16 @@ export default function DashboardLayout({
                 Get Pro
               </button>
             </div>
-            <a
+            {/* <a
               href="#"
-              className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="flex items-center space-x-3 text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-50 rounded-xl px-3 py-2 transition-all dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5"
             >
               <MessageSquare className="h-5 w-5" />
               <span>Messages</span>
-            </a>
+            </a> */}
             <Link
               href="/profile"
-              className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="flex items-center space-x-3 text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-50 rounded-xl px-3 py-2 transition-all dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5"
             >
               <Settings className="h-5 w-5" />
               <span>Settings</span>

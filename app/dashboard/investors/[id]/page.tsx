@@ -8,22 +8,103 @@ import {
   Building2,
   CheckCircle2,
   TrendingUp,
-  Users,
   Mail,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+
+interface Investor {
+  id: string;
+  name: string;
+  type: string;
+  focus: string[];
+  location: string;
+  logoInitial: string;
+  logoColor: string;
+  description: string;
+  investmentRange?: string;
+  website?: string;
+}
 
 export default function InvestorDetailsPage() {
   const params = useParams();
   const id = params.id as string;
-  const investor = MOCK_INVESTORS.find((inv) => inv.id === id);
+  const { token } = useAuth();
 
-  if (!investor) {
+  const [investor, setInvestor] = useState<Investor | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    async function fetchInvestor() {
+      setLoading(true);
+      setError(false);
+
+      // 1. Try finding in Mock Data first
+      const mockInvestor = MOCK_INVESTORS.find((inv) => inv.id === id);
+      if (mockInvestor) {
+        setInvestor(mockInvestor);
+        setLoading(false);
+        return;
+      }
+
+      // 2. If not in mock, try fetching from API
+      try {
+        // Ideally we would have a specific endpoint /api/investors/:id
+        // For now, we can fetch all and filter, OR create that endpoint.
+        // Let's assume we fetch all for now or the specific one if we add the route.
+        // Actually, let's try to fetch all and filter since we already have /api/investors
+        const res = await fetch("/api/investors", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const found = data.investors.find((inv: any) => inv.id === id);
+          if (found) {
+            setInvestor(found);
+          } else {
+            setError(true);
+          }
+        } else {
+          setError(true);
+        }
+      } catch (err) {
+        console.error(err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) {
+      fetchInvestor();
+    }
+  }, [id, token]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
+      </div>
+    );
+  }
+
+  if (error || !investor) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900">Investor Not Found</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Investor Not Found
+        </h2>
+        <p className="text-gray-500 dark:text-gray-400">
+          The investor profile you are looking for does not exist.
+        </p>
         <Link
           href="/dashboard/investors"
           className="text-yellow-600 font-semibold hover:underline"
@@ -39,7 +120,7 @@ export default function InvestorDetailsPage() {
       {/* Back Button */}
       <Link
         href="/dashboard/investors"
-        className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 mb-6 transition-colors group"
+        className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 mb-6 transition-colors group dark:text-gray-400 dark:hover:text-gray-200"
       >
         <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
         Back to Investors
@@ -52,7 +133,7 @@ export default function InvestorDetailsPage() {
         <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
           <div
             className={cn(
-              "w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center text-white text-4xl font-bold shadow-xl bg-gradient-to-br flex-shrink-0",
+              "w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center text-white text-4xl font-bold shadow-xl bg-linear-to-br flex-shrink-0",
               investor.logoColor,
             )}
           >
@@ -131,7 +212,7 @@ export default function InvestorDetailsPage() {
 
         {/* Sidebar details */}
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl p-6 border border-yellow-100 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-900/30">
+          <div className="bg-linear-to-br from-yellow-50 to-orange-50 rounded-3xl p-6 border border-yellow-100 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-900/30">
             <h4 className="text-sm font-bold text-yellow-800 uppercase tracking-wider mb-4 dark:text-yellow-500">
               Investment Range
             </h4>
