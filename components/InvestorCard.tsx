@@ -7,38 +7,82 @@ export interface Investor {
   name: string;
   type: "VC" | "Angel" | "Accelerator" | "PE";
   focus: string[];
-  location: string; // e.g., "Lagos, Nigeria"
+  location: string;
   logoInitial: string;
-  logoColor: string; // Tailwind gradient classes e.g., "from-blue-500 to-cyan-500"
+  logoColor: string;
   description: string;
   investmentRange?: string;
   website?: string;
 }
 
-export function InvestorCard({ investor }: { investor: Investor }) {
+interface InvestorCardProps {
+  investor: Investor;
+  isSaved?: boolean;
+  onToggleSave?: (id: string) => void;
+}
+
+export function InvestorCard({
+  investor,
+  isSaved = false,
+  onToggleSave,
+}: InvestorCardProps) {
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onToggleSave) {
+      onToggleSave(investor.id);
+    }
+  };
+
   return (
-    <Link href={`/dashboard/investors/${investor.id}`} className="block">
+    <Link href={`/dashboard/investors/${investor.id}`} className="block h-full">
       <div className="glass-card group flex flex-col p-6 rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden h-full dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10">
         {/* Decorative gradient blur */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500 dark:from-white/5"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500 dark:from-white/5"></div>
 
         {/* Header: Logo & Type */}
         <div className="flex justify-between items-start mb-4 z-10">
           <div
             className={cn(
-              "w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg bg-gradient-to-br",
-              investor.logoColor
+              "w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg bg-linear-to-br",
+              investor.logoColor,
             )}
           >
             {investor.logoInitial}
           </div>
-          <div className="px-3 py-1 rounded-full bg-white/50 border border-white/50 text-[10px] font-bold uppercase tracking-wider text-gray-600 shadow-sm backdrop-blur-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
-            {investor.type}
+          <div className="flex flex-col items-end gap-2">
+            <button
+              onClick={handleSaveClick}
+              className="p-2 rounded-full bg-white/50 border border-white/50 hover:bg-white transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={isSaved ? "currentColor" : "none"}
+                stroke="currentColor"
+                className={cn(
+                  "w-5 h-5 transition-colors",
+                  isSaved
+                    ? "text-red-500"
+                    : "text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400",
+                )}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+            </button>
+            <div className="px-3 py-1 rounded-full bg-white/50 border border-white/50 text-[10px] font-bold uppercase tracking-wider text-gray-600 shadow-sm backdrop-blur-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
+              {investor.type}
+            </div>
           </div>
         </div>
 
         {/* Content: Name & Desc */}
-        <div className="mb-4 z-10 flex-grow">
+        <div className="mb-4 z-10 grow">
           <h3 className="text-xl font-bold text-gray-900 leading-tight mb-1 group-hover:text-black transition-colors dark:text-white dark:group-hover:text-white">
             {investor.name}
           </h3>

@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "FoundexAI - Investor-Ready Starts Here",
   description:
     "AI-powered platform connecting founders and investors. Build investor-ready startups with comprehensive business planning, task management, and investor matching.",
+  icons: {
+    icon: "/foundex.png",
+  },
 };
 
 export default function RootLayout({

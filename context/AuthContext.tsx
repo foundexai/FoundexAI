@@ -14,6 +14,7 @@ interface User {
   id: string;
   email: string;
   full_name: string;
+  saved_investors: string[]; // Store IDs of saved investors
   // Add any other user properties you expect from your /api/auth/me endpoint
 }
 
@@ -59,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Only clear token if we get an authentication error
         if (res.status === 401 || res.status === 403) {
           console.error(
-            "Failed to fetch user data. Token might be invalid or expired."
+            "Failed to fetch user data. Token might be invalid or expired.",
           );
           localStorage.removeItem("token");
           setToken(null);
@@ -67,7 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           console.error(
             "Failed to fetch user data, but keeping session.",
-            res.status
+            res.status,
           );
           // On other errors (500, etc), keep the token.
           // We might want to try again later or let the user refresh.

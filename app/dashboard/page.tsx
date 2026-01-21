@@ -73,7 +73,7 @@ export default function Dashboard() {
     async (name: string, idea: string) => {
       if (!token || token.trim() === "") {
         alert(
-          "You are not logged in or your session has expired. Please log in again."
+          "You are not logged in or your session has expired. Please log in again.",
         );
         logout(); // Use the logout function from context
         return;
@@ -101,7 +101,7 @@ export default function Dashboard() {
         alert("Failed to create startup. Please try again.");
       }
     },
-    [token, fetchStartups, logout]
+    [token, fetchStartups, logout],
   );
 
   if (loading) {
@@ -316,11 +316,12 @@ export default function Dashboard() {
           {/* Editable Description Block */}
           <DescriptionBlock startup={currentStartup} onUpdate={fetchStartups} />
 
-          {/* Tasks and Notes */}
+          {/* Tasks and Notes - Commented out for now
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TasksList />
             <NotesList />
           </div>
+          */}
         </div>
       ) : (
         // Loading Skeleton Shell

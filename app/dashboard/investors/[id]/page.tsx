@@ -53,7 +53,7 @@ export default function InvestorDetailsPage() {
           <div
             className={cn(
               "w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center text-white text-4xl font-bold shadow-xl bg-gradient-to-br flex-shrink-0",
-              investor.logoColor
+              investor.logoColor,
             )}
           >
             {investor.logoInitial}
@@ -104,7 +104,7 @@ export default function InvestorDetailsPage() {
               <Building2 className="w-5 h-5 text-gray-400" />
               About
             </h3>
-            <p className="text-gray-600 leading-relaxed text-lg dark:text-gray-300">
+            <p className="text-gray-600 leading-relaxed text-md dark:text-gray-300">
               {investor.description}
             </p>
           </section>

@@ -46,20 +46,7 @@ export default function DashboardLayout({
                 <LayoutDashboard className="h-5 w-5" />
                 <span>Overview</span>
               </Link>
-              <Link
-                href="/dashboard/tasks"
-                className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <CheckCheck className="h-5 w-5" />
-                <span>Tasks</span>
-              </Link>
-              <Link
-                href="/dashboard/notes"
-                className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <FileText className="h-5 w-5" />
-                <span>Notes</span>
-              </Link>
+
               <Link
                 href="/dashboard/investors"
                 className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -107,8 +94,23 @@ export default function DashboardLayout({
         </aside>
 
         {/* Desktop Sidebar */}
-        <aside className="hidden md:flex w-64 bg-white/50 backdrop-blur-md border-r border-gray-100 flex-col justify-between min-h-screen sticky top-0 pt-24 dark:border-zinc-800 inset-y-0 left-0 z-50 transform translate-x-0 transition-transform duration-300 ease-in-out dark:bg-zinc-900 dark:border-r">
-          <nav className="px-6 space-y-6 flex-1">
+        <aside className="hidden md:flex w-64 bg-white/50 backdrop-blur-md border-r border-gray-100 flex-col justify-between min-h-screen sticky top-0 dark:border-zinc-800 inset-y-0 left-0 z-50 transform translate-x-0 transition-transform duration-300 ease-in-out dark:bg-zinc-900 dark:border-r">
+          <div className="flex items-center space-x-3 px-6 h-16 mt-2">
+            <div className="relative w-8 h-8">
+              <img
+                src="/foundex.png"
+                alt="FoundexAI Logo"
+                className="object-contain drop-shadow-lg"
+              />
+            </div>
+            <Link
+              href="/dashboard"
+              className="text-xl font-black text-gray-900 tracking-tighter hover:opacity-80 transition-opacity dark:text-white"
+            >
+              FoundexAI
+            </Link>
+          </div>
+          <nav className="px-6 space-y-6 flex-1 mt-6">
             <Link
               href="/dashboard"
               className="flex items-center space-x-3 text-gray-700 font-semibold hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
@@ -116,20 +118,7 @@ export default function DashboardLayout({
               <LayoutDashboard className="h-5 w-5" />
               <span>Overview</span>
             </Link>
-            <Link
-              href="/dashboard/tasks"
-              className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <CheckCheck className="h-5 w-5" />
-              <span>Tasks</span>
-            </Link>
-            <Link
-              href="/dashboard/notes"
-              className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <FileText className="h-5 w-5" />
-              <span>Notes</span>
-            </Link>
+
             <Link
               href="/dashboard/investors"
               className="flex items-center space-x-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
