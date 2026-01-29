@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Filter, SlidersHorizontal, Loader2, Plus } from "lucide-react";
+import {
+  Search,
+  Filter,
+  SlidersHorizontal,
+  Loader2,
+  Plus,
+  Sparkles,
+} from "lucide-react";
+import { MatchInvestorModal } from "@/components/MatchInvestorModal";
+
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -17,6 +26,7 @@ export default function InvestorsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [savedInvestorIds, setSavedInvestorIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -128,6 +138,11 @@ export default function InvestorsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <MatchInvestorModal
+        isOpen={isMatchModalOpen}
+        onClose={() => setIsMatchModalOpen(false)}
+        investors={investors}
+      />
       <AddInvestorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -188,6 +203,13 @@ export default function InvestorsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white"
           />
+          <button
+            onClick={() => setIsMatchModalOpen(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4" />
+            Match Me
+          </button>
           <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20">
             <SlidersHorizontal className="w-4 h-4" />
             Filters
@@ -195,7 +217,7 @@ export default function InvestorsPage() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="hidden md:flex items-center gap-2 px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-yellow-500/20 hover:shadow-lg hover:scale-105 cursor-pointer text-xs"
+            className="hidden md:flex items-center gap-2 px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-yellow-500/20 hover:shadow-lg hover:scale-105 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Investor

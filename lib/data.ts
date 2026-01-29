@@ -1,4 +1,5 @@
 import { Investor } from "@/components/InvestorCard";
+export type { Investor };
 
 export const MOCK_INVESTORS: Investor[] = [
   {
@@ -104,5 +105,99 @@ export const MOCK_INVESTORS: Investor[] = [
       "Pre-seed/Seed checks into tech-enabled companies across Sub-Saharan Africa. We provide access to global networks and resources.",
     investmentRange: "$50k - $400k",
     website: "ingressivecapital.com",
+  },
+];
+
+export interface Startup {
+  id: string;
+  name: string;
+  sector: string;
+  stage: string;
+  location: string;
+  logoInitial: string;
+  logoColor: string;
+  description: string;
+  website?: string;
+  traction?: string;
+}
+
+export const MOCK_STARTUPS: Startup[] = [
+  {
+    id: "1",
+    name: "Paystack",
+    sector: "Fintech",
+    stage: "Acquired (Stripe)",
+    location: "Lagos, Nigeria",
+    logoInitial: "P",
+    logoColor: "from-blue-500 to-cyan-500",
+    description:
+      "Modern online payment processing for African businesses. Easy to integrate and broadly supported.",
+    website: "paystack.com",
+    traction: "60k+ Businesses",
+  },
+  {
+    id: "2",
+    name: "Flutterwave",
+    sector: "Fintech",
+    stage: "Series D",
+    location: "Lagos / SF",
+    logoInitial: "F",
+    logoColor: "from-orange-400 to-yellow-500",
+    description:
+      "Payment technology company focused on helping banks and businesses provide seamless and secure payment experiences.",
+    website: "flutterwave.com",
+    traction: "$3B+ Valuation",
+  },
+  {
+    id: "3",
+    name: "Andela",
+    sector: "EdTech / HR",
+    stage: "Series E",
+    location: "Remote / Pan-Africa",
+    logoInitial: "A",
+    logoColor: "from-green-500 to-teal-500",
+    description:
+      "Global talent network that connects companies with engineering talent in emerging markets.",
+    website: "andela.com",
+    traction: "Unicorn Status",
+  },
+  {
+    id: "4",
+    name: "Kobo360",
+    sector: "Logistics",
+    stage: "Series B",
+    location: "Lagos, Nigeria",
+    logoInitial: "K",
+    logoColor: "from-purple-600 to-indigo-600",
+    description:
+      "Logistics platform that aggregates end-to-end haulage operations to help cargo owners, truck owners, and drivers.",
+    website: "kobo360.com",
+    traction: "50k+ Trucks",
+  },
+  {
+    id: "5",
+    name: "Cowrywise",
+    sector: "WealthTech",
+    stage: "Series A",
+    location: "Lagos, Nigeria",
+    logoInitial: "C",
+    logoColor: "from-blue-600 to-indigo-700",
+    description:
+      "Wealth management platform that helps Nigerians plan, save, and invest money easily.",
+    website: "cowrywise.com",
+    traction: "200k+ Users",
+  },
+  {
+    id: "6",
+    name: "54gene",
+    sector: "HealthTech",
+    stage: "Series B",
+    location: "Lagos / DC",
+    logoInitial: "5",
+    logoColor: "from-red-500 to-pink-500",
+    description:
+      "Health technology company advancing the state of healthcare through inclusion of African genomic data.",
+    website: "54gene.com",
+    traction: "Key Partnerships",
   },
 ];

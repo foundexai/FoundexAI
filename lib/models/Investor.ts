@@ -22,6 +22,8 @@ const InvestorSchema = new mongoose.Schema({
   description: { type: String, required: true },
   investmentRange: { type: String }, // e.g. "$50k - $500k"
   website: { type: String },
+  isApproved: { type: Boolean, default: false },
+  submittedBy: { type: String }, // User ID of the submitter
   created_at: { type: Date, default: Date.now },
 });
 

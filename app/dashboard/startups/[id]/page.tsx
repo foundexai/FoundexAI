@@ -1,6 +1,6 @@
 "use client";
 
-import { MOCK_INVESTORS } from "@/lib/data";
+import { MOCK_STARTUPS, Startup } from "@/lib/data";
 import {
   ArrowLeft,
   MapPin,
@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Mail,
   Loader2,
+  Rocket,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -17,58 +19,39 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-interface Investor {
-  id: string;
-  name: string;
-  type: string;
-  focus: string[];
-  location: string;
-  logoInitial: string;
-  logoColor: string;
-  description: string;
-  investmentRange?: string;
-  website?: string;
-}
-
-export default function InvestorDetailsPage() {
+export default function StartupDetailsPage() {
   const params = useParams();
   const id = params.id as string;
   const { token } = useAuth();
 
-  const [investor, setInvestor] = useState<Investor | null>(null);
+  const [startup, setStartup] = useState<Startup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    async function fetchInvestor() {
+    async function fetchStartup() {
       setLoading(true);
       setError(false);
 
       // 1. Try finding in Mock Data first
-      const mockInvestor = MOCK_INVESTORS.find((inv) => inv.id === id);
-      if (mockInvestor) {
-        setInvestor(mockInvestor);
+      const mockStartup = MOCK_STARTUPS.find((s) => s.id === id);
+      if (mockStartup) {
+        setStartup(mockStartup);
         setLoading(false);
         return;
       }
 
       // 2. If not in mock, try fetching from API
       try {
-        // Ideally we would have a specific endpoint /api/investors/:id
-        // For now, we can fetch all and filter, OR create that endpoint.
-        // Let's assume we fetch all for now or the specific one if we add the route.
-        // Actually, let's try to fetch all and filter since we already have /api/investors
-        const res = await fetch("/api/investors", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await fetch("/api/startups/directory", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
 
         if (res.ok) {
           const data = await res.json();
-          const found = data.investors.find((inv: any) => inv.id === id);
+          const found = data.startups.find((s: any) => s.id === id);
           if (found) {
-            setInvestor(found);
+            setStartup(found);
           } else {
             setError(true);
           }
@@ -84,7 +67,7 @@ export default function InvestorDetailsPage() {
     }
 
     if (id) {
-      fetchInvestor();
+      fetchStartup();
     }
   }, [id, token]);
 
@@ -96,20 +79,20 @@ export default function InvestorDetailsPage() {
     );
   }
 
-  if (error || !investor) {
+  if (error || !startup) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Investor Not Found
+          Startup Not Found
         </h2>
         <p className="text-gray-500 dark:text-gray-400">
-          The investor profile you are looking for does not exist.
+          The startup profile you are looking for does not exist.
         </p>
         <Link
-          href="/dashboard/investors"
+          href="/dashboard/startups"
           className="text-yellow-600 font-semibold hover:underline"
         >
-          Back to Database
+          Back to Directory
         </Link>
       </div>
     );
@@ -119,11 +102,11 @@ export default function InvestorDetailsPage() {
     <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Back Button */}
       <Link
-        href="/dashboard/investors"
+        href="/dashboard/startups"
         className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 mb-6 transition-colors group dark:text-gray-400 dark:hover:text-gray-200"
       >
         <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
-        Back to Investors
+        Back to Startups
       </Link>
 
       {/* Header Card */}
@@ -134,31 +117,31 @@ export default function InvestorDetailsPage() {
           <div
             className={cn(
               "w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center text-white text-4xl font-bold shadow-xl bg-linear-to-br shrink-0",
-              investor.logoColor,
+              startup.logoColor,
             )}
           >
-            {investor.logoInitial}
+            {startup.logoInitial}
           </div>
 
           <div className="grow">
             <div className="flex flex-wrap items-center gap-3 mb-2">
               <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight dark:text-white">
-                {investor.name}
+                {startup.name}
               </h1>
               <span className="px-3 py-1 rounded-full bg-white/60 border border-white/50 text-xs font-bold uppercase tracking-wider text-gray-700 backdrop-blur-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
-                {investor.type}
+                {startup.stage}
               </span>
             </div>
 
             <div className="flex items-center text-gray-500 mb-6 font-medium dark:text-gray-400">
               <MapPin className="w-4 h-4 mr-1.5" />
-              {investor.location}
+              {startup.location}
             </div>
 
             <div className="flex flex-wrap gap-4">
-              {investor.website && (
+              {startup.website && (
                 <a
-                  href={`https://${investor.website}`}
+                  href={`https://${startup.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm dark:bg-white/5 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10"
@@ -186,62 +169,47 @@ export default function InvestorDetailsPage() {
               About
             </h3>
             <p className="text-gray-600 leading-relaxed text-md dark:text-gray-300">
-              {investor.description}
+              {startup.description}
             </p>
           </section>
 
-          {/* Focus Areas */}
+          {/* Sector / Highlights */}
           <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 dark:text-white">
-              <TrendingUp className="w-5 h-5 text-gray-400" />
-              Investment Focus
+              <Rocket className="w-5 h-5 text-gray-400" />
+              Sector Focus
             </h3>
             <div className="flex flex-wrap gap-3">
-              {investor.focus.map((tag) => (
-                <div
-                  key={tag}
-                  className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 font-semibold flex items-center gap-2 dark:bg-white/5 dark:border-white/10 dark:text-gray-300"
-                >
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  {tag}
-                </div>
-              ))}
+              <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 font-semibold flex items-center gap-2 dark:bg-white/5 dark:border-white/10 dark:text-gray-300">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                {startup.sector}
+              </div>
             </div>
           </section>
         </div>
 
         {/* Sidebar details */}
         <div className="space-y-6">
-          <div className="bg-linear-to-br from-yellow-50 to-orange-50 rounded-3xl p-6 border border-yellow-100 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-900/30">
-            <h4 className="text-sm font-bold text-yellow-800 uppercase tracking-wider mb-4 dark:text-yellow-500">
-              Investment Range
+          <div className="bg-linear-to-br from-blue-50 to-cyan-50 rounded-3xl p-6 border border-blue-100 dark:from-blue-900/20 dark:to-cyan-900/20 dark:border-blue-900/30">
+            <h4 className="text-sm font-bold text-blue-800 uppercase tracking-wider mb-4 dark:text-blue-500">
+              Traction
             </h4>
-            <div className="text-3xl font-black text-gray-900 dark:text-white">
-              {investor.investmentRange}
+            <div className="text-2xl font-black text-gray-900 dark:text-white">
+              {startup.traction || "N/A"}
             </div>
             <p className="text-sm text-gray-500 mt-2 font-medium dark:text-gray-400">
-              Typical check size per deal
+              Key Metric
             </p>
           </div>
 
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
             <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Portfolio Highlights
+              Similar Startups
             </h4>
             <div className="space-y-3">
-              {["Paystack", "Flutterwave", "Andela"].map((company) => (
-                <div
-                  key={company}
-                  className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer group dark:hover:bg-white/5"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-white group-hover:shadow-md transition-all dark:bg-white/10 dark:text-gray-400 dark:group-hover:bg-white/20">
-                    {company[0]}
-                  </div>
-                  <span className="font-bold text-gray-700 dark:text-gray-300">
-                    {company}
-                  </span>
-                </div>
-              ))}
+              <p className="text-gray-500 text-sm italic dark:text-gray-500">
+                Coming soon...
+              </p>
             </div>
           </div>
         </div>

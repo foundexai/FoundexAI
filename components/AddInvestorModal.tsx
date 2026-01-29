@@ -69,11 +69,11 @@ export default function AddInvestorModal({
         throw new Error("Failed to create investor");
       }
 
-      toast.success("Investor added successfully!");
+      toast.success("Investor profile submitted for review!");
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error("Failed to add investor. Please try again.");
+      toast.error("Failed to submit request. Please try again.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -103,10 +103,11 @@ export default function AddInvestorModal({
         <div className="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
           <div>
             <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-              Add New Investor
+              Suggest New Investor
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Expand the database with a new profile.
+              Suggest a new investor for our database. All submissions are
+              reviewed.
             </p>
           </div>
           <button
@@ -287,7 +288,7 @@ export default function AddInvestorModal({
             className="px-8 py-3 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold shadow-lg shadow-yellow-500/30 transition-all transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            Add Investor
+            Submit Request
           </button>
         </div>
       </div>

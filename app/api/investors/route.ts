@@ -6,7 +6,10 @@ import { verifyToken } from "@/lib/auth";
 export async function GET() {
   try {
     await connectDB();
-    const investors = await Investor.find({}).sort({ created_at: -1 });
+    // Only fetch investors that are approved
+    const investors = await Investor.find({ isApproved: true }).sort({
+      created_at: -1,
+    });
 
     // Transform _id to id to match frontend interface
     const formattedInvestors = investors.map((inv) => ({

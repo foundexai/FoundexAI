@@ -14,7 +14,9 @@ import {
   MapPin,
   Globe,
 } from "lucide-react";
+import { InvestorCard } from "@/components/InvestorCard";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { MOCK_INVESTORS, Investor } from "@/lib/data";
 
 interface Startup {
   _id: string;
@@ -54,6 +56,27 @@ export default function ProfilePage() {
     profile_image_url: "",
   });
   const [uploading, setUploading] = useState(false);
+  const [savedInvestors, setSavedInvestors] = useState<Investor[]>([]);
+
+  const handleToggleSave = async (id: string) => {
+    // Optimistic update
+    setSavedInvestors((prev) => prev.filter((inv) => inv.id !== id));
+
+    const token = localStorage.getItem("token");
+    try {
+      await fetch("/api/investors/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ investorId: id }),
+      });
+      toast.success("Removed from favorites");
+    } catch (e) {
+      toast.error("Failed to update favorites");
+    }
+  };
 
   const fetchStartups = async () => {
     const token = localStorage.getItem("token");
@@ -189,6 +212,19 @@ export default function ProfilePage() {
           if (startupsRes.ok) {
             const startupsData = await startupsRes.json();
             setStartups(startupsData.startups || []);
+          }
+
+          // Fetch Saved Investors
+          try {
+            const savedRes = await fetch("/api/investors/saved", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (savedRes.ok) {
+              const savedData = await savedRes.json();
+              setSavedInvestors(savedData.investors || []);
+            }
+          } catch (e) {
+            console.error("Failed to load saved investors");
           }
         }
       } else {
@@ -546,6 +582,29 @@ export default function ProfilePage() {
                   />
                 </div>
               )}
+
+              <div className="mt-20 border-t border-gray-200 dark:border-white/10 pt-10">
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-2">
+                  <Save className="w-6 h-6 text-yellow-500" />
+                  Saved Investors
+                </h2>
+                {savedInvestors.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {savedInvestors.map((inv) => (
+                      <InvestorCard
+                        key={inv.id}
+                        investor={inv}
+                        isSaved={true}
+                        onToggleSave={handleToggleSave}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-gray-500 dark:text-gray-400 italic">
+                    No saved investors yet. Browse the database to add some!
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>

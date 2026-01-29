@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useMobileMenu } from "@/context/MobileMenuContext";
 import { usePathname } from "next/navigation";
+// [CHUNK 1] Import Rocket
 import {
   LayoutDashboard,
   CheckCheck,
@@ -11,6 +12,7 @@ import {
   LogOut,
   MessageSquare,
   Users,
+  Rocket,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -63,6 +65,13 @@ export default function DashboardLayout({
               >
                 <Users className="h-5 w-5" />
                 <span>Investors</span>
+              </Link>
+              <Link
+                href="/dashboard/startups"
+                className={getLinkClass("/dashboard/startups")}
+              >
+                <Rocket className="h-5 w-5" />
+                <span>Startups</span>
               </Link>
               <div className="p-4 bg-yellow-400 rounded-lg text-center dark:bg-yellow-500/90 my-4">
                 <p className="font-bold text-gray-900">FoundexAI</p>
@@ -137,6 +146,13 @@ export default function DashboardLayout({
             >
               <Users className="h-5 w-5" />
               <span>Investors</span>
+            </Link>
+            <Link
+              href="/dashboard/startups"
+              className={getLinkClass("/dashboard/startups")}
+            >
+              <Rocket className="h-5 w-5" />
+              <span>Startups</span>
             </Link>
             <div className="p-4 bg-yellow-400 rounded-lg text-center dark:bg-yellow-500/90 my-4 mx-2">
               <p className="font-bold text-gray-900">FoundexAI</p>
