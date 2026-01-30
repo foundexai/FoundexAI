@@ -205,10 +205,11 @@ export default function InvestorsPage() {
           />
           <button
             onClick={() => setIsMatchModalOpen(true)}
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer shrink-0"
           >
             <Sparkles className="w-4 h-4" />
-            Match Me
+            <span className="hidden sm:inline">Match Me</span>
+            <span className="sm:hidden">Match</span>
           </button>
           <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20">
             <SlidersHorizontal className="w-4 h-4" />

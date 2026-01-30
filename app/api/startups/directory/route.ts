@@ -7,26 +7,26 @@ export async function GET() {
     await connectDB();
     // Fetch all startups that are approved (assuming approved flag exists, or just all for directory for now if we assume curated)
     // The previous schema addition included `isApproved`.
-    const startups = await Startup.find({ isApproved: true }).sort({
+    // Fetch all startups (User requested that all user startups be visible immediately)
+    const startups = await Startup.find({}).sort({
       created_at: -1,
     });
 
     const formattedStartups = startups.map((startup) => ({
       id: startup._id.toString(),
       name: startup.company_name,
-      sector: startup.sector,
-      stage: startup.stage,
-      location: startup.location,
-      logoInitial: startup.logoInitial,
-      logoColor: startup.logoColor,
+      sector: startup.sector || "Uncategorized",
+      stage: startup.stage || "Unknown",
+      location: startup.location || "Africa",
+      logoInitial: startup.logoInitial || startup.company_name.charAt(0) || "S",
+      logoColor: startup.logoColor || "bg-blue-500",
       description: startup.business_description,
-      website: startup.website,
-      traction: startup.traction, // Might not be in schema? I didn't add traction to schema explicitly, I added funding fields.
-      // Schema has: funding_amount, monthly_burn, etc.
-      // Let's use `funding_stage` or `readiness_score` as proxy for traction or just omit if not there.
-      // Wait, MOCK data has `traction`. Schema has `funding_stage`.
-      // I'll skip traction from DB for now as it's not in schema string field.
-      // Or I should add it to schema if needed.
+      website: startup.website_url, // Map website_url to website
+      traction: startup.funding_amount
+        ? `$${startup.funding_amount.toLocaleString()} Raised`
+        : startup.readiness_score
+          ? `${startup.readiness_score}% Readiness`
+          : "Pre-revenue",
     }));
 
     return NextResponse.json({ startups: formattedStartups });

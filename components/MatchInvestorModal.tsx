@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
 import { InvestorCard } from "./InvestorCard";
 import { cn } from "@/lib/utils";
@@ -26,34 +26,43 @@ export function MatchInvestorModal({
     description: "",
   });
   const [matches, setMatches] = useState<Investor[]>([]);
+  const [matchReasons, setMatchReasons] = useState<Record<string, string>>({});
+
+  if (!isOpen) return null;
 
   const handleMatch = async () => {
     setStep("matching");
 
-    // Simulate AI delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const res = await fetch("/api/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    // Simple matching logic
-    const matched = investors.filter((inv) => {
-      // 1. Match Sector (Check if investor focus includes the sector)
-      const sectorMatch = inv.focus.some(
-        (f) => f.toLowerCase() === formData.sector.toLowerCase(),
+      if (!res.ok) throw new Error("Failed to fetch matches");
+
+      const data = await res.json();
+      // data.matches = [{ id, reason }]
+
+      const reasons: Record<string, string> = {};
+      const matchedIDs = (data.matches || []).map((m: any) => {
+        reasons[m.id] = m.reason;
+        return m.id;
+      });
+
+      setMatchReasons(reasons);
+
+      const matchedInvestors = investors.filter((inv) =>
+        matchedIDs.includes(inv.id),
       );
-
-      // 2. Match Stage (Check if investor type/stage aligns - simple heuristic)
-      // For MVP, we assume VCs do Seed/Series A, Angels do Pre-seed.
-      // But let's rely on description search if stage is unknown or just sector match for now.
-      // Let's also check description for keywords.
-
-      const keywordMatch =
-        inv.description.toLowerCase().includes(formData.sector.toLowerCase()) ||
-        inv.description.toLowerCase().includes(formData.stage.toLowerCase());
-
-      return sectorMatch || keywordMatch;
-    });
-
-    setMatches(matched);
-    setStep("results");
+      setMatches(matchedInvestors);
+      setStep("results");
+    } catch (error) {
+      console.error(error);
+      toast.error("AI Matching failed. Try again.");
+      setStep("input");
+    }
   };
 
   const reset = () => {
@@ -68,8 +77,15 @@ export function MatchInvestorModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-4xl bg-white dark:bg-zinc-900 border-none shadow-2xl rounded-3xl overflow-hidden p-0 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Modal Container */}
+      <div className="relative w-full sm:max-w-4xl bg-white dark:bg-zinc-900 shadow-2xl rounded-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-white/20 dark:border-white/10">
         {/* Header */}
         <div className="bg-linear-to-r from-blue-600 to-indigo-600 p-6 relative shrink-0">
           <button
@@ -92,7 +108,7 @@ export function MatchInvestorModal({
         </div>
 
         {/* Body */}
-        <div className="p-8 grow overflow-y-auto">
+        <div className="p-8 grow overflow-y-auto custom-scrollbar">
           {step === "input" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -224,15 +240,22 @@ export function MatchInvestorModal({
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-1 custom-scrollbar">
                 {matches.length > 0 ? (
                   matches.map((inv) => (
-                    <InvestorCard
-                      key={inv.id}
-                      investor={inv}
-                      isSaved={false}
-                      onToggleSave={() => {}}
-                    />
+                    <div key={inv.id} className="relative group">
+                      <InvestorCard
+                        investor={inv}
+                        isSaved={false}
+                        onToggleSave={() => {}}
+                      />
+                      {matchReasons[inv.id] && (
+                        <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-xs text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-2">
+                          <span className="font-bold">AI Reason:</span>{" "}
+                          {matchReasons[inv.id]}
+                        </div>
+                      )}
+                    </div>
                   ))
                 ) : (
                   <div className="col-span-2 text-center py-10 text-gray-500 border-2 border-dashed border-gray-200 rounded-2xl dark:border-zinc-800">
@@ -250,7 +273,7 @@ export function MatchInvestorModal({
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

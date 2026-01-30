@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import { MOCK_INVESTORS } from "@/lib/data";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import Investor from "@/lib/models/Investor";
@@ -26,10 +28,13 @@ export async function GET(req: Request) {
     // Get IDs
     const savedIds = user.saved_investors || [];
 
-    // Fetch Investors
-    const investors = await Investor.find({ _id: { $in: savedIds } });
+    // Fetch Investors from DB
+    const dbIds = savedIds.filter((id: string) =>
+      mongoose.Types.ObjectId.isValid(id),
+    );
+    const investorsDocs = await Investor.find({ _id: { $in: dbIds } });
 
-    const formattedInvestors = investors.map((inv) => ({
+    const formattedDBInvestors = investorsDocs.map((inv) => ({
       id: inv._id.toString(),
       name: inv.name,
       type: inv.type,
@@ -38,11 +43,18 @@ export async function GET(req: Request) {
       logoInitial: inv.logoInitial,
       logoColor: inv.logoColor,
       description: inv.description,
-      investmentRange: inv.investmentRange,
+      investmentRange: inv.investmentRange || inv.investment_range,
       website: inv.website,
     }));
 
-    return NextResponse.json({ investors: formattedInvestors });
+    // Fetch saved Mock Investors
+    const savedMocks = MOCK_INVESTORS.filter((inv) =>
+      savedIds.includes(inv.id),
+    );
+
+    const allSaved = [...formattedDBInvestors, ...savedMocks];
+
+    return NextResponse.json({ investors: allSaved });
   } catch (error) {
     console.error("Error fetching saved investors:", error);
     return NextResponse.json(
