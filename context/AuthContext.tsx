@@ -15,6 +15,7 @@ interface User {
   email: string;
   full_name: string;
   saved_investors: string[]; // Store IDs of saved investors
+  user_type?: "founder" | "investor";
   // Add any other user properties you expect from your /api/auth/me endpoint
 }
 

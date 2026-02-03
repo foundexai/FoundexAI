@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -11,13 +11,12 @@ import {
   FileText,
 } from "lucide-react";
 
-export default function DocumentViewerPage() {
-  const router = useRouter();
+function DocumentViewerContent() {
   const searchParams = useSearchParams();
 
   const url = searchParams.get("url");
   const name = searchParams.get("name");
-  const type = searchParams.get("type");
+  // const type = searchParams.get("type"); // Unused
 
   const [textContent, setTextContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,5 +122,13 @@ export default function DocumentViewerPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function DocumentViewerPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>}>
+      <DocumentViewerContent />
+    </Suspense>
   );
 }

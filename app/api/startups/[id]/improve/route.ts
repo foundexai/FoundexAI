@@ -4,7 +4,7 @@ import { verifyToken } from "@/lib/auth";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }, // Correctly type params
+  { params }: { params: Promise<{ id: string }> }, // Correctly type params
 ) {
   try {
     const { id } = await params; // Await params (Next.js 15+ requirement or good practice)

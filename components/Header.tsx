@@ -163,10 +163,16 @@ export default function Header() {
                       </p>
                     </div>
                     <Link
-                      href="/profile"
+                      href="/dashboard/profile"
                       className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
                     >
-                      Profile Settings
+                      Profile
+                    </Link>
+                    <Link
+                      href="/dashboard/settings"
+                      className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
+                    >
+                      Settings
                     </Link>
                     <button
                       onClick={handleLogout}
@@ -228,6 +234,12 @@ export default function Header() {
                   className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 mx-2 rounded-lg dark:text-gray-300 dark:hover:bg-white/5"
                 >
                   Profile
+                </Link>
+                <Link
+                  href="/settings"
+                  className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 mx-2 rounded-lg dark:text-gray-300 dark:hover:bg-white/5"
+                >
+                  Settings
                 </Link>
                 <div className="border-t border-gray-100 my-1 dark:border-zinc-800"></div>
                 <button

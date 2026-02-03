@@ -92,8 +92,15 @@ export default function DashboardLayout({
               </a>
 */}
               <Link
-                href="/profile"
-                className="flex items-center space-x-3 text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-50 rounded-xl px-3 py-2 transition-all dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5"
+                href="/dashboard/profile"
+                className={getLinkClass("/dashboard/profile")}
+              >
+                <Users className="h-5 w-5" />
+                <span>Profile</span>
+              </Link>
+              <Link
+                href="/dashboard/settings"
+                className={getLinkClass("/dashboard/settings")}
               >
                 <Settings className="h-5 w-5" />
                 <span>Settings</span>
@@ -170,9 +177,19 @@ export default function DashboardLayout({
               <MessageSquare className="h-5 w-5" />
               <span>Messages</span>
             </a> */}
+            {/* Profile Link */}
             <Link
-              href="/profile"
-              className="flex items-center space-x-3 text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-50 rounded-xl px-3 py-2 transition-all dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5"
+              href="/dashboard/profile"
+              className={getLinkClass("/dashboard/profile")}
+            >
+              <Users className="h-5 w-5" />
+              <span>Profile</span>
+            </Link>
+
+            {/* Settings Link */}
+            <Link
+              href="/dashboard/settings"
+              className={getLinkClass("/dashboard/settings")}
             >
               <Settings className="h-5 w-5" />
               <span>Settings</span>
