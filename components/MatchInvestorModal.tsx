@@ -250,8 +250,11 @@ export function MatchInvestorModal({
                         onToggleSave={() => {}}
                       />
                       {matchReasons[inv.id] && (
-                        <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-xs text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-2">
-                          <span className="font-bold">AI Reason:</span>{" "}
+                        <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-2 leading-relaxed shadow-sm">
+                          <div className="flex gap-2 mb-1">
+                            <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                            <span className="font-bold">AI Analysis:</span>
+                          </div>
                           {matchReasons[inv.id]}
                         </div>
                       )}

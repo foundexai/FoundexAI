@@ -8,6 +8,13 @@ import NotesList from "@/components/NotesList";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
+import LegalStructureCard from "@/components/dashboard/LegalStructureCard";
+import BusinessModelCard from "@/components/dashboard/BusinessModelCard";
+import DocumentsSection from "@/components/dashboard/DocumentsSection";
+import SelectedInvestors from "@/components/dashboard/SelectedInvestors";
+import ReadinessScore from "@/components/ReadinessScore";
+import { Pencil, Save, X, Sparkles, Loader2 } from "lucide-react";
+
 interface Startup {
   _id: string;
   company_name: string;
@@ -16,10 +23,15 @@ interface Startup {
   mission?: string;
   vision?: string;
   readiness_score?: number;
+  readiness_feedback?: string[];
   image?: string;
   authorImage?: string;
   tags?: string[];
   location?: string;
+  legal_structure_details?: string;
+  legal_structure?: string;
+  business_models?: string[];
+  documents?: any[];
 }
 
 export default function Dashboard() {
@@ -125,98 +137,15 @@ export default function Dashboard() {
                   </svg>
                   <span>Action Items</span>
                 </a>
-                <div className="p-4 bg-yellow-400 rounded-lg text-center">
-                  <p className="font-bold">FoundexAI</p>
-                  <p className="text-sm mb-4">
-                    Get access to all features and functions
-                  </p>
-                  <button className="bg-white text-yellow-500 px-4 py-2 rounded-full font-semibold">
-                    Get Pro
-                  </button>
-                </div>
-                <a
-                  href="#"
-                  className="flex items-center space-x-2 text-gray-500"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M3 4a2 2 0 012-2h10a2 2 0 012 2v1h-1V4a1 1 0 00-1-1H5a1 1 0 00-1 1v1H3V4zm0 3v9a2 2 0 002 2h10a2 2 0 002-2V7H3zm2-5h10v1H5V2z" />
-                  </svg>
-                  <span>Messages</span>
-                </a>
-                <Link
-                  href="/profile"
-                  className="flex items-center space-x-2 text-gray-500"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0L8 7.49l-4.75.69c-1.6.23-2.24 2.18-1.07 3.33l3.44 3.35-.81 4.73c-.27 1.58 1.39 2.79 2.81 2.08L10 18.39l4.25 2.23c1.42.71 3.08-.5 2.81-2.08l-.81-4.73 3.44-3.35c1.17-1.15.53-3.1-1.07-3.33L12 7.49l-.51-4.32z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>Settings</span>
-                </Link>
               </nav>
             </div>
-            <a href="#" className="flex items-center space-x-2 text-gray-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>Sign Out</span>
-            </a>
           </aside>
           <main className="w-full flex-1 p-8 bg-gray-100 animate-pulse">
-            <header className="flex justify-between md:justify-end items-center mb-8">
-              <div className="flex items-center space-x-4">
-                <div className="hidden md:block w-24 h-10 bg-gray-300 rounded-lg"></div>
-                <div className="hidden md:block w-24 h-10 bg-gray-300 rounded-lg"></div>
-                <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                  <div className="w-20 h-4 bg-gray-300 rounded"></div>
-                  <div className="w-5 h-5 bg-gray-300 rounded"></div>
-                </div>
-              </div>
-            </header>
-            <div className="h-6 w-48 bg-gray-300 rounded mb-4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg shadow p-4">
-                  <div className="bg-gray-300 rounded-lg mb-4 h-40"></div>
-                  <div className="flex items-center mb-2">
-                    <div className="w-6 h-6 bg-gray-300 rounded-full mr-2"></div>
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                  </div>
-                  <div className="h-3 bg-gray-300 rounded mb-1 w-full"></div>
-                  <div className="h-3 bg-gray-300 rounded w-5/6"></div>
-                </div>
-              ))}
-              <div className="bg-gray-200 rounded-lg shadow p-6 flex items-center justify-center border-2 border-dashed border-gray-300">
-                <div className="text-center">
-                  <div className="mx-auto h-12 w-12 bg-gray-300 rounded-md"></div>
-                  <div className="mt-2 h-4 w-24 bg-gray-300 rounded mx-auto"></div>
-                  <div className="mt-1 h-3 w-40 bg-gray-300 rounded mx-auto"></div>
-                </div>
-              </div>
+            <div className="h-64 bg-gray-300 rounded-3xl mb-8"></div>
+            <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="h-40 bg-gray-300 rounded-2xl"></div>
+              <div className="h-40 bg-gray-300 rounded-2xl"></div>
+              <div className="h-40 bg-gray-300 rounded-2xl"></div>
             </div>
           </main>
         </div>
@@ -239,7 +168,7 @@ export default function Dashboard() {
         // Empty State
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <div className="glass-card p-10 rounded-3xl border border-white/50 max-w-md w-full relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-yellow-500 via-orange-500 to-yellow-500"></div>
             <div className="w-20 h-20 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3 transition-transform hover:rotate-6 duration-300 dark:bg-yellow-900/20">
               <svg
                 className="w-10 h-10 text-yellow-600 dark:text-yellow-500"
@@ -275,7 +204,7 @@ export default function Dashboard() {
         <div className="space-y-8 animate-in fade-in duration-700">
           {/* Header Section */}
           <div className="glass-card rounded-3xl p-8 md:p-10 border border-white/50 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-yellow-200/40 to-orange-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60 -translate-y-1/2 translate-x-1/3 dark:from-yellow-900/20 dark:to-orange-900/20 dark:opacity-30"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-linear-to-br from-yellow-200/40 to-orange-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60 -translate-y-1/2 translate-x-1/3 dark:from-yellow-900/20 dark:to-orange-900/20 dark:opacity-30"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-100/30 rounded-full mix-blend-multiply filter blur-3xl opacity-40 translate-y-1/2 -translate-x-1/2 dark:bg-yellow-900/10"></div>
 
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
@@ -283,45 +212,79 @@ export default function Dashboard() {
                 <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
                   {currentStartup.sector || "Technology"}
                 </div>
-                <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight dark:text-white">
-                  {currentStartup.company_name}
-                </h1>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                  <div className="group p-5 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 transition-all duration-300 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2 dark:text-gray-500">
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
-                      Mission
-                    </h3>
-                    <p className="text-sm text-gray-700 leading-relaxed font-medium group-hover:text-gray-900 transition-colors dark:text-gray-300 dark:group-hover:text-white">
-                      {currentStartup.mission || "No mission defined."}
-                    </p>
-                  </div>
-                  <div className="group p-5 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 transition-all duration-300 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2 dark:text-gray-500">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-                      Vision
-                    </h3>
-                    <p className="text-sm text-gray-700 leading-relaxed font-medium group-hover:text-gray-900 transition-colors dark:text-gray-300 dark:group-hover:text-white">
-                      {currentStartup.vision || "No vision defined."}
-                    </p>
-                  </div>
+                <div className="flex justify-start items-center gap-x-3">
+                  <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight dark:text-white">
+                    {currentStartup.company_name}
+                  </h1>
+                  <Link
+                    href="/dashboard/investors"
+                    className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/20 hover:-translate-y-1 dark:bg-white dark:text-black dark:hover:bg-gray-200 dark:shadow-white/10"
+                  >
+                    <Sparkles className="w-5 h-5 text-yellow-400" />
+                    Find Matches
+                  </Link>
+                </div>
+                <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                  <p className="text-lg text-gray-500 font-medium dark:text-gray-400 max-w-lg">
+                    Welcome back, {user?.full_name?.split(" ")[0] || "Founder"}!
+                    Let's bring your idea to life.
+                  </p>
+
+                  <Link
+                    href="/dashboard/investors"
+                    className="inline-flex md:hidden items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/20 hover:-translate-y-1 dark:bg-white dark:text-black dark:hover:bg-gray-200 dark:shadow-white/10"
+                  >
+                    <Sparkles className="w-5 h-5 text-yellow-400" />
+                    Find Matches
+                  </Link>
                 </div>
               </div>
-              <div className="flex justify-center md:justify-end">
-                <ReadinessScore score={currentStartup.readiness_score || 0} />
+              <div className="flex flex-col items-center md:items-end gap-6">
+                <ReadinessScore
+                  score={currentStartup.readiness_score || 0}
+                  startupId={currentStartup._id}
+                  feedback={currentStartup.readiness_feedback}
+                  onUpdate={fetchStartups}
+                />
               </div>
             </div>
           </div>
 
-          {/* Editable Description Block */}
-          <DescriptionBlock startup={currentStartup} onUpdate={fetchStartups} />
+          {/* Row 1: Description | Legal | Business Model */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            <DescriptionBlock
+              startup={currentStartup}
+              onUpdate={fetchStartups}
+            />
 
-          {/* Tasks and Notes - Commented out for now
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <TasksList />
-            <NotesList />
+            <LegalStructureCard
+              startupId={currentStartup._id}
+              location={currentStartup.location}
+              currentStructure={currentStartup.legal_structure}
+              details={currentStartup.legal_structure_details}
+              onUpdate={fetchStartups}
+            />
+
+            <BusinessModelCard
+              startupId={currentStartup._id}
+              sector={currentStartup.sector}
+              selectedModels={currentStartup.business_models}
+              onUpdate={fetchStartups}
+            />
           </div>
-          */}
+
+          {/* Row 2: Documents | Notes | Tasks */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            <DocumentsSection documents={currentStartup.documents} />
+
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+              <NotesList />
+              <TasksList />
+            </div>
+          </div>
+
+          {/* Row 3: Selected Investors */}
+          <SelectedInvestors />
         </div>
       ) : (
         // Loading Skeleton Shell
@@ -345,9 +308,6 @@ export default function Dashboard() {
   );
 }
 
-import ReadinessScore from "@/components/ReadinessScore";
-import { Pencil, Save, X } from "lucide-react";
-
 function DescriptionBlock({
   startup,
   onUpdate,
@@ -358,11 +318,46 @@ function DescriptionBlock({
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(startup.business_description);
   const [saving, setSaving] = useState(false);
+  const [improving, setImproving] = useState(false);
 
   // Sync description if startup changes from parent
   useEffect(() => {
     setDescription(startup.business_description);
   }, [startup.business_description]);
+
+  async function handleImprove() {
+    if (!description) {
+      toast.error("Please add a basic description first");
+      return;
+    }
+    setImproving(true);
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`/api/startups/${startup._id}/improve`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          description: description,
+          company_name: startup.company_name,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDescription(data.improved);
+        setIsEditing(true);
+        toast.success("Description optimized by AI!");
+      } else {
+        toast.error("Improvement failed");
+      }
+    } catch (e) {
+      toast.error("Error connecting to AI");
+    } finally {
+      setImproving(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -391,52 +386,73 @@ function DescriptionBlock({
   }
 
   return (
-    <div className="glass-card p-8 rounded-3xl border border-white/50 dark:bg-zinc-900/60 dark:border-zinc-800">
-      <div className="flex justify-between items-start mb-6">
-        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 dark:text-white">
-          <span className="w-2 h-8 bg-yellow-500 rounded-full"></span>
+    <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 dark:text-white">
+          <Sparkles className="w-5 h-5 text-yellow-500" />
           Business Description
         </h3>
+
+        {/* Helper Badge */}
+        {!isEditing && (
+          <button
+            onClick={handleImprove}
+            disabled={improving}
+            className="text-xs font-bold text-yellow-700 bg-yellow-100 hover:bg-yellow-200 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors disabled:opacity-50 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50 cursor-pointer"
+          >
+            {improving ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <Sparkles className="w-3 h-3" />
+            )}
+            {improving ? "Optimizing..." : "AI Improve"}
+          </button>
+        )}
+      </div>
+
+      <div className="grow">
+        {isEditing ? (
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all min-h-[150px] dark:bg-black/50 dark:border-zinc-700 dark:text-gray-200"
+          />
+        ) : (
+          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap dark:text-gray-300 line-clamp-6">
+            {description}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-50 rounded-lg dark:hover:bg-white/10 dark:hover:text-gray-300"
+            className="w-full py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors dark:bg-white/5 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-white/10"
           >
-            <Pencil className="w-4 h-4" />
+            Edit Description
           </button>
         ) : (
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             <button
               onClick={() => {
                 setIsEditing(false);
                 setDescription(startup.business_description);
               }}
-              className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-lg dark:text-gray-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+              className="flex-1 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 dark:bg-transparent dark:border-zinc-700 dark:text-gray-400"
             >
-              <X className="w-4 h-4" />
+              Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
+              className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-bold hover:bg-green-600 shadow-lg shadow-green-500/20"
             >
-              <Save className="w-4 h-4" />
+              Save Changes
             </button>
           </div>
         )}
       </div>
-
-      {isEditing ? (
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all min-h-[120px] dark:bg-black/50 dark:border-zinc-700 dark:text-gray-200"
-        />
-      ) : (
-        <p className="text-gray-600 leading-relaxed whitespace-pre-wrap dark:text-gray-300">
-          {description}
-        </p>
-      )}
     </div>
   );
 }

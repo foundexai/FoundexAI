@@ -191,7 +191,7 @@ export default function DashboardLayout({
             </button>
           </div>
         </aside>
-        <main className="w-full flex-1 p-8 bg-gray-100 dark:bg-black/90">
+        <main className="w-full flex-1 p-4 py-8 lg:p-8 bg-gray-100 dark:bg-black/90">
           {children}
         </main>
       </div>

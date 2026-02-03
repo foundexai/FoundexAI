@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
     // 2. Construct Prompt
     const prompt = `
-      You are an expert Venture Capital matchmaker. 
+      You are an expert Venture Capital matchmaker and Investment Analyst.
       
       Startup Profile:
       - Name: ${name}
@@ -56,7 +56,12 @@ export async function POST(req: Request) {
 
       Task: 
       Analyze the list of Investors below and identify the TOP 3 best matches for this startup.
-      Focus on sector alignment, investment stage compatibility, and description relevance.
+      Provide a DETAILED strategic rationale for each match.
+      
+      Reasoning Requirements:
+      - Explain WHY this investor is a good fit based on their specific focus, stage, and thesis.
+      - Mention potential synergies or shared interest areas.
+      - Write 2-3 insight sentences. Do NOT be generic.
       
       Investors List:
       ${JSON.stringify(allInvestors)}
@@ -66,7 +71,7 @@ export async function POST(req: Request) {
         "matches": [
           {
             "id": "investor_id",
-            "reason": "One sentence explaining why this is a good match."
+            "reason": "Detailed strategic rationale here."
           }
         ]
       }

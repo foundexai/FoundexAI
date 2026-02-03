@@ -16,8 +16,6 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import AddInvestorModal from "@/components/AddInvestorModal";
 
-import { MOCK_INVESTORS } from "@/lib/data";
-
 export default function InvestorsPage() {
   const { token, user, refreshUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,23 +34,22 @@ export default function InvestorsPage() {
         setSavedInvestorIds(user.saved_investors || []);
       }
 
-      // 2. Real Investors
-      let allInvestors = [...MOCK_INVESTORS];
+      // 2. Real Investors (No Mocks)
       try {
         const res = await fetch("/api/investors");
         if (res.ok) {
           const data = await res.json();
-          // Assuming API returns { investors: [...] } or array
-          const realInvestors = data.investors || [];
-          allInvestors = [...realInvestors, ...MOCK_INVESTORS];
+          setInvestors(data.investors || []);
+        } else {
+          setInvestors([]);
         }
       } catch (e) {
         console.log("Failed to fetch real investors", e);
+        setInvestors([]);
       }
 
       // Remove duplicates if any (based on ID, though likely they differ)
       // Mocks have string IDs "1", "2". Mongo has ObjectIds. Should be safe.
-      setInvestors(allInvestors);
     } catch (error) {
       console.error("Failed to load data", error);
       toast.error("Failed to load investors");
@@ -64,12 +61,6 @@ export default function InvestorsPage() {
   useEffect(() => {
     if (user) {
       fetchData();
-    } else {
-      // Even if not logged in, we might want to show public investors?
-      // But for dashboard, we usually require user.
-      // Let's rely on Layout/Protect route, but effectively just load mocks if no user for now.
-      setInvestors(MOCK_INVESTORS);
-      setIsLoading(false);
     }
   }, [user]);
 
@@ -86,25 +77,12 @@ export default function InvestorsPage() {
       return;
     }
 
-    // Check if it's a mock investor
-    const isMock = MOCK_INVESTORS.some((inv) => inv.id === id);
-
     const isCurrentlySaved = savedInvestorIds.includes(id);
     const newSavedIds = isCurrentlySaved
       ? savedInvestorIds.filter((savedId) => savedId !== id)
       : [...savedInvestorIds, id];
 
     setSavedInvestorIds(newSavedIds); // Optimistic / Local update
-
-    // If mock, we stop here (local state only)
-    if (isMock) {
-      toast.success(
-        isCurrentlySaved
-          ? "Removed from favorites"
-          : "Saved to favorites (Session only)",
-      );
-      return;
-    }
 
     try {
       const res = await fetch("/api/investors/save", {

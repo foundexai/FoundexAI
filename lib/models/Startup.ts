@@ -37,6 +37,7 @@ const StartupSchema = new mongoose.Schema({
     enum: ["Sole Proprietorship", "Partnership", "LLC", "C-Corp", "S-Corp"],
   },
   readiness_score: { type: Number, default: 0, min: 0, max: 100 },
+  readiness_feedback: [{ type: String }],
   logo_url: String,
   website_url: String,
   pitch_deck_url: String,
@@ -55,6 +56,18 @@ const StartupSchema = new mongoose.Schema({
   cac: { type: Number },
   ltv: { type: Number },
 
+  // New Dashboard Features
+  legal_structure_details: { type: String }, // AI Draft outcome
+  business_models: [{ type: String }], // Flexible tags like "Revenue Model", "B2B"
+  documents: [
+    {
+      name: { type: String, required: true },
+      type: { type: String, required: true },
+      url: { type: String, required: true },
+      date: { type: Date, default: Date.now },
+    },
+  ],
+
   // Approval fields
   isApproved: { type: Boolean, default: false },
   submittedBy: { type: String },
@@ -65,12 +78,11 @@ const StartupSchema = new mongoose.Schema({
 
 // Helper to ensure stage consistency
 // Helper to ensure stage consistency
-StartupSchema.pre("save", function (next: any) {
+StartupSchema.pre("save", async function () {
   if (this.funding_stage && !this.stage) {
     this.stage =
       this.funding_stage === "Pre-seed" ? "Pre-Seed" : this.funding_stage;
   }
-  next();
 });
 
 export default mongoose.models.Startup ||

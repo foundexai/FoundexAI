@@ -16,13 +16,20 @@ export async function GET() {
       id: inv._id.toString(),
       name: inv.name,
       type: inv.type,
+      stage: inv.stage,
       focus: inv.focus,
       location: inv.location,
+      hq_country: inv.hq_country,
       logoInitial: inv.logoInitial,
       logoColor: inv.logoColor,
       description: inv.description,
+      thesis: inv.thesis,
       investmentRange: inv.investmentRange,
       website: inv.website,
+      linkedin: inv.linkedin,
+      email: inv.email,
+      active_status: inv.active_status,
+      notes: inv.notes,
     }));
 
     return NextResponse.json({ investors: formattedInvestors });
