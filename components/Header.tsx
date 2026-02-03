@@ -64,9 +64,10 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full glass-header sticky top-0 z-50">
-      <div className="container mx-auto p-4 lg:px-6 py-3 flex justify-between items-center bg-transparent">
-        <div className="flex items-center space-x-3 md:hidden">
+    <header className="w-full sticky top-0 z-50 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10 transition-all duration-300">
+      <div className="mx-auto p-4 lg:px-6 py-3 flex justify-between items-center bg-transparent">
+        {/* Logo Section - Visible on all screens now */}
+        <div className="flex items-center space-x-3">
           <div className="relative w-8 h-8 md:w-10 md:h-10">
             <Image
               src="/foundex.png"

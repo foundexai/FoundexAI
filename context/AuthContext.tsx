@@ -83,6 +83,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // We can keep the user state if we had it, or just let it fail silently
       // The middleware will still protect routes if the cookie is invalid.
 
+      // Force logout if we think the session is truly invalid (like a 404 from me endpoint)
+      // or if token format is bad
+      if (
+        (error as any)?.message?.includes("Unexpected token") || // JSON parse error
+        authToken.split(".").length !== 3 // Invalid JWT structure check
+      ) {
+        localStorage.removeItem("token");
+        setToken(null);
+        setUser(null);
+      }
+
       toast.error("Checking session... please wait.");
     } finally {
       setLoading(false);
