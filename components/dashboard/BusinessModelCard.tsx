@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Loader2, Plus, CheckCircle, X, Save } from "lucide-react";
+import { Zap, Loader2, Plus, CheckCircle, X, Save } from "lucide-react";
 import { toast } from "sonner";
 
 interface BusinessModelCardProps {
@@ -129,7 +129,7 @@ export default function BusinessModelCard({
             {isSuggesting ? (
               <Loader2 className="w-3 h-3 animate-spin" />
             ) : (
-              <Sparkles className="w-3 h-3" />
+              <Zap className="w-3 h-3" />
             )}
             AI Suggestion
           </button>

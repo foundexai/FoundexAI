@@ -132,12 +132,8 @@ export default function InvestorDetailsPage() {
 
         <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
           <div
-            className={cn(
-              "w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center text-white text-4xl font-bold shadow-xl bg-linear-to-br shrink-0",
-              investor.logoColor,
-            )}
+            className="w-24 h-24 md:w-32 md:h-32 rounded-3xl flex items-center justify-center bg-yellow-400 shadow-xl shrink-0 border-4 border-white/50 dark:border-white/10"
           >
-            {investor.logoInitial}
           </div>
 
           <div className="grow">
@@ -182,7 +178,6 @@ export default function InvestorDetailsPage() {
           {/* About Section */}
           <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800 dark:text-gray-100">
             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 dark:text-white">
-              <Building2 className="w-5 h-5 text-gray-400" />
               About
             </h3>
             <p className="text-gray-600 leading-relaxed text-md dark:text-gray-300">
@@ -193,7 +188,6 @@ export default function InvestorDetailsPage() {
           {/* Focus Areas */}
           <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 dark:text-white">
-              <TrendingUp className="w-5 h-5 text-gray-400" />
               Investment Focus
             </h3>
             <div className="flex flex-wrap gap-3">
@@ -234,8 +228,7 @@ export default function InvestorDetailsPage() {
                   key={company}
                   className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer group dark:hover:bg-white/5"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-white group-hover:shadow-md transition-all dark:bg-white/10 dark:text-gray-400 dark:group-hover:bg-white/20">
-                    {company[0]}
+                  <div className="w-10 h-10 rounded-lg bg-yellow-400 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all shrink-0">
                   </div>
                   <span className="font-bold text-gray-700 dark:text-gray-300">
                     {company}

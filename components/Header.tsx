@@ -129,7 +129,7 @@ export default function Header() {
                     onClick={toggleDesktopDropdown}
                     className="flex items-center space-x-3 bg-white/40 hover:bg-white/80 border border-white/50 rounded-full pl-1 pr-4 py-1 transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
                   >
-                    <div className="w-8 h-8 bg-linear-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                    <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner shrink-0">
                       {user.full_name?.charAt(0)?.toUpperCase() || "U"}
                     </div>
                     <span className="hidden lg:block text-sm font-bold text-gray-800 dark:text-gray-200">
@@ -213,7 +213,7 @@ export default function Header() {
                 onClick={toggleMobileDropdown}
                 className="flex items-center space-x-2"
               >
-                <div className="w-9 h-9 bg-linear-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                <div className="w-9 h-9 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold shadow-md shrink-0">
                   {user.full_name?.charAt(0)?.toUpperCase() || "U"}
                 </div>
               </button>

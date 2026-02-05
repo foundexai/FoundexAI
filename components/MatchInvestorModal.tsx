@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
+import { X, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
 import { InvestorCard } from "./InvestorCard";
@@ -96,7 +96,7 @@ export function MatchInvestorModal({
           </button>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Sparkles className="w-6 h-6 text-white" />
+              <Zap className="w-6 h-6 text-white" />
             </div>
             <h2 className="text-2xl font-black text-white tracking-tight">
               AI Matchmaker
@@ -200,7 +200,7 @@ export function MatchInvestorModal({
                 className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 text-lg hover:-translate-y-1"
                 disabled={!formData.name || !formData.description}
               >
-                <Sparkles className="w-5 h-5" />
+                <Zap className="w-5 h-5" />
                 Find My Match
               </button>
             </div>
@@ -211,7 +211,7 @@ export function MatchInvestorModal({
               <div className="relative">
                 <div className="w-24 h-24 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 text-blue-600 animate-pulse" />
+                  <Zap className="w-8 h-8 text-blue-600 animate-pulse" />
                 </div>
               </div>
               <div>
@@ -252,7 +252,7 @@ export function MatchInvestorModal({
                       {matchReasons[inv.id] && (
                         <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-2 leading-relaxed shadow-sm">
                           <div className="flex gap-2 mb-1">
-                            <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                            <Zap className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                             <span className="font-bold">AI Analysis:</span>
                           </div>
                           {matchReasons[inv.id]}

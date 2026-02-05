@@ -24,20 +24,20 @@ const tagColors: { [key: string]: string } = {
   Personal: "bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-400",
 };
 
-export default function NotesList() {
+export default function NotesList({ startupId }: { startupId: string }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     loadNotes();
-  }, []);
+  }, [startupId]);
 
   async function loadNotes() {
     setIsLoading(true);
     const token = localStorage.getItem("token");
     if (!token) return;
-    const r = await fetch("/api/notes", {
+    const r = await fetch(`/api/notes?startup_id=${startupId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -165,7 +165,6 @@ export default function StartupDetailsPage() {
           {/* About Section */}
           <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800 dark:text-gray-100">
             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2 dark:text-white">
-              <Building2 className="w-5 h-5 text-gray-400" />
               About
             </h3>
             <p className="text-gray-600 leading-relaxed text-md dark:text-gray-300">
@@ -176,7 +175,6 @@ export default function StartupDetailsPage() {
           {/* Sector / Highlights */}
           <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 dark:text-white">
-              <Rocket className="w-5 h-5 text-gray-400" />
               Sector Focus
             </h3>
             <div className="flex flex-wrap gap-3">

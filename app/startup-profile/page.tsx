@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Zap } from "lucide-react";
 import AiHelperModal from "@/components/AiHelperModal";
 
 function StartupProfileContent() {
@@ -248,7 +249,7 @@ function StartupProfileContent() {
             <div className="flex items-center ml-4">
               <Link href="/profile">
                 <button className="max-w-xs bg-white rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 cursor-pointer shadow-sm p-1">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold">
+                  <div className="h-8 w-8 rounded-full bg-yellow-400 flex items-center justify-center text-white font-bold">
                     {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
                   </div>
                 </button>
@@ -262,14 +263,7 @@ function StartupProfileContent() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="md:col-span-1 glass-card border border-white/50 rounded-3xl overflow-hidden shadow-sm">
-                    <Image
-                      src="https://images.unsplash.com/photo-1599493343424-c317a5b7a152?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                      alt="Eco-Delivery"
-                      width={300}
-                      height={200}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="md:col-span-1 glass-card border border-white/50 rounded-3xl overflow-hidden shadow-sm aspect-square bg-yellow-400 flex items-center justify-center">
                   </div>
                   <div className="md:col-span-2 grid grid-cols-1 gap-4">
                     <div
@@ -285,12 +279,7 @@ function StartupProfileContent() {
                         </p>
                       </div>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Image
-                          src="/sparkle.svg"
-                          alt="AI Sparkle"
-                          width={20}
-                          height={20}
-                        />
+                        <Zap className="w-5 h-5 text-yellow-600" />
                       </div>
                     </div>
                     <div
@@ -306,12 +295,7 @@ function StartupProfileContent() {
                         </p>
                       </div>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Image
-                          src="/sparkle.svg"
-                          alt="AI Sparkle"
-                          width={20}
-                          height={20}
-                        />
+                        <Zap className="w-5 h-5 text-yellow-600" />
                       </div>
                     </div>
                     <div
@@ -327,12 +311,7 @@ function StartupProfileContent() {
                         </p>
                       </div>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Image
-                          src="/sparkle.svg"
-                          alt="AI Sparkle"
-                          width={20}
-                          height={20}
-                        />
+                        <Zap className="w-5 h-5 text-yellow-600" />
                       </div>
                     </div>
                   </div>
@@ -348,12 +327,7 @@ function StartupProfileContent() {
                         Mission
                       </h3>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Image
-                          src="/sparkle.svg"
-                          alt="AI Sparkle"
-                          width={20}
-                          height={20}
-                        />
+                        <Zap className="w-5 h-5 text-yellow-600" />
                       </div>
                     </div>
                     <p className="text-gray-600 leading-relaxed">
@@ -369,12 +343,7 @@ function StartupProfileContent() {
                         Vision
                       </h3>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Image
-                          src="/sparkle.svg"
-                          alt="AI Sparkle"
-                          width={20}
-                          height={20}
-                        />
+                        <Zap className="w-5 h-5 text-yellow-600" />
                       </div>
                     </div>
                     <p className="text-gray-600 leading-relaxed">
@@ -392,12 +361,7 @@ function StartupProfileContent() {
                       Business Description
                     </h3>
                     <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                      <Image
-                        src="/sparkle.svg"
-                        alt="AI Sparkle"
-                        width={20}
-                        height={20}
-                      />
+                      <Zap className="w-5 h-5 text-yellow-600" />
                     </div>
                   </div>
                   <p className="text-gray-600 leading-relaxed">
@@ -414,12 +378,7 @@ function StartupProfileContent() {
                       Legal Structure
                     </h3>
                     <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                      <Image
-                        src="/sparkle.svg"
-                        alt="AI Sparkle"
-                        width={20}
-                        height={20}
-                      />
+                      <Zap className="w-5 h-5 text-yellow-600" />
                     </div>
                   </div>
                   <p className="text-gray-600 leading-relaxed">
@@ -436,12 +395,7 @@ function StartupProfileContent() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-gray-900 text-lg">Tasks</h3>
                     <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                      <Image
-                        src="/sparkle.svg"
-                        alt="AI Sparkle"
-                        width={20}
-                        height={20}
-                      />
+                      <Zap className="w-5 h-5 text-yellow-600" />
                     </div>
                   </div>
                   <div className="space-y-4">

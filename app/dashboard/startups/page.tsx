@@ -75,7 +75,7 @@ export default function StartupsPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 px-1.5 lg:px-0">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>

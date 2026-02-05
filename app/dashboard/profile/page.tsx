@@ -524,8 +524,7 @@ export default function ProfilePage() {
                         className="glass-card border border-white/60 rounded-3xl p-8 flex flex-col hover:border-yellow-500/50 transition-all duration-300 group bg-white/40 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 dark:hover:border-yellow-500/50"
                       >
                         <div className="flex justify-between items-start mb-4">
-                          <div className="w-12 h-12 bg-linear-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md">
-                            {startup.company_name.charAt(0)}
+                          <div className="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center shadow-md shrink-0">
                           </div>
                           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button

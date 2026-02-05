@@ -17,8 +17,21 @@ export async function GET(req: Request) {
   try {
     await connectDB();
     const userId = await getUserId(req);
-    const startup = await Startup.findOne({ user_id: new mongoose.Types.ObjectId(userId) });
-    if (!startup) return NextResponse.json({ tasks: [] });
+    const { searchParams } = new URL(req.url);
+    const startupId = searchParams.get("startup_id");
+    
+    if (!startupId) {
+      return NextResponse.json({ error: "No startup_id" }, { status: 400 });
+    }
+
+    // Verify ownership
+    const startup = await Startup.findOne({ 
+      _id: startupId, 
+      user_id: new mongoose.Types.ObjectId(userId) 
+    });
+    
+    if (!startup) return NextResponse.json({ error: "Access denied" }, { status: 403 });
+
     const tasks = await Task.find({ startup_id: startup._id });
     return NextResponse.json({ tasks });
   } catch (err) {

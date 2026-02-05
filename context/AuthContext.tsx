@@ -16,13 +16,29 @@ interface User {
   full_name: string;
   saved_investors: string[]; // Store IDs of saved investors
   user_type?: "founder" | "investor";
-  // Add any other user properties you expect from your /api/auth/me endpoint
+}
+
+export interface Startup {
+  _id: string;
+  company_name: string;
+  sector?: string;
+  business_description?: string;
+  readiness_score?: number;
+  readiness_feedback?: string[];
+  location?: string;
+  legal_structure?: string;
+  legal_structure_details?: string;
+  business_models?: string[];
+  documents?: any[];
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
+  startups: Startup[];
+  activeStartupId: string | null;
+  setActiveStartupId: (id: string) => void;
   login: (newToken: string) => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -36,8 +52,15 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [startups, setStartups] = useState<Startup[]>([]);
+  const [activeStartupId, setActiveStartupIdState] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const setActiveStartupId = (id: string) => {
+    localStorage.setItem("activeStartupId", id);
+    setActiveStartupIdState(id);
+  };
 
   // Function to fetch user data
   const fetchUser = useCallback(async (authToken: string | null) => {
@@ -57,6 +80,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        setStartups(data.startups || []);
+        
+        // Handle active startup selection
+        const storedActiveId = localStorage.getItem("activeStartupId");
+        if (data.startups?.length > 0) {
+          const isValidStored = data.startups.some((s: any) => s._id === storedActiveId);
+          if (storedActiveId && isValidStored) {
+            setActiveStartupIdState(storedActiveId);
+          } else {
+            setActiveStartupIdState(data.startups[0]._id);
+            localStorage.setItem("activeStartupId", data.startups[0]._id);
+          }
+        }
       } else {
         // Only clear token if we get an authentication error
         if (res.status === 401 || res.status === 403) {
@@ -135,6 +171,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         token,
         loading,
+        startups,
+        activeStartupId,
+        setActiveStartupId,
         login,
         logout,
         refreshUser: () => fetchUser(token),

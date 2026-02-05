@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RefreshCw, Sparkles, Loader2 } from "lucide-react";
+import { RefreshCw, Zap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ReadinessScoreProps {
@@ -117,7 +117,7 @@ export default function ReadinessScore({
           disabled={analyzing}
           className="text-xs font-bold text-yellow-600 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 transition-colors disabled:opacity-50 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/30 cursor-pointer"
         >
-          <Sparkles className="w-3 h-3" />
+          <Zap className="w-3 h-3" />
           {analyzing ? "AI Analyzing..." : "AI Analysis"}
         </button>
       </div>

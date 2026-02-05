@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Loader2, Check, Scale, Pencil, X, Save } from "lucide-react";
+import { Zap, Loader2, Check, Scale, Pencil, X, Save } from "lucide-react";
 import { toast } from "sonner";
 
 interface LegalStructureCardProps {
@@ -105,7 +105,7 @@ export default function LegalStructureCard({
                 onClick={handleDraft}
                 className="text-xs font-bold text-yellow-600 bg-yellow-100 hover:bg-yellow-200 px-2 py-1 rounded-full flex items-center gap-1 transition-colors dark:bg-yellow-900/30 dark:text-yellow-400"
               >
-                <Sparkles className="w-3 h-3" />
+                <Zap className="w-3 h-3" />
                 AI Draft
               </button>
             )}

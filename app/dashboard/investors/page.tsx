@@ -7,26 +7,45 @@ import {
   SlidersHorizontal,
   Loader2,
   Plus,
-  Sparkles,
+  Zap,
 } from "lucide-react";
 import { MatchInvestorModal } from "@/components/MatchInvestorModal";
-
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import AddInvestorModal from "@/components/AddInvestorModal";
+import { Pagination } from "@/components/Pagination";
 
 export default function InvestorsPage() {
   const { token, user, refreshUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [savedInvestorIds, setSavedInvestorIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    pages: 1,
+    limit: 12,
+  });
 
-  const fetchData = async () => {
+  // Debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1); // Reset to page 1 on search
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const fetchData = async (page: number, search: string, type: string | null) => {
     setIsLoading(true);
     try {
       // 1. Saved Investors
@@ -34,12 +53,20 @@ export default function InvestorsPage() {
         setSavedInvestorIds(user.saved_investors || []);
       }
 
-      // 2. Real Investors (No Mocks)
+      // 2. Real Investors (Server-side paginated & filtered)
       try {
-        const res = await fetch("/api/investors");
+        const queryParams = new URLSearchParams({
+          page: page.toString(),
+          limit: "12",
+          search: search,
+          type: type || "",
+        });
+
+        const res = await fetch(`/api/investors?${queryParams.toString()}`);
         if (res.ok) {
           const data = await res.json();
           setInvestors(data.investors || []);
+          setPagination(data.pagination);
         } else {
           setInvestors([]);
         }
@@ -47,9 +74,6 @@ export default function InvestorsPage() {
         console.log("Failed to fetch real investors", e);
         setInvestors([]);
       }
-
-      // Remove duplicates if any (based on ID, though likely they differ)
-      // Mocks have string IDs "1", "2". Mongo has ObjectIds. Should be safe.
     } catch (error) {
       console.error("Failed to load data", error);
       toast.error("Failed to load investors");
@@ -60,9 +84,9 @@ export default function InvestorsPage() {
 
   useEffect(() => {
     if (user) {
-      fetchData();
+      fetchData(currentPage, debouncedSearch, selectedType);
     }
-  }, [user]);
+  }, [user, currentPage, debouncedSearch, selectedType]);
 
   // Sync saved list
   useEffect(() => {
@@ -106,16 +130,13 @@ export default function InvestorsPage() {
     }
   };
 
-  const filteredInvestors = investors.filter((inv) => {
-    const matchesSearch =
-      inv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inv.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = selectedType ? inv.type === selectedType : true;
-    return matchesSearch && matchesType;
-  });
+  const handleTypeChange = (type: string | null) => {
+    setSelectedType(type);
+    setCurrentPage(1); // Reset to page 1 on filter
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 px-1.5 lg:px-0">
       <MatchInvestorModal
         isOpen={isMatchModalOpen}
         onClose={() => setIsMatchModalOpen(false)}
@@ -124,7 +145,7 @@ export default function InvestorsPage() {
       <AddInvestorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchData}
+        onSuccess={() => fetchData(currentPage, debouncedSearch, selectedType)}
       />
 
       {/* Header Area */}
@@ -153,7 +174,7 @@ export default function InvestorsPage() {
               {["All", "VC", "Angel", "Accelerator"].map((type) => (
                 <button
                   key={type}
-                  onClick={() => setSelectedType(type === "All" ? null : type)}
+                  onClick={() => handleTypeChange(type === "All" ? null : type)}
                   className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
                     (type === "All" && !selectedType) || selectedType === type
                       ? "bg-white shadow-sm text-gray-900 dark:bg-white/10 dark:text-white"
@@ -185,7 +206,7 @@ export default function InvestorsPage() {
             onClick={() => setIsMatchModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer shrink-0"
           >
-            <Sparkles className="w-4 h-4" />
+            <Zap className="w-4 h-4" />
             <span className="hidden sm:inline">Match Me</span>
             <span className="sm:hidden">Match</span>
           </button>
@@ -206,24 +227,34 @@ export default function InvestorsPage() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-10 h-10 animate-spin text-yellow-500" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredInvestors.map((investor) => (
-            <InvestorCard
-              key={investor.id}
-              investor={investor}
-              isSaved={savedInvestorIds.includes(investor.id)}
-              onToggleSave={handleToggleSave}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 opacity-60">
+           {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-64 rounded-2xl bg-gray-100 animate-pulse dark:bg-white/5" />
           ))}
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {investors.map((investor) => (
+              <InvestorCard
+                key={investor.id}
+                investor={investor}
+                isSaved={savedInvestorIds.includes(investor.id)}
+                onToggleSave={handleToggleSave}
+              />
+            ))}
+          </div>
+
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={pagination.pages}
+            onPageChange={setCurrentPage}
+          />
+        </>
       )}
 
       {/* Empty State */}
-      {!isLoading && filteredInvestors.length === 0 && (
+      {!isLoading && investors.length === 0 && (
         <div className="text-center py-20">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 dark:bg-white/5 dark:text-gray-500">
             <Search className="w-8 h-8" />

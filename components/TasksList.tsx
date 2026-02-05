@@ -20,19 +20,19 @@ const categoryColors: { [key: string]: string } = {
 
 const categoryOrder = ["Finance", "Market", "Legal", "Operations"];
 
-export default function TasksList() {
+export default function TasksList({ startupId }: { startupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadTasks();
-  }, []);
+  }, [startupId]);
 
   async function loadTasks() {
     setIsLoading(true);
     const token = localStorage.getItem("token");
     if (!token) return;
-    const r = await fetch("/api/tasks", {
+    const r = await fetch(`/api/tasks?startup_id=${startupId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -144,7 +144,7 @@ export default function TasksList() {
                 <li key={task._id} className="flex items-start gap-3 group">
                   <button
                     onClick={() => toggleTask(task._id, task.status)}
-                    className="mt-0.5 text-gray-300 hover:text-green-500 transition-colors flex-shrink-0 dark:text-gray-600 dark:hover:text-green-400"
+                    className="mt-0.5 text-gray-300 hover:text-green-500 transition-colors shrink-0 dark:text-gray-600 dark:hover:text-green-400"
                   >
                     {task.status === "completed" ? (
                       <CheckCircle2 className="h-5 w-5 text-green-500" />

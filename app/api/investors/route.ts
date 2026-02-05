@@ -3,13 +3,41 @@ import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
 import { verifyToken } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "12");
+    const search = searchParams.get("search") || "";
+    const type = searchParams.get("type") || "";
+
     await connectDB();
-    // Only fetch investors that are approved
-    const investors = await Investor.find({ isApproved: true }).sort({
-      created_at: -1,
-    });
+
+    // Build Query
+    const query: any = { isApproved: true };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { focus: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (type) {
+      query.type = type;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [investors, total] = await Promise.all([
+      Investor.find(query)
+        .sort({ created_at: -1 })
+        .skip(skip)
+        .limit(limit),
+      Investor.countDocuments(query),
+    ]);
 
     // Transform _id to id to match frontend interface
     const formattedInvestors = investors.map((inv) => ({
@@ -32,7 +60,15 @@ export async function GET() {
       notes: inv.notes,
     }));
 
-    return NextResponse.json({ investors: formattedInvestors });
+    return NextResponse.json({
+      investors: formattedInvestors,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching investors:", error);
     return NextResponse.json(

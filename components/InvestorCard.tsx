@@ -43,12 +43,8 @@ export function InvestorCard({
         {/* Header: Logo & Type */}
         <div className="flex justify-between items-start mb-4 z-10">
           <div
-            className={cn(
-              "w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg bg-linear-to-br",
-              investor.logoColor,
-            )}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center bg-yellow-400 shadow-lg shrink-0"
           >
-            {investor.logoInitial}
           </div>
           <div className="flex flex-col items-end gap-2">
             <button

@@ -92,8 +92,7 @@ export default function SelectedInvestors() {
               >
                 <td className="py-4 pl-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-blue-500 shadow-md shadow-blue-500/20 shrink-0">
-                      {inv.name.charAt(0)}
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-400 shadow-md shadow-yellow-500/20 shrink-0">
                     </div>
                     <div>
                       <span className="font-bold text-gray-900 dark:text-gray-200 block whitespace-nowrap">
