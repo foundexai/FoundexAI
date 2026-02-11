@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RefreshCw, Zap, Loader2 } from "lucide-react";
+import { ArrowsClockwise, Lightning, CircleNotch } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface ReadinessScoreProps {
@@ -75,7 +75,7 @@ export default function ReadinessScore({
           className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 dark:hover:bg-white/10 dark:text-gray-500"
           title="Recalculate Score with AI"
         >
-          <RefreshCw className={`w-4 h-4 ${analyzing ? "animate-spin" : ""}`} />
+          <ArrowsClockwise className={`w-4 h-4 ${analyzing ? "animate-spin" : ""}`} weight="bold" />
         </button>
       </div>
 
@@ -117,7 +117,7 @@ export default function ReadinessScore({
           disabled={analyzing}
           className="text-xs font-bold text-yellow-600 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 transition-colors disabled:opacity-50 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/30 cursor-pointer"
         >
-          <Zap className="w-3 h-3" />
+          <Lightning className="w-3 h-3" weight="bold" />
           {analyzing ? "AI Analyzing..." : "AI Analysis"}
         </button>
       </div>
@@ -148,7 +148,7 @@ export default function ReadinessScore({
                   }`}
                 >
                   {analyzing && (
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-blue-500" />
+                    <CircleNotch className="w-2.5 h-2.5 animate-spin text-blue-500" weight="bold" />
                   )}
                 </div>
                 <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed flex-1 group-hover:text-gray-900 dark:group-hover:text-gray-200">

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Zap } from "lucide-react";
+import { Sparkle, House, Users, FileText, Gear, SignOut, List, X as XIcon, MagnifyingGlass } from "@phosphor-icons/react";
 import AiHelperModal from "@/components/AiHelperModal";
 
 function StartupProfileContent() {
@@ -163,7 +163,7 @@ function StartupProfileContent() {
                   href="/dashboard"
                   className="flex items-center p-3 rounded-xl text-gray-600 hover:bg-white hover:shadow-sm transition-all"
                 >
-                  <span className="mr-3">🏠</span>Dashboard
+                  <House className="mr-3 w-5 h-5" weight="bold" />Dashboard
                 </a>
               </li>
               <li>
@@ -171,7 +171,7 @@ function StartupProfileContent() {
                   href="#"
                   className="flex items-center p-3 text-gray-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
                 >
-                  <span className="mr-3">👥</span>Team
+                  <Users className="mr-3 w-5 h-5" weight="bold" />Team
                 </a>
               </li>
               <li>
@@ -179,7 +179,7 @@ function StartupProfileContent() {
                   href="#"
                   className="flex items-center p-3 text-gray-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
                 >
-                  <span className="mr-3">📄</span>Documents
+                  <FileText className="mr-3 w-5 h-5" weight="bold" />Documents
                 </a>
               </li>
               <li>
@@ -187,7 +187,7 @@ function StartupProfileContent() {
                   href="/profile"
                   className="flex items-center p-3 text-gray-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
                 >
-                  <span className="mr-3">⚙️</span>Settings
+                  <Gear className="mr-3 w-5 h-5" weight="bold" />Settings
                 </a>
               </li>
               <li className="mt-8">
@@ -198,7 +198,7 @@ function StartupProfileContent() {
                   }}
                   className="flex items-center p-3 text-red-500 hover:bg-red-50 rounded-xl w-full text-left transition-all"
                 >
-                  <span className="mr-3">🚪</span>Sign Out
+                  <SignOut className="mr-3 w-5 h-5" weight="bold" />Sign Out
                 </button>
               </li>
             </ul>
@@ -279,7 +279,7 @@ function StartupProfileContent() {
                         </p>
                       </div>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Zap className="w-5 h-5 text-yellow-600" />
+                        <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                       </div>
                     </div>
                     <div
@@ -295,7 +295,7 @@ function StartupProfileContent() {
                         </p>
                       </div>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Zap className="w-5 h-5 text-yellow-600" />
+                        <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                       </div>
                     </div>
                     <div
@@ -311,7 +311,7 @@ function StartupProfileContent() {
                         </p>
                       </div>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Zap className="w-5 h-5 text-yellow-600" />
+                        <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                       </div>
                     </div>
                   </div>
@@ -327,7 +327,7 @@ function StartupProfileContent() {
                         Mission
                       </h3>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Zap className="w-5 h-5 text-yellow-600" />
+                        <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                       </div>
                     </div>
                     <p className="text-gray-600 leading-relaxed">
@@ -343,7 +343,7 @@ function StartupProfileContent() {
                         Vision
                       </h3>
                       <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Zap className="w-5 h-5 text-yellow-600" />
+                        <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                       </div>
                     </div>
                     <p className="text-gray-600 leading-relaxed">
@@ -361,7 +361,7 @@ function StartupProfileContent() {
                       Business Description
                     </h3>
                     <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                      <Zap className="w-5 h-5 text-yellow-600" />
+                      <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                     </div>
                   </div>
                   <p className="text-gray-600 leading-relaxed">
@@ -378,7 +378,7 @@ function StartupProfileContent() {
                       Legal Structure
                     </h3>
                     <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                      <Zap className="w-5 h-5 text-yellow-600" />
+                      <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                     </div>
                   </div>
                   <p className="text-gray-600 leading-relaxed">
@@ -395,7 +395,7 @@ function StartupProfileContent() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-gray-900 text-lg">Tasks</h3>
                     <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                      <Zap className="w-5 h-5 text-yellow-600" />
+                      <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                     </div>
                   </div>
                   <div className="space-y-4">

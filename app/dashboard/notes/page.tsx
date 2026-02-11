@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Trash2 } from "lucide-react";
+import { Trash } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 interface Note {
@@ -183,7 +183,7 @@ export default function NotesPage() {
                     className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-red-900/20"
                     onClick={() => deleteNote(note._id)}
                   >
-                    <Trash2 size={18} />
+                    <Trash size={18} weight="bold" />
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-3">

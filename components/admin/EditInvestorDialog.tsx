@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   X,
   Check,
@@ -7,27 +7,33 @@ import {
   GlobeSimple,
   MapPin,
   Briefcase,
+  EnvelopeSimple,
+  LinkedinLogo,
+  FileText,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { Investor } from "@/components/InvestorCard";
 
-interface AddInvestorModalProps {
+interface EditInvestorDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  investor: Investor | null;
 }
 
-export default function AddInvestorModal({
+export default function EditInvestorDialog({
   isOpen,
   onClose,
   onSuccess,
-}: AddInvestorModalProps) {
+  investor,
+}: EditInvestorDialogProps) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     name: "",
     type: "VC",
-    focus: "", // comma separated string for input
+    focus: "",
     location: "",
     description: "",
     investmentRange: "",
@@ -36,28 +42,41 @@ export default function AddInvestorModal({
     logoColor: "from-blue-500 to-indigo-600",
   });
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (investor) {
+      setFormData({
+        name: investor.name || "",
+        type: investor.type || "VC",
+        focus: Array.isArray(investor.focus) ? investor.focus.join(", ") : investor.focus || "",
+        location: investor.location || "",
+        description: investor.description || "",
+        investmentRange: investor.investmentRange || "",
+        website: investor.website || "",
+        logoInitial: investor.logoInitial || "",
+        logoColor: investor.logoColor || "from-blue-500 to-indigo-600",
+      });
+    }
+  }, [investor]);
+
+  if (!isOpen || !investor) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Process focus tags
       const focusArray = formData.focus
         .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
+        .map((tag: string) => tag.trim())
+        .filter((tag: string) => tag.length > 0);
 
       const payload = {
         ...formData,
         focus: focusArray,
-        logoInitial:
-          formData.logoInitial || formData.name.charAt(0).toUpperCase(),
       };
 
-      const res = await fetch("/api/investors", {
-        method: "POST",
+      const res = await fetch(`/api/admin/investors/${investor.id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -66,14 +85,14 @@ export default function AddInvestorModal({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create investor");
+        throw new Error("Failed to update investor");
       }
 
-      toast.success("Investor profile submitted for review!");
+      toast.success("Investor updated successfully!");
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error("Failed to submit request. Please try again.");
+      toast.error("Failed to update investor. Please try again.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -90,7 +109,7 @@ export default function AddInvestorModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -103,20 +122,24 @@ export default function AddInvestorModal({
         <div className="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
           <div>
             <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-              Suggest New Investor
+              Edit Investor Profile
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Suggest a new investor for our database. All submissions are
-              reviewed.
+              Update investor details in the global database.
             </p>
           </div>
-            <X className="w-5 h-5" weight="bold" />
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-gray-500 dark:text-gray-400"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Form Body */}
         <div className="overflow-y-auto p-8 custom-scrollbar">
           <form
-            id="add-investor-form"
+            id="edit-investor-form"
             onSubmit={handleSubmit}
             className="space-y-6"
           >
@@ -180,7 +203,7 @@ export default function AddInvestorModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                  <Briefcase className="w-3.5 h-3.5" weight="bold" /> Industries (Comma separated)
+                  <Briefcase className="w-3.5 h-3.5" weight="bold" /> Focus (Comma separated)
                 </label>
                 <input
                   type="text"
@@ -229,8 +252,8 @@ export default function AddInvestorModal({
                   <GlobeSimple className="w-3.5 h-3.5" weight="bold" /> Website
                 </label>
                 <input
-                  type="url"
-                  placeholder="https://..."
+                  type="text"
+                  placeholder="www.sequoia.com"
                   className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
                   value={formData.website}
                   onChange={(e) =>
@@ -243,24 +266,36 @@ export default function AddInvestorModal({
             {/* Visuals */}
             <div className="space-y-3 pt-2">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Brand Color Style
+                Logo Style (Admin Only)
               </label>
-              <div className="flex flex-wrap gap-3">
-                {colorOptions.map((opt) => (
-                  <button
-                    key={opt.name}
-                    type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, logoColor: opt.class })
-                    }
-                    className={`h-10 px-4 rounded-xl text-xs font-bold text-white transition-all transform hover:scale-105 flex items-center gap-2 bg-linear-to-br ${opt.class} ${formData.logoColor === opt.class ? "ring-4 ring-offset-2 ring-yellow-500/50 scale-105 shadow-lg" : "opacity-70 hover:opacity-100"}`}
-                  >
-                    {formData.logoColor === opt.class && (
-                      <Check className="w-3 h-3" weight="bold" />
-                    )}
-                    {opt.name}
-                  </button>
-                ))}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Initial</label>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 font-bold text-center focus:ring-2 focus:ring-yellow-500 outline-none dark:text-white"
+                    value={formData.logoInitial}
+                    onChange={(e) => setFormData({ ...formData, logoInitial: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Color Theme</label>
+                  <div className="flex flex-wrap gap-2">
+                    {colorOptions.map((opt) => (
+                      <button
+                        key={opt.name}
+                        type="button"
+                        onClick={() =>
+                          setFormData({ ...formData, logoColor: opt.class })
+                        }
+                        className={`w-8 h-8 rounded-lg transition-all transform hover:scale-110 bg-linear-to-br ${opt.class} ${formData.logoColor === opt.class ? "ring-2 ring-offset-2 ring-yellow-500 scale-110 shadow-md" : "opacity-60"}`}
+                        title={opt.name}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </form>
@@ -271,19 +306,19 @@ export default function AddInvestorModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-all"
+            className="px-6 py-3 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-all font-inter"
             disabled={loading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            form="add-investor-form"
+            form="edit-investor-form"
             disabled={loading}
-            className="px-8 py-3 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold shadow-lg shadow-yellow-500/30 transition-all transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-10 py-3 rounded-xl bg-gray-900 border border-black text-white hover:bg-black text-sm font-black shadow-xl transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-black dark:border-white"
           >
             {loading && <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />}
-            Submit Request
+            Save Changes
           </button>
         </div>
       </div>

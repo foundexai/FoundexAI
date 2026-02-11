@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Plus, LayoutGrid, Check } from "lucide-react";
+import { CaretDown, Plus, Check } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -41,7 +41,8 @@ export default function StartupSwitcher() {
             {activeStartup.company_name}
           </h3>
         </div>
-        <ChevronDown 
+        <CaretDown 
+          weight="bold"
           className={cn(
             "w-4 h-4 text-gray-400 transition-transform duration-300",
             isOpen && "rotate-180"
@@ -90,7 +91,7 @@ export default function StartupSwitcher() {
                   </p>
                 </div>
                 {activeStartupId === startup._id && (
-                  <Check className="w-4 h-4 text-yellow-500" />
+                  <Check className="w-4 h-4 text-yellow-500" weight="bold" />
                 )}
               </button>
             ))}

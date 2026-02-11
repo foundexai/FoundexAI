@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import {
-  Search,
-  Filter,
-  SlidersHorizontal,
-  Loader2,
-  Rocket,
-} from "lucide-react";
+  MagnifyingGlass,
+  Funnel,
+  FadersHorizontal,
+  CircleNotch,
+  RocketLaunch,
+} from "@phosphor-icons/react";
 import { StartupCard, Startup } from "@/components/StartupCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -117,7 +117,7 @@ export default function StartupsPage() {
       <div className="sticky top-20 z-30">
         <div className="glass-card p-2 rounded-2xl border border-white/60 shadow-lg flex items-center bg-white/70 backdrop-blur-xl dark:bg-black/40 dark:border-white/10 gap-2">
           <div className="pl-4 text-gray-400">
-            <Search className="w-5 h-5" />
+            <MagnifyingGlass className="w-5 h-5" weight="bold" />
           </div>
           <input
             type="text"
@@ -127,7 +127,7 @@ export default function StartupsPage() {
             className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white"
           />
           <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20">
-            <SlidersHorizontal className="w-4 h-4" />
+            <FadersHorizontal className="w-4 h-4" weight="bold" />
             Filters
           </button>
         </div>
@@ -136,7 +136,7 @@ export default function StartupsPage() {
       {/* Grid */}
       {isLoading ? (
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-10 h-10 animate-spin text-yellow-500" />
+          <CircleNotch className="w-10 h-10 animate-spin text-yellow-500" weight="bold" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -150,7 +150,7 @@ export default function StartupsPage() {
       {!isLoading && filteredStartups.length === 0 && (
         <div className="text-center py-20">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 dark:bg-white/5 dark:text-gray-500">
-            <Rocket className="w-8 h-8" />
+            <RocketLaunch className="w-8 h-8" weight="bold" />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white">
             No startups found

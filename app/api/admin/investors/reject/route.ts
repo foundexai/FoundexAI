@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
-import { verifyToken } from "@/lib/auth";
-
-const ADMIN_EMAIL = "almussanplanner12@gmail.com";
+import { verifyToken, isAdmin } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const decoded = await verifyToken(token);
-    if (!decoded || decoded.user.email !== ADMIN_EMAIL) {
+    if (!decoded || !isAdmin(decoded.user.email)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

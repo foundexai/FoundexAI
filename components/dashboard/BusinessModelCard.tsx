@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, Loader2, Plus, CheckCircle, X, Save } from "lucide-react";
+import { MagicWand, CircleNotch, Plus, CheckCircle, X, FloppyDiskBack } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface BusinessModelCardProps {
@@ -117,7 +117,7 @@ export default function BusinessModelCard({
               onClick={handleManualSave}
               className="p-1 hover:bg-green-100 rounded text-green-600 dark:hover:bg-green-900/20"
             >
-              <Save className="w-4 h-4" />
+              <FloppyDiskBack className="w-4 h-4" weight="bold" />
             </button>
           </div>
         ) : (
@@ -127,9 +127,9 @@ export default function BusinessModelCard({
             className="text-xs font-bold text-yellow-600 bg-yellow-100 hover:bg-yellow-200 px-2 py-1 rounded-full flex items-center gap-1 transition-colors disabled:opacity-50 dark:bg-yellow-900/30 dark:text-yellow-400"
           >
             {isSuggesting ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
+              <CircleNotch className="w-3 h-3 animate-spin" weight="bold" />
             ) : (
-              <Zap className="w-3 h-3" />
+              <MagicWand className="w-3 h-3" weight="bold" />
             )}
             AI Suggestion
           </button>
@@ -155,9 +155,7 @@ export default function BusinessModelCard({
                     : "bg-white text-gray-500 border-gray-100 hover:bg-gray-50 dark:bg-white/5 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-white/10"
                 }`}
               >
-                {currentModels.includes(model) && (
-                  <CheckCircle className="w-3 h-3" />
-                )}
+                  <CheckCircle className="w-3 h-3" weight="bold" />
                 {model}
               </button>
             ))}
@@ -184,7 +182,7 @@ export default function BusinessModelCard({
               onClick={() => setIsEditing(true)}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-50 text-gray-500 text-xs font-bold border border-gray-100 hover:bg-gray-100 transition-colors dark:bg-white/5 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-white/10"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3 h-3" weight="bold" />
               Edit
             </button>
           </div>

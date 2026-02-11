@@ -1,4 +1,4 @@
-import { MapPin, ArrowRight, Building2, Globe } from "lucide-react";
+import { MapPin, ArrowRight, Buildings, GlobeSimple, Heart } from "@phosphor-icons/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -51,25 +51,15 @@ export function InvestorCard({
               onClick={handleSaveClick}
               className="p-2 rounded-full bg-white/50 border border-white/50 hover:bg-white transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill={isSaved ? "currentColor" : "none"}
-                stroke="currentColor"
+              <Heart
+                weight={isSaved ? "fill" : "bold"}
                 className={cn(
                   "w-5 h-5 transition-colors",
                   isSaved
                     ? "text-red-500"
                     : "text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400",
                 )}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
+              />
             </button>
             <div className="px-3 py-1 rounded-full bg-white/50 border border-white/50 text-[10px] font-bold uppercase tracking-wider text-gray-600 shadow-sm backdrop-blur-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
               {investor.type}
@@ -83,7 +73,7 @@ export function InvestorCard({
             {investor.name}
           </h3>
           <div className="flex items-center text-xs text-gray-500 mb-3 font-medium dark:text-gray-400">
-            <MapPin className="w-3 h-3 mr-1" />
+            <MapPin className="w-3.5 h-3.5 mr-1" weight="bold" />
             {investor.location}
           </div>
           <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed dark:text-gray-300">
@@ -119,7 +109,7 @@ export function InvestorCard({
           </div>
 
           <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white group-hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:group-hover:bg-white dark:group-hover:text-black">
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4" weight="bold" />
           </div>
         </div>
       </div>

@@ -2,17 +2,17 @@
 
 import { MOCK_STARTUPS, Startup } from "@/lib/data";
 import {
-  ArrowLeft,
+  CaretLeft,
   MapPin,
-  Globe,
-  Building2,
-  CheckCircle2,
-  TrendingUp,
-  Mail,
-  Loader2,
-  Rocket,
-  Zap,
-} from "lucide-react";
+  GlobeSimple,
+  Buildings,
+  CheckCircle,
+  TrendUp,
+  EnvelopeSimple,
+  CircleNotch,
+  RocketLaunch,
+  Lightning,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -74,7 +74,7 @@ export default function StartupDetailsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
+        <CircleNotch className="w-8 h-8 animate-spin text-yellow-500" weight="bold" />
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function StartupDetailsPage() {
         href="/dashboard/startups"
         className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 mb-6 transition-colors group dark:text-gray-400 dark:hover:text-gray-200"
       >
-        <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
+        <CaretLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" weight="bold" />
         Back to Startups
       </Link>
 
@@ -134,7 +134,7 @@ export default function StartupDetailsPage() {
             </div>
 
             <div className="flex items-center text-gray-500 mb-6 font-medium dark:text-gray-400">
-              <MapPin className="w-4 h-4 mr-1.5" />
+              <MapPin className="w-4 h-4 mr-1.5" weight="bold" />
               {startup.location}
             </div>
 
@@ -146,12 +146,12 @@ export default function StartupDetailsPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm dark:bg-white/5 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10"
                 >
-                  <Globe className="w-4 h-4 mr-2 text-gray-400" />
+                  <GlobeSimple className="w-4 h-4 mr-2 text-gray-400" weight="bold" />
                   Visit Website
                 </a>
               )}
               <button className="inline-flex items-center px-6 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 dark:bg-white dark:text-black dark:hover:bg-gray-200">
-                <Mail className="w-4 h-4 mr-2" />
+                <EnvelopeSimple className="w-4 h-4 mr-2" weight="bold" />
                 Connect
               </button>
             </div>
@@ -179,7 +179,7 @@ export default function StartupDetailsPage() {
             </h3>
             <div className="flex flex-wrap gap-3">
               <div className="px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 font-semibold flex items-center gap-2 dark:bg-white/5 dark:border-white/10 dark:text-gray-300">
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                <CheckCircle className="w-4 h-4 text-green-500" weight="bold" />
                 {startup.sector}
               </div>
             </div>

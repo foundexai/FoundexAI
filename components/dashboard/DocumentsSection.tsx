@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FileText, Plus, MoreHorizontal } from "lucide-react";
+import { FileText, Plus, DotsThree } from "@phosphor-icons/react";
 
 interface UploadedDoc {
   name: string;
@@ -49,7 +49,7 @@ export default function DocumentsSection({
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2574&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
 
             <div className="relative z-10 text-center">
-              <FileText className="w-8 h-8 text-white/80 mx-auto mb-2" />
+              <FileText className="w-8 h-8 text-white/80 mx-auto mb-2" weight="bold" />
               <h4 className="text-white font-bold text-lg tracking-tight">
                 {doc.name}
               </h4>
@@ -60,7 +60,7 @@ export default function DocumentsSection({
 
             <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
               <button className="p-1 rounded-full bg-black/50 text-white hover:bg-black">
-                <MoreHorizontal className="w-4 h-4" />
+                <DotsThree className="w-4 h-4" weight="bold" />
               </button>
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function DocumentsSection({
 
         <Link href="/dashboard/documents/new">
           <button className="w-full py-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 font-bold hover:bg-gray-50 hover:border-gray-300 transition-all flex flex-col items-center justify-center gap-1 dark:border-zinc-700 dark:hover:bg-white/5 dark:text-gray-500">
-            <Plus className="w-6 h-6" />
+            <Plus className="w-6 h-6" weight="bold" />
             <span>Add New Document</span>
           </button>
         </Link>

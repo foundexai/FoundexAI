@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { Warning, X } from "@phosphor-icons/react";
 import { createPortal } from "react-dom";
 
 interface ConfirmationModalProps {
@@ -49,7 +49,7 @@ export default function ConfirmationModal({
             <div
               className={`p-3 rounded-full shrink-0 ${isDestructive ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" : "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"}`}
             >
-              <AlertTriangle className="w-6 h-6" />
+              <Warning className="w-6 h-6" weight="bold" />
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, isAdmin } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import User from '@/lib/models/User';
 import Startup from '@/lib/models/Startup';
@@ -22,7 +22,10 @@ export async function GET(req: Request) {
     const startups = await Startup.find({ user_id: userId });
     
     return NextResponse.json({ 
-      user: decoded.user,
+      user: {
+        ...((decoded.user as any).toObject ? (decoded.user as any).toObject() : decoded.user),
+        isAdmin: isAdmin(decoded.user.email)
+      },
       startups 
     });
 

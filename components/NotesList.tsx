@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Trash2, ArrowRight, StickyNote, Calendar } from "lucide-react";
+import { Trash, ArrowRight, Note, Calendar } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
@@ -87,7 +87,7 @@ export default function NotesList({ startupId }: { startupId: string }) {
       <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 dark:text-white">
-            <StickyNote className="w-5 h-5 text-gray-400" />
+            <Note className="w-5 h-5 text-gray-400" weight="bold" />
             Recent Notes
           </h2>
           <Link href="/dashboard/notes">
@@ -136,7 +136,7 @@ export default function NotesList({ startupId }: { startupId: string }) {
 
                   <div className="flex justify-between items-center pt-3 border-t border-gray-200/50 dark:border-white/5">
                     <p className="text-xs text-gray-400 font-medium flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
+                      <Calendar className="w-3 h-3" weight="bold" />
                       {note.created_at
                         ? new Date(note.created_at).toLocaleDateString(
                             "en-US",
@@ -156,7 +156,7 @@ export default function NotesList({ startupId }: { startupId: string }) {
                       }}
                       className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded-lg dark:hover:bg-red-900/20"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash weight="bold" className="h-4 w-4" />
                     </button>
                   </div>
                 </div>

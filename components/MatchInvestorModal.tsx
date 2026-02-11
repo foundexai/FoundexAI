@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Zap, Loader2, CheckCircle2 } from "lucide-react";
+import { X, Sparkle, CircleNotch, CheckCircle } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
 import { InvestorCard } from "./InvestorCard";
@@ -96,7 +96,7 @@ export function MatchInvestorModal({
           </button>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Zap className="w-6 h-6 text-white" />
+              <Sparkle className="w-6 h-6 text-white" weight="bold" />
             </div>
             <h2 className="text-2xl font-black text-white tracking-tight">
               AI Matchmaker
@@ -200,7 +200,7 @@ export function MatchInvestorModal({
                 className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 text-lg hover:-translate-y-1"
                 disabled={!formData.name || !formData.description}
               >
-                <Zap className="w-5 h-5" />
+                <Sparkle className="w-5 h-5" weight="bold" />
                 Find My Match
               </button>
             </div>
@@ -211,7 +211,7 @@ export function MatchInvestorModal({
               <div className="relative">
                 <div className="w-24 h-24 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Zap className="w-8 h-8 text-blue-600 animate-pulse" />
+                  <Sparkle className="w-8 h-8 text-blue-600 animate-pulse" weight="bold" />
                 </div>
               </div>
               <div>
@@ -229,7 +229,7 @@ export function MatchInvestorModal({
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold text-sm mb-4 dark:bg-green-500/20 dark:text-green-400">
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle className="w-4 h-4" weight="bold" />
                   Found {matches.length} Matches
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -252,7 +252,7 @@ export function MatchInvestorModal({
                       {matchReasons[inv.id] && (
                         <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-2 leading-relaxed shadow-sm">
                           <div className="flex gap-2 mb-1">
-                            <Zap className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                            <Sparkle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" weight="bold" />
                             <span className="font-bold">AI Analysis:</span>
                           </div>
                           {matchReasons[inv.id]}

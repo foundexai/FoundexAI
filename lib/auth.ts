@@ -8,6 +8,13 @@ export const hashPassword = (pwd:string) => bcrypt.hash(pwd, 10);
 export const comparePassword = (pwd:string, hash:string) => bcrypt.compare(pwd, hash);
 export const signToken = (payload:{id:string,email:string}) => jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 
+const ADMIN_EMAILS = [
+  "almussanplanner12@gmail.com",
+  "sophzine@gmail.com"
+];
+
+export const isAdmin = (email: string) => ADMIN_EMAILS.includes(email);
+
 export const verifyToken = async (token: string) => {
   try {
     await connectDB();

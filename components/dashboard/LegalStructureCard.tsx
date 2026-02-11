@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, Loader2, Check, Scale, Pencil, X, Save } from "lucide-react";
+import { MagicWand, CircleNotch, Check, Scales, NotePencil, X, FloppyDiskBack } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface LegalStructureCardProps {
@@ -73,7 +73,7 @@ export default function LegalStructureCard({
     <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 dark:text-white">
-          <Scale className="w-5 h-5 text-gray-400" />
+          <Scales className="w-5 h-5 text-gray-400" weight="bold" />
           Legal Structure
         </h3>
 
@@ -89,14 +89,14 @@ export default function LegalStructureCard({
               onClick={handleManualSave}
               className="p-1 hover:bg-green-100 rounded text-green-600 dark:hover:bg-green-900/20"
             >
-              <Save className="w-4 h-4" />
+              <FloppyDiskBack className="w-4 h-4" weight="bold" />
             </button>
           </div>
         ) : (
           <div className="flex gap-2">
             {draft && !isDrafting && (
               <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full flex items-center gap-1 dark:bg-green-900/30 dark:text-green-400">
-                <Check className="w-3 h-3" />
+                <Check className="w-3 h-3" weight="bold" />
                 Saved
               </span>
             )}
@@ -105,7 +105,7 @@ export default function LegalStructureCard({
                 onClick={handleDraft}
                 className="text-xs font-bold text-yellow-600 bg-yellow-100 hover:bg-yellow-200 px-2 py-1 rounded-full flex items-center gap-1 transition-colors dark:bg-yellow-900/30 dark:text-yellow-400"
               >
-                <Zap className="w-3 h-3" />
+                <MagicWand className="w-3 h-3" weight="bold" />
                 AI Draft
               </button>
             )}
@@ -121,7 +121,7 @@ export default function LegalStructureCard({
 
         {isDrafting ? (
           <div className="flex flex-col items-center justify-center h-32 space-y-3">
-            <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
+            <CircleNotch className="w-8 h-8 text-yellow-500 animate-spin" weight="bold" />
             <span className="text-xs text-gray-500 animate-pulse">
               Consulting legal database...
             </span>

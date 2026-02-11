@@ -14,7 +14,7 @@ import DocumentsSection from "@/components/dashboard/DocumentsSection";
 import SelectedInvestors from "@/components/dashboard/SelectedInvestors";
 import ReadinessScore from "@/components/ReadinessScore";
 import StartupSwitcher from "@/components/dashboard/StartupSwitcher";
-import { Pencil, Save, X, Compass, FileText, Zap, Loader2 } from "lucide-react";
+import { NotePencil, FloppyDiskBack, X, MagicWand, Sparkle, FileText, CircleNotch, MagnifyingGlass } from "@phosphor-icons/react";
 
 
 export default function Dashboard() {
@@ -60,7 +60,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-yellow-500" />
+        <CircleNotch className="w-10 h-10 animate-spin text-yellow-500" weight="bold" />
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function Dashboard() {
                     href="/dashboard/investors"
                     className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg dark:bg-white dark:text-black"
                   >
-                    <Compass className="w-5 h-5 text-yellow-400" />
+                    <Sparkle className="w-5 h-5 text-yellow-500" weight="bold" />
                     Find Matches
                   </Link>
                 </div>
@@ -258,7 +258,7 @@ function DescriptionBlock({
     <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 dark:text-white">
-          <FileText className="w-5 h-5 text-yellow-500" />
+          <FileText className="w-5 h-5 text-yellow-500" weight="bold" />
           Business Description
         </h3>
 
@@ -268,7 +268,7 @@ function DescriptionBlock({
             disabled={improving}
             className="text-xs font-bold text-yellow-700 bg-yellow-100 hover:bg-yellow-200 px-3 py-1.5 rounded-full flex items-center gap-1.5"
           >
-            {improving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+            {improving ? <CircleNotch className="w-3 h-3 animate-spin" weight="bold" /> : <MagicWand className="w-3 h-3" weight="bold" />}
             {improving ? "Optimizing..." : "AI Improve"}
           </button>
         )}

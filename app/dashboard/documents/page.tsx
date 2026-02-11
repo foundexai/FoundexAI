@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
+  CaretLeft,
   FileText,
   Plus,
-  Search,
-  Filter,
-  Loader2,
+  MagnifyingGlass,
+  Funnel,
+  CircleNotch,
   Calendar,
-  Download,
+  DownloadSimple,
   Eye,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 
@@ -67,7 +67,7 @@ export default function DocumentsPage() {
             href="/dashboard"
             className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
           </Link>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             All Documents
@@ -86,7 +86,7 @@ export default function DocumentsPage() {
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between items-center">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" weight="bold" />
             <input
               type="text"
               placeholder="Search documents..."
@@ -117,7 +117,7 @@ export default function DocumentsPage() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+            <CircleNotch className="w-8 h-8 text-gray-400 animate-spin" weight="bold" />
           </div>
         ) : filteredDocs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -145,7 +145,7 @@ export default function DocumentsPage() {
                           : "bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400"
                     }`}
                   >
-                    <FileText className="w-6 h-6" />
+                    <FileText className="w-6 h-6" weight="bold" />
                   </div>
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                     {doc.type}
@@ -158,14 +158,14 @@ export default function DocumentsPage() {
 
                 <div className="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
+                    <Calendar className="w-3 h-3" weight="bold" />
                     {doc.date
                       ? format(new Date(doc.date), "MMM d, yyyy")
                       : "Recently"}
                   </div>
                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="bg-gray-100 p-1.5 rounded-lg hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">
-                      <Eye className="w-3 h-3 text-gray-700 dark:text-gray-300" />
+                      <Eye className="w-3 h-3 text-gray-700 dark:text-gray-300" weight="bold" />
                     </span>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export default function DocumentsPage() {
         ) : (
           <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-200 dark:bg-zinc-900 dark:border-zinc-800">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-zinc-800">
-              <FileText className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+              <FileText className="w-8 h-8 text-gray-300 dark:text-gray-600" weight="bold" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1 dark:text-white">
               No documents found
@@ -187,7 +187,7 @@ export default function DocumentsPage() {
               href="/dashboard/documents/new"
               className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-all dark:bg-white dark:text-black"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4" weight="bold" />
               Add Document
             </Link>
           </div>

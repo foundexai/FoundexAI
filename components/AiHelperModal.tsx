@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Sparkle, X } from "@phosphor-icons/react";
 
 export default function AiHelperModal({
   field,
@@ -28,7 +29,7 @@ export default function AiHelperModal({
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            &times;
+            <X className="w-5 h-5" weight="bold" />
           </button>
         </div>
         <p className="text-gray-600 mb-4 dark:text-gray-300">
@@ -43,18 +44,7 @@ export default function AiHelperModal({
         />
         <div className="flex justify-between items-center">
           <button className="flex items-center space-x-2 text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L10 9.586 7.707 7.293a1 1 0 00-1.414 1.414L8.586 11l-2.293 2.293a1 1 0 001.414 1.414L10 12.414l2.293 2.293a1 1 0 001.414-1.414L11.414 11l2.293-2.293z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <Sparkle className="h-5 w-5" weight="bold" />
             <span>Ask Sophia</span>
           </button>
           <button

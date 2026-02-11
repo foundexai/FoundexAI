@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
+import { CaretLeft, FloppyDiskBack, Trash, CircleNotch } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -87,7 +87,7 @@ export default function NoteEditorPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin text-yellow-500" />
+        <CircleNotch className="animate-spin text-yellow-500" weight="bold" />
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function NoteEditorPage() {
           href="/dashboard"
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold transition-colors dark:text-gray-400 dark:hover:text-white"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <CaretLeft className="w-5 h-5" weight="bold" />
           Back
         </Link>
         <div className="flex gap-2">
@@ -108,7 +108,7 @@ export default function NoteEditorPage() {
             onClick={handleDelete}
             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all dark:hover:bg-red-900/20"
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash className="w-5 h-5" weight="bold" />
           </button>
           <button
             onClick={handleSave}
@@ -116,9 +116,9 @@ export default function NoteEditorPage() {
             className="flex items-center gap-2 px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-yellow-500/20 hover:-translate-y-0.5 disabled:opacity-50"
           >
             {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
             ) : (
-              <Save className="w-4 h-4" />
+              <FloppyDiskBack className="w-4 h-4" weight="bold" />
             )}
             Save Note
           </button>

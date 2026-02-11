@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, SlidersHorizontal, Trash2, MessageCircle } from "lucide-react";
+import { MagnifyingGlass, FadersHorizontal, Trash, ChatCircleDots } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -162,13 +162,13 @@ export default function SelectedInvestors() {
                       className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-lg transition-colors"
                       title="Remove"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash weight="bold" className="w-4 h-4" />
                     </button>
                     <button
                       className="text-blue-600 hover:text-blue-700 font-bold text-sm flex items-center gap-1 p-2 hover:bg-blue-50 rounded-lg transition-colors dark:text-blue-400 dark:hover:bg-blue-900/20"
                       title="View Analysis"
                     >
-                      <MessageCircle className="w-4 h-4" />
+                      <ChatCircleDots weight="bold" className="w-4 h-4" />
                     </button>
                   </div>
                 </td>

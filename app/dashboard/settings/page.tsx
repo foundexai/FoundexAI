@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { User, Lock, Bell, Shield, LogOut } from "lucide-react";
+import { User, Lock, Bell, Shield, SignOut } from "@phosphor-icons/react";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -16,7 +16,7 @@ export default function SettingsPage() {
         {/* Account Section */}
         <div className="glass-card p-8 rounded-3xl border border-white/60 bg-white/40 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <User className="w-5 h-5 text-gray-400" />
+            <User className="w-5 h-5 text-gray-400" weight="bold" />
             Account Information
           </h2>
           
@@ -43,7 +43,7 @@ export default function SettingsPage() {
         {/* Security Section (Placeholder) */}
         <div className="glass-card p-8 rounded-3xl border border-white/60 bg-white/40 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-gray-400" />
+            <Lock className="w-5 h-5 text-gray-400" weight="bold" />
             Security
           </h2>
           <button className="text-left w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
@@ -55,7 +55,7 @@ export default function SettingsPage() {
         {/* Notifications (Placeholder) */}
         <div className="glass-card p-8 rounded-3xl border border-white/60 bg-white/40 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <Bell className="w-5 h-5 text-gray-400" />
+            <Bell className="w-5 h-5 text-gray-400" weight="bold" />
             Notifications
           </h2>
            <div className="flex items-center justify-between p-4">
@@ -71,7 +71,7 @@ export default function SettingsPage() {
                 onClick={logout}
                 className="flex items-center gap-2 text-red-600 font-bold hover:text-red-700 transition-colors px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
             >
-                <LogOut className="w-5 h-5" />
+                <SignOut className="w-5 h-5" weight="bold" />
                 Sign Out
             </button>
         </div>

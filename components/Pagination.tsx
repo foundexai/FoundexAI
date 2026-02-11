@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 interface PaginationProps {
   currentPage: number;
@@ -49,7 +49,7 @@ export function Pagination({
         disabled={currentPage === 1}
         className="p-2 rounded-xl border border-white/60 bg-white/50 backdrop-blur-md shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 group"
       >
-        <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+        <CaretLeft className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" weight="bold" />
       </button>
 
       <div className="flex items-center gap-1 bg-white/30 backdrop-blur-sm border border-white/40 p-1.5 rounded-2xl dark:bg-white/5 dark:border-white/5">
@@ -91,7 +91,7 @@ export function Pagination({
         disabled={currentPage === totalPages}
         className="p-2 rounded-xl border border-white/60 bg-white/50 backdrop-blur-md shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 group"
       >
-        <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+        <CaretRight className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" weight="bold" />
       </button>
     </div>
   );

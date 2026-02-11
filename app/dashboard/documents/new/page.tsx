@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
-  Upload,
+  CaretLeft,
+  UploadSimple,
   FileText,
-  Loader2,
-  PenLine,
-  Save,
-} from "lucide-react";
+  CircleNotch,
+  NotePencil,
+  FloppyDiskBack,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -129,7 +129,7 @@ export default function NewDocumentPage() {
           href="/dashboard"
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold transition-colors dark:text-gray-400 dark:hover:text-white"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <CaretLeft className="w-5 h-5" weight="bold" />
           Back to Dashboard
         </Link>
       </div>
@@ -145,14 +145,14 @@ export default function NewDocumentPage() {
             onClick={() => setActiveTab("upload")}
             className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "upload" ? "bg-white text-gray-900 shadow-sm dark:bg-zinc-700 dark:text-white" : "text-gray-500 hover:text-gray-700 dark:text-gray-400"}`}
           >
-            <Upload className="w-4 h-4" />
+            <UploadSimple className="w-4 h-4" weight="bold" />
             Upload File
           </button>
           <button
             onClick={() => setActiveTab("write")}
             className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "write" ? "bg-white text-gray-900 shadow-sm dark:bg-zinc-700 dark:text-white" : "text-gray-500 hover:text-gray-700 dark:text-gray-400"}`}
           >
-            <PenLine className="w-4 h-4" />
+            <NotePencil className="w-4 h-4" weight="bold" />
             Write New
           </button>
         </div>
@@ -207,9 +207,9 @@ export default function NewDocumentPage() {
                 />
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 dark:bg-zinc-800">
                   {file ? (
-                    <FileText className="w-8 h-8 text-blue-600" />
+                    <FileText className="w-8 h-8 text-blue-600" weight="bold" />
                   ) : (
-                    <Upload className="w-8 h-8 text-gray-400" />
+                    <UploadSimple className="w-8 h-8 text-gray-400" weight="bold" />
                   )}
                 </div>
                 {file ? (
@@ -254,11 +254,11 @@ export default function NewDocumentPage() {
               className="w-full py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               {uploading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <CircleNotch className="w-5 h-5 animate-spin" weight="bold" />
               ) : activeTab === "upload" ? (
-                <Upload className="w-5 h-5" />
+                <UploadSimple className="w-5 h-5" weight="bold" />
               ) : (
-                <Save className="w-5 h-5" />
+                <FloppyDiskBack className="w-5 h-5" weight="bold" />
               )}
               {uploading
                 ? "Processing..."

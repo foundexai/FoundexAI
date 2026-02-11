@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { CheckCircle2, Circle, Trash2 } from "lucide-react";
+import { CheckCircle, Circle, Trash } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 interface Task {
@@ -162,9 +162,9 @@ export default function TasksPage() {
                     onClick={() => toggleTask(task._id, task.status)}
                   >
                     {task.status === "completed" ? (
-                      <CheckCircle2 size={20} />
+                      <CheckCircle size={20} weight="fill" />
                     ) : (
-                      <Circle size={20} />
+                      <Circle size={20} weight="bold" />
                     )}
                   </button>
                   <div>
@@ -187,7 +187,7 @@ export default function TasksPage() {
                   className="p-2 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-red-900/20"
                   onClick={() => deleteTask(task._id)}
                 >
-                  <Trash2 size={18} />
+                  <Trash size={18} weight="bold" />
                 </button>
               </li>
             ))}

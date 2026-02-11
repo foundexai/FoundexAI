@@ -6,14 +6,14 @@ import ProfileForm from "@/components/ProfileForm";
 import { toast } from "sonner";
 import {
   User,
-  Pencil,
-  Trash2,
+  NotePencil,
+  Trash,
   Plus,
-  Save,
-  UploadCloud,
+  FloppyDiskBack,
+  CloudArrowUp,
   MapPin,
-  Globe,
-} from "lucide-react";
+  GlobeSimple,
+} from "@phosphor-icons/react";
 import { InvestorCard } from "@/components/InvestorCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                       />
                     ) : (
                       <div className="w-48 h-48 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center border-4 border-white dark:border-white/10 shadow-xl">
-                        <User className="w-24 h-24 text-gray-300 dark:text-white/20" />
+                        <User className="w-24 h-24 text-gray-300 dark:text-white/20" weight="bold" />
                       </div>
                     )}
                     {uploading && (
@@ -295,7 +295,7 @@ export default function ProfilePage() {
                   </div>
                   <label className="cursor-pointer bg-white/50 hover:bg-white text-gray-800 font-bold py-3 px-6 rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 shadow-sm border border-gray-200 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white dark:border-white/10">
                     <div className="flex items-center gap-2">
-                      <UploadCloud className="h-5 w-5 text-yellow-500" />
+                      <CloudArrowUp className="h-5 w-5 text-yellow-500" weight="bold" />
                       <span>
                         {profile.profile_image_url
                           ? "Change Photo"
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                        <Globe className="h-4 w-4" />
+                        <GlobeSimple className="h-4 w-4" weight="bold" />
                       </div>
                       <input
                         type="text"
@@ -403,7 +403,7 @@ export default function ProfilePage() {
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                        <MapPin className="h-4 w-4" />
+                        <MapPin className="h-4 w-4" weight="bold" />
                       </div>
                       <input
                         type="text"
@@ -487,7 +487,7 @@ export default function ProfilePage() {
                   onClick={handleSave}
                   className="bg-yellow-500 text-white font-bold py-4 px-10 rounded-xl hover:bg-yellow-600 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-xl shadow-yellow-500/30 flex items-center gap-3"
                 >
-                  <Save className="h-5 w-5" />
+                  <FloppyDiskBack className="h-5 w-5" weight="bold" />
                   Save Profile
                 </button>
               </div>
@@ -498,7 +498,7 @@ export default function ProfilePage() {
               {startups.length === 0 && !showAddForm ? (
                 <div className="glass-card text-center p-20 rounded-3xl border border-white/50 bg-white/40 dark:bg-white/5 dark:border-white/10">
                   <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6 dark:bg-yellow-500/20">
-                    <Plus className="h-8 w-8 text-yellow-600 dark:text-yellow-500" />
+                    <Plus className="h-8 w-8 text-yellow-600 dark:text-yellow-500" weight="bold" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">
                     No Startups Yet
@@ -510,7 +510,7 @@ export default function ProfilePage() {
                     onClick={() => setShowAddForm(true)}
                     className="bg-yellow-500 text-white px-8 py-4 rounded-xl hover:bg-yellow-600 flex items-center gap-3 mx-auto transition-all duration-300 ease-in-out transform hover:scale-105 shadow-xl shadow-yellow-500/30 font-bold"
                   >
-                    <Plus className="h-6 w-6" />
+                    <Plus className="h-6 w-6" weight="bold" />
                     Create Startup Profile
                   </button>
                 </div>
@@ -532,14 +532,14 @@ export default function ProfilePage() {
                               className="text-gray-400 hover:text-yellow-600 p-2 rounded-lg hover:bg-yellow-50 transition-colors dark:hover:bg-yellow-500/10 dark:hover:text-yellow-500"
                               title="Edit Startup"
                             >
-                              <Pencil className="h-5 w-5" />
+                              <NotePencil className="h-5 w-5" weight="bold" />
                             </button>
                             <button
                               onClick={() => handleDeleteStartup(startup._id)}
                               className="text-gray-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-colors dark:hover:bg-red-500/10 dark:hover:text-red-500"
                               title="Delete Startup"
                             >
-                              <Trash2 className="h-5 w-5" />
+                              <Trash className="h-5 w-5" weight="bold" />
                             </button>
                           </div>
                         </div>
@@ -584,7 +584,7 @@ export default function ProfilePage() {
 
               <div className="mt-20 border-t border-gray-200 dark:border-white/10 pt-10">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-2">
-                  <Save className="w-6 h-6 text-yellow-500" />
+                  <FloppyDiskBack className="w-6 h-6 text-yellow-500" weight="bold" />
                   Saved Investors
                 </h2>
                 {savedInvestors.length > 0 ? (

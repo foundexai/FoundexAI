@@ -5,14 +5,14 @@ import { useMobileMenu } from "@/context/MobileMenuContext";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutGrid,
-  Settings,
-  LogOut,
-  Rocket,
+  SquaresFour,
+  Gear,
+  SignOut,
+  RocketLaunch,
   Compass,
   UserCircle,
-  Zap,
-} from "lucide-react";
+  Lightning,
+} from "@phosphor-icons/react";
 
 interface NavItem {
   name: string;
@@ -30,21 +30,21 @@ const NAVIGATION_GROUPS: NavGroup[] = [
   {
     title: "Overview",
     items: [
-      { name: "Dashboard", href: "/dashboard", icon: LayoutGrid, exact: true },
+      { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
     ],
   },
   {
     title: "Discover",
     items: [
       { name: "Investors", href: "/dashboard/investors", icon: Compass },
-      { name: "Startups", href: "/dashboard/startups", icon: Rocket },
+      { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
     ],
   },
   {
     title: "Account",
     items: [
       { name: "Profile", href: "/dashboard/profile", icon: UserCircle },
-      { name: "Settings", href: "/dashboard/settings", icon: Settings },
+      { name: "Settings", href: "/dashboard/settings", icon: Gear },
     ],
   },
 ];
@@ -85,7 +85,7 @@ export default function DashboardLayout({
                   onClick={closeSidebar}
                   className={getLinkClass(item.href, item.exact)}
                 >
-                  <item.icon className={cn(
+                  <item.icon weight="bold" className={cn(
                     "h-5 w-5 transition-transform duration-200 group-hover:scale-110",
                     pathname === item.href || (!item.exact && pathname.startsWith(item.href))
                       ? "text-black"
@@ -103,7 +103,7 @@ export default function DashboardLayout({
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-yellow-400/10 rounded-full blur-2xl group-hover:bg-yellow-400/20 transition-colors"></div>
           <div className="relative z-10">
             <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center mb-4">
-              <Zap className="w-5 h-5 text-black" />
+              <Lightning className="w-5 h-5 text-black" weight="bold" />
             </div>
             <p className="font-black text-sm tracking-tight mb-1">Foundex Pro</p>
             <p className="text-[11px] text-zinc-400 leading-relaxed mb-4">
@@ -124,7 +124,7 @@ export default function DashboardLayout({
           }}
           className="flex items-center space-x-3 text-gray-500 hover:text-red-500 w-full px-4 py-3 transition-colors cursor-pointer dark:text-gray-400"
         >
-          <LogOut className="h-5 w-5" />
+          <SignOut className="h-5 w-5" weight="bold" />
           <span className="font-bold">Sign Out</span>
         </button>
       </div>

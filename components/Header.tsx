@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Bell, CaretDown, List } from "@phosphor-icons/react";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -100,29 +100,16 @@ export default function Header() {
               aria-label="Toggle theme"
             >
               {mounted && resolvedTheme === "dark" ? (
-                <Sun className="h-5 w-5 text-gray-600 group-hover:text-yellow-500 transition-colors dark:text-gray-400 dark:group-hover:text-yellow-400" />
+                <Sun className="h-5 w-5 text-gray-600 group-hover:text-yellow-500 transition-colors dark:text-gray-400 dark:group-hover:text-yellow-400" weight="bold" />
               ) : (
-                <Moon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors dark:text-gray-400" />
+                <Moon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors dark:text-gray-400" weight="bold" />
               )}
             </button>
 
             {user ? (
               <>
                 <button className="p-2.5 rounded-full bg-gray-100/50 hover:bg-white border border-white/50 transition-all shadow-sm hover:shadow-md group dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-600 group-hover:text-yellow-600 transition-colors dark:text-gray-400 dark:group-hover:text-yellow-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341A6.002 6.002 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
+                  <Bell className="h-5 w-5 text-gray-600 group-hover:text-yellow-600 transition-colors dark:text-gray-400 dark:group-hover:text-yellow-400" weight="bold" />
                 </button>
                 <div className="relative" ref={desktopDropdownRef}>
                   <button
@@ -135,18 +122,7 @@ export default function Header() {
                     <span className="hidden lg:block text-sm font-bold text-gray-800 dark:text-gray-200">
                       {user.full_name}
                     </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 text-gray-500 dark:text-gray-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CaretDown className="h-4 w-4 text-gray-500 dark:text-gray-400" weight="bold" />
                   </button>
                   <div
                     className={`absolute right-0 mt-2 w-56 glass-card border border-white/50 rounded-2xl shadow-xl py-2 z-50 transform origin-top-right transition-all duration-200 dark:bg-zinc-900/90 dark:border-zinc-800 ${
@@ -264,20 +240,7 @@ export default function Header() {
             onClick={toggle}
             className="p-2.5 rounded-xl bg-white/50 text-gray-700 hover:text-gray-900 hover:bg-white transition-colors border border-white/50 dark:bg-white/10 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/20"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+            <List className="h-6 w-6" weight="bold" />
           </button>
         </div>
       </div>

@@ -16,6 +16,7 @@ interface User {
   full_name: string;
   saved_investors: string[]; // Store IDs of saved investors
   user_type?: "founder" | "investor";
+  isAdmin?: boolean;
 }
 
 export interface Startup {

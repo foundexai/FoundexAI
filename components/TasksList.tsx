@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle2, Circle, ArrowUpRight } from "lucide-react";
+import { CheckCircle, Circle, ArrowUpRight } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 interface Task {
@@ -115,7 +115,7 @@ export default function TasksList({ startupId }: { startupId: string }) {
       className="glass-card p-6 rounded-2xl border border-white/50 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800"
     >
       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-        <CheckCircle2 className="w-32 h-32 text-gray-900 dark:text-white" />
+        <CheckCircle className="w-32 h-32 text-gray-900 dark:text-white" weight="bold" />
       </div>
 
       <div className="flex justify-between items-center mb-6 relative z-10">
@@ -124,7 +124,7 @@ export default function TasksList({ startupId }: { startupId: string }) {
         </h2>
         <Link href="/dashboard/tasks">
           <span className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full dark:hover:bg-white/10 dark:hover:text-gray-300">
-            <ArrowUpRight className="h-5 w-5" />
+            <ArrowUpRight className="h-5 w-5" weight="bold" />
           </span>
         </Link>
       </div>
@@ -147,9 +147,9 @@ export default function TasksList({ startupId }: { startupId: string }) {
                     className="mt-0.5 text-gray-300 hover:text-green-500 transition-colors shrink-0 dark:text-gray-600 dark:hover:text-green-400"
                   >
                     {task.status === "completed" ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      <CheckCircle className="h-5 w-5 text-green-500" weight="bold" />
                     ) : (
-                      <Circle className="h-5 w-5" />
+                      <Circle className="h-5 w-5" weight="bold" />
                     )}
                   </button>
                   <span

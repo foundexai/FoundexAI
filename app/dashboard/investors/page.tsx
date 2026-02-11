@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import {
-  Search,
-  Filter,
-  SlidersHorizontal,
-  Loader2,
+  MagnifyingGlass,
+  Funnel,
+  FadersHorizontal,
+  CircleNotch,
   Plus,
-  Zap,
-} from "lucide-react";
+  Sparkle,
+} from "@phosphor-icons/react";
 import { MatchInvestorModal } from "@/components/MatchInvestorModal";
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { useAuth } from "@/context/AuthContext";
@@ -165,7 +165,7 @@ export default function InvestorsPage() {
             onClick={() => setIsModalOpen(true)}
             className="md:hidden bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-xl shadow-lg shadow-yellow-500/30 transition-all active:scale-95"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-5 h-5" weight="bold" />
           </button>
 
           <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1 rounded-xl shadow-sm flex dark:bg-white/5 dark:border-white/10 overflow-x-auto max-w-[200px] md:max-w-none custom-scrollbar">
@@ -193,7 +193,7 @@ export default function InvestorsPage() {
       <div className="sticky top-20 z-30">
         <div className="glass-card p-2 rounded-2xl border border-white/60 shadow-lg flex items-center bg-white/70 backdrop-blur-xl dark:bg-black/40 dark:border-white/10 gap-2">
           <div className="pl-4 text-gray-400">
-            <Search className="w-5 h-5" />
+            <MagnifyingGlass className="w-5 h-5" weight="bold" />
           </div>
           <input
             type="text"
@@ -206,12 +206,12 @@ export default function InvestorsPage() {
             onClick={() => setIsMatchModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer shrink-0"
           >
-            <Zap className="w-4 h-4" />
+            <Sparkle className="w-4 h-4" weight="bold" />
             <span className="hidden sm:inline">Match Me</span>
             <span className="sm:hidden">Match</span>
           </button>
           <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20">
-            <SlidersHorizontal className="w-4 h-4" />
+            <FadersHorizontal className="w-4 h-4" weight="bold" />
             Filters
           </button>
 
@@ -219,7 +219,7 @@ export default function InvestorsPage() {
             onClick={() => setIsModalOpen(true)}
             className="hidden md:flex items-center gap-2 px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-yellow-500/20 hover:shadow-lg hover:scale-105 cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" weight="bold" />
             Investor
           </button>
         </div>
@@ -257,7 +257,7 @@ export default function InvestorsPage() {
       {!isLoading && investors.length === 0 && (
         <div className="text-center py-20">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 dark:bg-white/5 dark:text-gray-500">
-            <Search className="w-8 h-8" />
+            <MagnifyingGlass className="w-8 h-8" weight="bold" />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white">
             No investors found

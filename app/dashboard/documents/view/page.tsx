@@ -4,12 +4,12 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  Download,
-  ExternalLink,
-  Loader2,
+  CaretLeft,
+  DownloadSimple,
+  ArrowSquareOut,
+  CircleNotch,
   FileText,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 function DocumentViewerContent() {
   const searchParams = useSearchParams();
@@ -64,11 +64,11 @@ function DocumentViewerContent() {
             href="/dashboard/documents"
             className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
           </Link>
           <div>
             <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2 dark:text-white">
-              <FileText className="w-4 h-4 text-gray-400" />
+              <FileText className="w-4 h-4 text-gray-400" weight="bold" />
               {name || "Document Viewer"}
             </h1>
           </div>
@@ -80,7 +80,7 @@ function DocumentViewerContent() {
             target="_blank"
             className="px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors dark:text-gray-300 dark:hover:bg-zinc-800"
           >
-            <Download className="w-4 h-4" />
+            <DownloadSimple className="w-4 h-4" weight="bold" />
             Download
           </a>
           <a
@@ -88,7 +88,7 @@ function DocumentViewerContent() {
             target="_blank"
             className="hidden sm:flex px-4 py-2 text-sm font-bold bg-black text-white rounded-lg hover:bg-gray-800 items-center gap-2 transition-colors dark:bg-white dark:text-black dark:hover:bg-gray-200"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ArrowSquareOut className="w-4 h-4" weight="bold" />
             Open Original
           </a>
         </div>
@@ -98,7 +98,7 @@ function DocumentViewerContent() {
       <div className="grow overflow-hidden relative flex flex-col">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+            <CircleNotch className="w-8 h-8 text-gray-400 animate-spin" weight="bold" />
           </div>
         ) : textContent !== null ? (
           // Text Viewer (In-House Experience for Memos/Drafts)
@@ -127,7 +127,7 @@ function DocumentViewerContent() {
 
 export default function DocumentViewerPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-screen"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center h-screen"><CircleNotch className="w-8 h-8 animate-spin text-gray-400" weight="bold" /></div>}>
       <DocumentViewerContent />
     </Suspense>
   );
