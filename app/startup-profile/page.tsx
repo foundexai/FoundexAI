@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkle, House, Users, FileText, Gear, SignOut, List, X as XIcon, MagnifyingGlass } from "@phosphor-icons/react";
+import { Sparkle, House, Users, FileText, Gear, SignOut, List, X as XIcon, MagnifyingGlass, ShieldCheck } from "@phosphor-icons/react";
 import AiHelperModal from "@/components/AiHelperModal";
 
 function StartupProfileContent() {
@@ -190,6 +190,16 @@ function StartupProfileContent() {
                   <Gear className="mr-3 w-5 h-5" weight="bold" />Settings
                 </a>
               </li>
+              {user?.isAdmin && (
+                <li>
+                  <a
+                    href="/admin"
+                    className="flex items-center p-3 text-gray-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
+                  >
+                    <ShieldCheck className="mr-3 w-5 h-5" weight="bold" />Admin
+                  </a>
+                </li>
+              )}
               <li className="mt-8">
                 <button
                   onClick={() => {

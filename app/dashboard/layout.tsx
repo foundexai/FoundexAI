@@ -12,6 +12,7 @@ import {
   Compass,
   UserCircle,
   Lightning,
+  ShieldCheck,
 } from "@phosphor-icons/react";
 
 interface NavItem {
@@ -69,10 +70,21 @@ export default function DashboardLayout({
     );
   };
 
-  const NavContent = () => (
-    <div className="flex flex-col h-full py-6">
-      <div className="flex-1 px-4 space-y-8 overflow-y-auto no-scrollbar pt-20 md:pt-4">
-        {NAVIGATION_GROUPS.map((group) => (
+  const NavContent = () => {
+    const groups = [...NAVIGATION_GROUPS];
+    if (user?.isAdmin) {
+      groups.push({
+        title: "Management",
+        items: [
+          { name: "Admin", href: "/admin", icon: ShieldCheck },
+        ],
+      });
+    }
+
+    return (
+      <div className="flex flex-col h-full py-6">
+        <div className="flex-1 px-4 space-y-8 overflow-y-auto no-scrollbar pt-20 md:pt-4">
+          {groups.map((group) => (
           <div key={group.title} className="space-y-3 lg:mt-10">
             <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500">
               {group.title}
@@ -129,7 +141,8 @@ export default function DashboardLayout({
         </button>
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">

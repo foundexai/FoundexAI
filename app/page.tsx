@@ -86,9 +86,9 @@ function AuthForm() {
     <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-gray-100 animate-in fade-in zoom-in duration-500 dark:bg-zinc-900 dark:border-zinc-800 dark:shadow-2xl">
       <div className="mb-8 text-center">
         <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4 dark:bg-yellow-900/20">
-          <Lightning className="w-6 h-6 text-yellow-600 dark:text-yellow-500" weight="bold" />
+          <img src="/foundex.png" alt="" />
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight dark:text-white">
+        <h1 className="text-3xl font-bold text-gray-`900 tracking-tight dark:text-white">
           {isLogin ? "Welcome Back" : "Create Account"}
         </h1>
         <p className="text-gray-500 mt-2 text-sm dark:text-gray-400">
