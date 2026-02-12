@@ -118,7 +118,7 @@ export default function Dashboard() {
                     href="/dashboard/investors"
                     className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg dark:bg-white dark:text-black"
                   >
-                    <Sparkle className="w-5 h-5 text-yellow-500" weight="bold" />
+                    {/* <Sparkle className="w-5 h-5 text-yellow-500" weight="bold" /> */}
                     Find Matches
                   </Link>
                 </div>
