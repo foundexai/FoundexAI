@@ -114,18 +114,19 @@ export default function TasksList({ startupId }: { startupId: string }) {
       id="tasks"
       className="glass-card p-6 rounded-2xl border border-white/50 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800"
     >
-      <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-        <CheckCircle className="w-32 h-32 text-gray-900 dark:text-white" weight="bold" />
-      </div>
+      {/* <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none">
+        <CheckCircle className="w-48 h-48 text-gray-900 dark:text-white" weight="bold" />
+      </div> */}
 
       <div className="flex justify-between items-center mb-6 relative z-10">
         <h2 className="text-xl font-bold text-gray-900 tracking-tight dark:text-white">
           Tasks
         </h2>
         <Link href="/dashboard/tasks">
-          <span className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full dark:hover:bg-white/10 dark:hover:text-gray-300">
-            <ArrowUpRight className="h-5 w-5" weight="bold" />
-          </span>
+          <button className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-xl dark:hover:bg-white/10 dark:hover:text-gray-300 flex items-center gap-1">
+            <span className="text-xs font-bold uppercase tracking-wider">Details</span>
+            <ArrowUpRight className="h-4 w-4" weight="bold" />
+          </button>
         </Link>
       </div>
 

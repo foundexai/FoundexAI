@@ -54,11 +54,7 @@ export default function InvestorDetailsPage() {
 
       // 2. If not in mock, try fetching from API
       try {
-        // Ideally we would have a specific endpoint /api/investors/:id
-        // For now, we can fetch all and filter, OR create that endpoint.
-        // Let's assume we fetch all for now or the specific one if we add the route.
-        // Actually, let's try to fetch all and filter since we already have /api/investors
-        const res = await fetch("/api/investors", {
+        const res = await fetch(`/api/investors/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -66,9 +62,8 @@ export default function InvestorDetailsPage() {
 
         if (res.ok) {
           const data = await res.json();
-          const found = data.investors.find((inv: any) => inv.id === id);
-          if (found) {
-            setInvestor(found);
+          if (data.investor) {
+            setInvestor(data.investor);
           } else {
             setError(true);
           }

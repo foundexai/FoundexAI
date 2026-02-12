@@ -7,8 +7,8 @@ export async function GET() {
     await connectDB();
     // Fetch all startups that are approved (assuming approved flag exists, or just all for directory for now if we assume curated)
     // The previous schema addition included `isApproved`.
-    // Fetch all startups (User requested that all user startups be visible immediately)
-    const startups = await Startup.find({}).sort({
+    // Fetch all startups that are approved
+    const startups = await Startup.find({ isApproved: true }).sort({
       created_at: -1,
     });
 

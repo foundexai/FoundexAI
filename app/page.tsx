@@ -9,7 +9,7 @@ import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans dark:bg-black">
-      <main className="flex-grow flex items-center justify-center p-4">
+      <main className="grow flex items-center justify-center p-4">
         <Suspense
           fallback={
             <div className="text-yellow-600 animate-pulse font-semibold">

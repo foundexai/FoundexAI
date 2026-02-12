@@ -14,7 +14,7 @@ import DocumentsSection from "@/components/dashboard/DocumentsSection";
 import SelectedInvestors from "@/components/dashboard/SelectedInvestors";
 import ReadinessScore from "@/components/ReadinessScore";
 import StartupSwitcher from "@/components/dashboard/StartupSwitcher";
-import { NotePencil, FloppyDiskBack, X, MagicWand, Sparkle, FileText, CircleNotch, MagnifyingGlass } from "@phosphor-icons/react";
+import { NotePencil, FloppyDiskBack, X, MagicWand, Sparkle, CircleNotch, MagnifyingGlass } from "@phosphor-icons/react";
 
 
 export default function Dashboard() {
@@ -257,8 +257,7 @@ function DescriptionBlock({
   return (
     <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 dark:text-white">
-          <FileText className="w-5 h-5 text-yellow-500" weight="bold" />
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
           Business Description
         </h3>
 

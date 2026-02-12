@@ -43,12 +43,35 @@ export async function POST(req: Request) {
   try {
     await connectDB();
     const userId = await getUserId(req);
-    const startup = await Startup.findOne({ user_id: new mongoose.Types.ObjectId(userId) });
-    if (!startup) return NextResponse.json({ error: 'No startup' }, { status: 400 });
     const data = await req.json();
-    const note = await Note.create({ startup_id: startup._id, ...data });
+    const { startup_id, title, content, tags } = data;
+
+    if (!startup_id) {
+      return NextResponse.json({ error: 'No startup_id provided' }, { status: 400 });
+    }
+
+    // Verify startup ownership
+    const startup = await Startup.findOne({ 
+      _id: startup_id, 
+      user_id: new mongoose.Types.ObjectId(userId) 
+    });
+    
+    if (!startup) {
+      return NextResponse.json({ error: 'Startup not found or access denied' }, { status: 403 });
+    }
+
+    const note = await Note.create({ 
+      startup_id: startup._id, 
+      title, 
+      content, 
+      tags,
+      type: "manual",
+      is_system_generated: false
+    });
+
     return NextResponse.json({ note });
   } catch (err) {
+    console.error("POST /api/notes error:", err);
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 }

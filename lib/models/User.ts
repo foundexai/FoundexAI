@@ -6,6 +6,8 @@ const UserSchema = new mongoose.Schema({
   password_hash: { type: String, required: true },
   user_type: { type: String, enum: ["founder", "investor"], required: true },
   saved_investors: [{ type: String }],
+  linkedin_url: { type: String },
+  profile_image_url: { type: String },
   reset_code: { type: String },
   reset_code_expires: { type: Date },
   created_at: { type: Date, default: Date.now },

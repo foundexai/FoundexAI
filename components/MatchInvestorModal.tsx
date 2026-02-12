@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkle, CircleNotch, CheckCircle } from "@phosphor-icons/react";
+import { X, Sparkle, CircleNotch, CheckCircle, CaretDown } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
 import { InvestorCard } from "./InvestorCard";
@@ -43,19 +43,19 @@ export function MatchInvestorModal({
       if (!res.ok) throw new Error("Failed to fetch matches");
 
       const data = await res.json();
-      // data.matches = [{ id, reason }]
+      // data.matches = [{ investor, reason }]
 
       const reasons: Record<string, string> = {};
-      const matchedIDs = (data.matches || []).map((m: any) => {
-        reasons[m.id] = m.reason;
-        return m.id;
+      const matchedInvestors: Investor[] = [];
+
+      (data.matches || []).forEach((m: any) => {
+        if (m.investor) {
+          matchedInvestors.push(m.investor);
+          reasons[m.investor.id] = m.reason;
+        }
       });
 
       setMatchReasons(reasons);
-
-      const matchedInvestors = investors.filter((inv) =>
-        matchedIDs.includes(inv.id),
-      );
       setMatches(matchedInvestors);
       setStep("results");
     } catch (error) {
@@ -87,7 +87,7 @@ export function MatchInvestorModal({
       {/* Modal Container */}
       <div className="relative w-full sm:max-w-4xl bg-white dark:bg-zinc-900 shadow-2xl rounded-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-white/20 dark:border-white/10">
         {/* Header */}
-        <div className="bg-linear-to-r from-blue-600 to-indigo-600 p-6 relative shrink-0">
+        <div className="bg-yellow-400 p-6 relative shrink-0">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
@@ -95,9 +95,6 @@ export function MatchInvestorModal({
             <X className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Sparkle className="w-6 h-6 text-white" weight="bold" />
-            </div>
             <h2 className="text-2xl font-black text-white tracking-tight">
               AI Matchmaker
             </h2>
@@ -130,55 +127,124 @@ export function MatchInvestorModal({
                   <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Sector
                   </label>
-                  <select
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
-                    value={formData.sector}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sector: e.target.value })
-                    }
-                  >
-                    {[
-                      "Fintech",
-                      "Healthtech",
-                      "SaaS",
-                      "E-commerce",
-                      "Edtech",
-                      "Cleantech",
-                      "AI/ML",
-                      "Blockchain",
-                      "Logistics",
-                      "Agritech",
-                      "Proptech",
-                    ].map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
+                      value={formData.sector}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sector: e.target.value })
+                      }
+                    >
+                      {[
+                        "Adtech",
+                        "Agriculture",
+                        "Agritech",
+                        "AI/ML",
+                        "Automotive",
+                        "Aviation",
+                        "Biotech",
+                        "Blockchain",
+                        "Circular Economy",
+                        "Cleantech",
+                        "Construction",
+                        "Consumer Electronics",
+                        "Cybersecurity",
+                        "Data & Analytics",
+                        "Deeptech",
+                        "Defense",
+                        "Design",
+                        "Direct-to-Consumer (DTC)",
+                        "E-commerce",
+                        "Edtech",
+                        "Energy",
+                        "Enterprise",
+                        "Entertainment",
+                        "Environment",
+                        "Events",
+                        "Fashion",
+                        "Fintech",
+                        "Foodtech",
+                        "Gaming",
+                        "Govtech",
+                        "Hardware",
+                        "Healthtech",
+                        "HRtech",
+                        "IoT",
+                        "Insurtech",
+                        "Legaltech",
+                        "Logistics",
+                        "Manufacturing",
+                        "Marine",
+                        "Marketplace",
+                        "Marketing",
+                        "Media",
+                        "Mining",
+                        "Mobility",
+                        "Nanotechnology",
+                        "Network Security",
+                        "Non-profit",
+                        "Other",
+                        "Proptech",
+                        "Real Estate",
+                        "Retail",
+                        "Robotics",
+                        "SaaS",
+                        "Security",
+                        "Smart City",
+                        "Smart Home",
+                        "Social Media",
+                        "Social Impact",
+                        "Software",
+                        "Space",
+                        "Sports",
+                        "Supply Chain",
+                        "Sustainability",
+                        "Technology",
+                        "Telecommunications",
+                        "Transportation",
+                        "Travel",
+                        "Virtual Reality (VR)",
+                        "Wearables",
+                        "Wellness",
+                      ].map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                      <CaretDown className="w-4 h-4" weight="bold" />
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Stage
                   </label>
-                  <select
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
-                    value={formData.stage}
-                    onChange={(e) =>
-                      setFormData({ ...formData, stage: e.target.value })
-                    }
-                  >
-                    {[
-                      "Pre-seed",
-                      "Seed",
-                      "Series A",
-                      "Series B+",
-                      "Growth",
-                    ].map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
+                      value={formData.stage}
+                      onChange={(e) =>
+                        setFormData({ ...formData, stage: e.target.value })
+                      }
+                    >
+                      {[
+                        "Pre-seed",
+                        "Seed",
+                        "Series A",
+                        "Series B+",
+                        "Growth",
+                      ].map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                      <CaretDown className="w-4 h-4" weight="bold" />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -197,10 +263,9 @@ export function MatchInvestorModal({
 
               <button
                 onClick={handleMatch}
-                className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 text-lg hover:-translate-y-1"
+                className="w-full py-4 bg-yellow-400 text-white font-bold rounded-xl hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-400/30 flex items-center justify-center gap-2 text-lg hover:-translate-y-1"
                 disabled={!formData.name || !formData.description}
               >
-                <Sparkle className="w-5 h-5" weight="bold" />
                 Find My Match
               </button>
             </div>
@@ -233,7 +298,7 @@ export function MatchInvestorModal({
                   Found {matches.length} Matches
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Best Matches for {formData.name}
+                  Best Matches for <span className="text-yellow-500">{formData.name}</span>
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400">
                   Based on your sector and stage.

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { uploadImage } from "@/lib/upload";
 import ProfileForm from "@/components/ProfileForm";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 import {
   User,
   NotePencil,
@@ -13,6 +14,9 @@ import {
   CloudArrowUp,
   MapPin,
   GlobeSimple,
+  CircleNotch,
+  RocketLaunch,
+  Star,
 } from "@phosphor-icons/react";
 import { InvestorCard } from "@/components/InvestorCard";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -37,6 +41,7 @@ interface Startup {
 }
 
 export default function ProfilePage() {
+  const { user: authUser, token, refreshUser } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [startups, setStartups] = useState<Startup[]>([]);
@@ -54,6 +59,11 @@ export default function ProfilePage() {
     linkedin_url: "",
     official_email: "",
     profile_image_url: "",
+  });
+  const [basicInfo, setBasicInfo] = useState({
+    full_name: "",
+    user_type: "",
+    linkedin_url: "",
   });
   const [uploading, setUploading] = useState(false);
   const [savedInvestors, setSavedInvestors] = useState<Investor[]>([]);
@@ -79,7 +89,6 @@ export default function ProfilePage() {
   };
 
   const fetchStartups = async () => {
-    const token = localStorage.getItem("token");
     if (!token) return;
     const startupsRes = await fetch("/api/startups", {
       headers: {
@@ -110,8 +119,31 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSaveMetadata = async () => {
+    if (!token) return;
+
+    try {
+      const res = await fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(basicInfo),
+      });
+
+      if (res.ok) {
+        toast.success("Basic info updated!");
+        if (refreshUser) refreshUser();
+      } else {
+        toast.error("Failed to update basic info");
+      }
+    } catch (e) {
+      toast.error("Error saving basic info");
+    }
+  };
+
   const handleSave = async () => {
-    const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Not authenticated");
       return;
@@ -169,11 +201,12 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchData() {
-      const token = localStorage.getItem("token");
-      if (!token) {
+      if (!authUser && !loading) {
         router.push("/");
         return;
       }
+      if (!token) return;
+
       const res = await fetch("/api/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -182,6 +215,15 @@ export default function ProfilePage() {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        setStartups(data.startups || []);
+
+        if (data.user) {
+          setBasicInfo({
+            full_name: data.user.full_name || "",
+            user_type: data.user.user_type || "",
+            linkedin_url: data.user.linkedin_url || "",
+          });
+        }
 
         if (data.user.user_type === "investor") {
           // Load investor profile
@@ -203,18 +245,7 @@ export default function ProfilePage() {
             }
           }
         } else {
-          // Founders: fetch startups
-          const startupsRes = await fetch("/api/startups", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (startupsRes.ok) {
-            const startupsData = await startupsRes.json();
-            setStartups(startupsData.startups || []);
-          }
-
-          // Fetch Saved Investors
+          // Founders: Fetch Saved Investors
           try {
             const savedRes = await fetch("/api/investors/saved", {
               headers: { Authorization: `Bearer ${token}` },
@@ -227,13 +258,11 @@ export default function ProfilePage() {
             console.error("Failed to load saved investors");
           }
         }
-      } else {
-        router.push("/");
       }
       setLoading(false);
     }
-    fetchData();
-  }, [router]);
+    if (token) fetchData();
+  }, [router, token, authUser]);
 
   if (loading) {
     return (
@@ -250,245 +279,190 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-500">
       <main className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              {user?.user_type === "investor"
-                ? "My Investor Profile"
-                : "My Startups"}
+          <div className="flex justify-between items-center mb-10">
+            <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+              My Profile
             </h1>
-            {user?.user_type === "founder" &&
-              !showAddForm &&
-              !editingStartup &&
-              startups.length > 0 && (
-                <button
-                  onClick={() => setShowAddForm(true)}
-                  className="bg-yellow-500 text-white px-6 py-3 rounded-xl hover:bg-yellow-600 flex items-center gap-2 transition-all font-bold shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/40 hover:-translate-y-1 cursor-pointer"
-                >
-                  <Plus className="h-5 w-5" />
-                  Add New Startup
-                </button>
-              )}
+          </div>
+
+          {/* General Identity Section */}
+          <div className="glass-card p-10 rounded-3xl border border-white/60 bg-white/40 shadow-xl backdrop-blur-xl dark:bg-white/5 dark:border-white/10 mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex flex-col md:flex-row gap-12 items-start">
+              {/* Profile Image Column */}
+              <div className="flex flex-col items-center text-center space-y-4 shrink-0">
+                <div className="relative w-32 h-32 group">
+                  {profile.profile_image_url ? (
+                    <img
+                      src={profile.profile_image_url}
+                      alt="Profile"
+                      className="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-xl transition-transform group-hover:scale-105 dark:border-white/10"
+                    />
+                  ) : (
+                    <div className="w-32 h-32 bg-gray-100 dark:bg-white/10 rounded-3xl flex items-center justify-center border-4 border-white dark:border-white/10 shadow-xl">
+                      <User className="w-12 h-12 text-gray-300 dark:text-white/20" weight="bold" />
+                    </div>
+                  )}
+                  <label className="absolute -bottom-2 -right-2 cursor-pointer bg-white text-gray-800 p-2 rounded-xl shadow-lg border border-gray-100 hover:bg-gray-50 transition-all dark:bg-zinc-800 dark:text-white dark:border-zinc-700">
+                    <CloudArrowUp className="h-5 w-5 text-yellow-500" weight="bold" />
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+                  </label>
+                  {uploading && (
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-3xl flex items-center justify-center">
+                      <CircleNotch className="animate-spin h-8 w-8 text-white" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Basic Fields Column */}
+              <div className="grow w-full space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Display Name</label>
+                    <input
+                      type="text"
+                      className="w-full bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
+                      value={basicInfo.full_name}
+                      onChange={(e) => setBasicInfo({...basicInfo, full_name: e.target.value})}
+                      placeholder="e.g. John Doe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">I am a...</label>
+                    <div className="relative">
+                      <select
+                        className="w-full appearance-none bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
+                        value={basicInfo.user_type}
+                        onChange={(e) => setBasicInfo({...basicInfo, user_type: e.target.value})}
+                      >
+                        <option value="founder">Founder / Startup</option>
+                        <option value="investor">Investor / VC</option>
+                      </select>
+                      <Plus className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none h-4 w-4" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">LinkedIn URL</label>
+                    <input
+                      type="url"
+                      className="w-full bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
+                      value={basicInfo.linkedin_url}
+                      onChange={(e) => setBasicInfo({...basicInfo, linkedin_url: e.target.value})}
+                      placeholder="linkedin.com/in/..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                    <button
+                        onClick={handleSaveMetadata}
+                        className="bg-zinc-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-lg hover:-translate-y-1 active:scale-95 text-sm dark:bg-white dark:text-black flex items-center gap-2"
+                    >
+                        <FloppyDiskBack className="h-4 w-4" weight="bold" />
+                        Update Identity
+                    </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {user?.user_type === "investor" ? (
             // Investor Profile Form
-            <div className="glass-card p-8 rounded-3xl border border-white/60 bg-white/40 shadow-xl backdrop-blur-xl dark:bg-white/5 dark:border-white/10 dark:shadow-2xl">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div className="md:col-span-1 flex flex-col items-center text-center">
-                  <div className="relative w-48 h-48 mb-6 group">
-                    {profile.profile_image_url ? (
-                      <img
-                        src={profile.profile_image_url}
-                        alt="Profile"
-                        className="w-48 h-48 rounded-full object-cover border-4 border-white shadow-xl transition-transform group-hover:scale-105 dark:border-white/10"
-                      />
-                    ) : (
-                      <div className="w-48 h-48 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center border-4 border-white dark:border-white/10 shadow-xl">
-                        <User className="w-24 h-24 text-gray-300 dark:text-white/20" weight="bold" />
-                      </div>
-                    )}
-                    {uploading && (
-                      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
-                      </div>
-                    )}
-                  </div>
-                  <label className="cursor-pointer bg-white/50 hover:bg-white text-gray-800 font-bold py-3 px-6 rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 shadow-sm border border-gray-200 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white dark:border-white/10">
-                    <div className="flex items-center gap-2">
-                      <CloudArrowUp className="h-5 w-5 text-yellow-500" weight="bold" />
-                      <span>
-                        {profile.profile_image_url
-                          ? "Change Photo"
-                          : "Upload Photo"}
-                      </span>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      disabled={uploading}
-                    />
-                  </label>
-                  <p className="text-xs text-gray-400 mt-4 font-medium uppercase tracking-wide dark:text-gray-500">
-                    JPG, PNG up to 2MB
-                  </p>
+            <div className="glass-card p-10 rounded-3xl border border-white/60 bg-white/40 shadow-xl backdrop-blur-xl dark:bg-white/5 dark:border-white/10 dark:shadow-2xl mb-12">
+              <h3 className="text-xl font-black text-gray-900 dark:text-white mb-8 border-b border-gray-100 dark:border-white/10 pb-4">
+                Investor Thesis & Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                {/* ... existing investor fields but inside this unified card ... */}
+                {/* Re-using the fields from original but without the image upload part which is now at top */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Company Name</label>
+                  <input
+                    type="text"
+                    className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                    placeholder="Enter company name"
+                    value={profile.company_name}
+                    onChange={(e) => setProfile({ ...profile, company_name: e.target.value })}
+                  />
                 </div>
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Full Name
-                    </label>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Website</label>
+                  <div className="relative">
+                    <GlobeSimple className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" weight="bold" />
                     <input
                       type="text"
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                      placeholder="Enter full name"
-                      value={profile.full_name}
-                      onChange={(e) =>
-                        setProfile({ ...profile, full_name: e.target.value })
-                      }
+                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 pl-10 px-4 focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                      placeholder="https://example.com"
+                      value={profile.website_url}
+                      onChange={(e) => setProfile({ ...profile, website_url: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                      placeholder="Enter company name"
-                      value={profile.company_name}
-                      onChange={(e) =>
-                        setProfile({ ...profile, company_name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Website
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                        <GlobeSimple className="h-4 w-4" weight="bold" />
-                      </div>
-                      <input
-                        type="text"
-                        className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 pl-10 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                        placeholder="https://example.com"
-                        value={profile.website_url}
-                        onChange={(e) =>
-                          setProfile({
-                            ...profile,
-                            website_url: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Stage Focus
-                    </label>
-                    <select
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white"
-                      value={profile.stage_focus}
-                      onChange={(e) =>
-                        setProfile({ ...profile, stage_focus: e.target.value })
-                      }
-                    >
-                      <option value="Pre-seed">Pre-seed</option>
-                      <option value="Seed">Seed</option>
-                      <option value="Series A">Series A</option>
-                      <option value="Series B+">Series B+</option>
-                      <option value="Growth">Growth</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Thesis
-                    </label>
-                    <textarea
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                      placeholder="Briefly describe your investment thesis..."
-                      rows={4}
-                      value={profile.thesis}
-                      onChange={(e) =>
-                        setProfile({ ...profile, thesis: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Geography
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                        <MapPin className="h-4 w-4" weight="bold" />
-                      </div>
-                      <input
-                        type="text"
-                        className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 pl-10 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                        placeholder="e.g., Africa, Global"
-                        value={profile.geography}
-                        onChange={(e) =>
-                          setProfile({ ...profile, geography: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                      placeholder="+1 (555) 000-0000"
-                      value={profile.phone_number}
-                      onChange={(e) =>
-                        setProfile({ ...profile, phone_number: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Type of Company
-                    </label>
-                    <select
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white"
-                      value={profile.company_type}
-                      onChange={(e) =>
-                        setProfile({ ...profile, company_type: e.target.value })
-                      }
-                    >
-                      <option value="">Select type</option>
-                      <option value="VC">VC</option>
-                      <option value="Angel">Angel</option>
-                      <option value="Family Office">Family Office</option>
-                      <option value="Corporate">Corporate</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      LinkedIn URL
-                    </label>
-                    <input
-                      type="url"
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                      placeholder="https://linkedin.com/in/..."
-                      value={profile.linkedin_url}
-                      onChange={(e) =>
-                        setProfile({ ...profile, linkedin_url: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">
-                      Official email
-                    </label>
-                    <input
-                      type="email"
-                      className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white dark:placeholder:text-gray-600"
-                      placeholder="Enter official email"
-                      value={profile.official_email}
-                      onChange={(e) =>
-                        setProfile({
-                          ...profile,
-                          official_email: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Stage Focus</label>
+                  <select
+                    className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-yellow-400 transition-all text-gray-900 font-medium dark:bg-black/20 dark:border-white/10 dark:text-white"
+                    value={profile.stage_focus}
+                    onChange={(e) => setProfile({ ...profile, stage_focus: e.target.value })}
+                  >
+                    <option value="Pre-seed">Pre-seed</option>
+                    <option value="Seed">Seed</option>
+                    <option value="Series A">Series A</option>
+                    <option value="Series B+">Series B+</option>
+                    <option value="Growth">Growth</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Type of Organization</label>
+                  <select
+                    className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                    value={profile.company_type}
+                    onChange={(e) => setProfile({ ...profile, company_type: e.target.value })}
+                  >
+                    <option value="">Select type</option>
+                    <option value="VC">VC</option>
+                    <option value="Angel">Angel</option>
+                    <option value="Family Office">Family Office</option>
+                    <option value="Corporate">Corporate</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Investment Thesis</label>
+                  <textarea
+                    className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-yellow-400 min-h-[120px] transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                    placeholder="Briefly describe your investment thesis..."
+                    value={profile.thesis}
+                    onChange={(e) => setProfile({ ...profile, thesis: e.target.value })}
+                  />
+                </div>
+                <div>
+                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Geography</label>
+                   <input
+                     type="text"
+                     className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                     placeholder="e.g. Africa, Global"
+                     value={profile.geography}
+                     onChange={(e) => setProfile({ ...profile, geography: e.target.value })}
+                   />
+                </div>
+                <div>
+                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Contact Email</label>
+                   <input
+                     type="email"
+                     className="block w-full border border-white/60 bg-white/50 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                     placeholder="invest@example.com"
+                     value={profile.official_email}
+                     onChange={(e) => setProfile({ ...profile, official_email: e.target.value })}
+                   />
                 </div>
               </div>
-              <div className="mt-12 flex justify-end">
+              <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleSave}
-                  className="bg-yellow-500 text-white font-bold py-4 px-10 rounded-xl hover:bg-yellow-600 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-xl shadow-yellow-500/30 flex items-center gap-3"
+                  className="bg-yellow-400 text-gray-900 font-black py-3 px-8 rounded-xl hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-400/20 flex items-center gap-2"
                 >
                   <FloppyDiskBack className="h-5 w-5" weight="bold" />
-                  Save Profile
+                  Save Thesis
                 </button>
               </div>
             </div>
@@ -566,7 +540,7 @@ export default function ProfilePage() {
                 )
               )}
               {(editingStartup || showAddForm) && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mb-12">
                   <ProfileForm
                     startup={editingStartup}
                     onSave={() => {
@@ -582,9 +556,57 @@ export default function ProfilePage() {
                 </div>
               )}
 
+              {/* Startups Section at the Bottom */}
               <div className="mt-20 border-t border-gray-200 dark:border-white/10 pt-10">
+                <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <RocketLaunch className="h-6 w-6 text-yellow-500" weight="bold" />
+                        My Startups
+                    </h2>
+                    {!showAddForm && !editingStartup && (
+                        <button
+                            onClick={() => setShowAddForm(true)}
+                            className="text-yellow-500 font-black flex items-center gap-2 hover:gap-3 transition-all text-sm uppercase tracking-wider"
+                        >
+                            <Plus className="h-4 w-4" weight="bold" />
+                            Add Startup
+                        </button>
+                    )}
+                </div>
+
+                {startups.length === 0 ? (
+                    <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-white/10">
+                        <p className="text-gray-400 font-bold italic">No startups registered yet.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {startups.map((startup) => (
+                            <div
+                                key={startup._id}
+                                className="glass-card border border-white/60 rounded-2xl p-4 flex flex-col hover:border-yellow-500/50 transition-all duration-300 group bg-white shadow-sm dark:bg-white/5 dark:border-white/10 relative overflow-hidden"
+                            >
+                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                    <button onClick={() => setEditingStartup(startup)} className="p-1.5 bg-white shadow-md rounded-lg text-gray-400 hover:text-yellow-500 dark:bg-zinc-900"><NotePencil className="h-3.5 w-3.5" /></button>
+                                    <button onClick={() => handleDeleteStartup(startup._id)} className="p-1.5 bg-white shadow-md rounded-lg text-gray-400 hover:text-red-500 dark:bg-zinc-900"><Trash className="h-3.5 w-3.5" /></button>
+                                </div>
+                                <div className="aspect-square w-10 h-10 bg-yellow-400 rounded-lg mb-3 flex items-center justify-center font-black text-xs text-gray-900 shadow-sm shrink-0">
+                                    {startup.company_name.charAt(0)}
+                                </div>
+                                <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1 truncate pr-8">
+                                    {startup.company_name}
+                                </h3>
+                                <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight">
+                                    {startup.business_description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+              </div>
+
+              <div className="mt-20 border-t border-gray-200 dark:border-white/10 pt-10 pb-20">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-2">
-                  <FloppyDiskBack className="w-6 h-6 text-yellow-500" weight="bold" />
+                  <Star className="w-6 h-6 text-yellow-500" weight="bold" />
                   Saved Investors
                 </h2>
                 {savedInvestors.length > 0 ? (

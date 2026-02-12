@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MagicWand, CircleNotch, Plus, CheckCircle, X, FloppyDiskBack } from "@phosphor-icons/react";
+import { MagicWand, CircleNotch, Plus, X, FloppyDiskBack } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface BusinessModelCardProps {
@@ -98,7 +98,7 @@ export default function BusinessModelCard({
   return (
     <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 dark:text-white">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
           Business Model
         </h3>
 
@@ -155,7 +155,6 @@ export default function BusinessModelCard({
                     : "bg-white text-gray-500 border-gray-100 hover:bg-gray-50 dark:bg-white/5 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-white/10"
                 }`}
               >
-                  <CheckCircle className="w-3 h-3" weight="bold" />
                 {model}
               </button>
             ))}
@@ -168,7 +167,6 @@ export default function BusinessModelCard({
                   key={i}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-yellow-50 text-yellow-700 text-xs font-bold border border-yellow-200/50 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/30"
                 >
-                  <CheckCircle className="w-3 h-3" />
                   {model}
                 </span>
               ))

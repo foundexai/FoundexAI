@@ -44,7 +44,7 @@ export default function NotesList({ startupId }: { startupId: string }) {
     });
     if (r.ok) {
       const data = await r.json();
-      setNotes(data.notes.slice(0, 3)); // Show only 3 notes
+      setNotes(data.notes.slice(0, 2)); // Show only 2 notes
     }
     setIsLoading(false);
   }
@@ -73,8 +73,8 @@ export default function NotesList({ startupId }: { startupId: string }) {
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-4 w-20" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2].map((i) => (
             <Skeleton key={i} className="h-32 w-full rounded-2xl" />
           ))}
         </div>
@@ -90,16 +90,23 @@ export default function NotesList({ startupId }: { startupId: string }) {
             <Note className="w-5 h-5 text-gray-400" weight="bold" />
             Recent Notes
           </h2>
-          <Link href="/dashboard/notes">
-            <span className="text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-              View All
-            </span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard/notes?add=true">
+              <button className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
+                + Add Note
+              </button>
+            </Link>
+            <Link href="/dashboard/notes">
+              <span className="text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                View All
+              </span>
+            </Link>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 grow">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 grow">
           {notes.length === 0 ? (
-            <div className="col-span-3 text-center py-10 border-2 border-dashed border-gray-100 rounded-2xl dark:border-zinc-800">
+            <div className="col-span-2 text-center py-10 border-2 border-dashed border-gray-100 rounded-2xl dark:border-zinc-800">
               <p className="text-gray-400 text-sm dark:text-gray-500">
                 No notes found. Create your first note!
               </p>

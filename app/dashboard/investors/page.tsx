@@ -10,6 +10,7 @@ import {
   Sparkle,
 } from "@phosphor-icons/react";
 import { MatchInvestorModal } from "@/components/MatchInvestorModal";
+import { AIFilterModal } from "@/components/AIFilterModal";
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ export default function InvestorsPage() {
   const [savedInvestorIds, setSavedInvestorIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -142,6 +144,10 @@ export default function InvestorsPage() {
         onClose={() => setIsMatchModalOpen(false)}
         investors={investors}
       />
+      <AIFilterModal 
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+      />
       <AddInvestorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -171,7 +177,7 @@ export default function InvestorsPage() {
           <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1 rounded-xl shadow-sm flex dark:bg-white/5 dark:border-white/10 overflow-x-auto max-w-[200px] md:max-w-none custom-scrollbar">
             {/* Simple Scrollable Types */}
             <div className="flex gap-1">
-              {["All", "VC", "Angel", "Accelerator"].map((type) => (
+              {["All", "VC", "Angel", "Accelerator", "Grants"].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleTypeChange(type === "All" ? null : type)}
@@ -191,7 +197,7 @@ export default function InvestorsPage() {
 
       {/* Search Bar */}
       <div className="sticky top-20 z-30">
-        <div className="glass-card p-2 rounded-2xl border border-white/60 shadow-lg flex items-center bg-white/70 backdrop-blur-xl dark:bg-black/40 dark:border-white/10 gap-2">
+        <div className="glass-card p-2 rounded-2xl border border-white/60 shadow-lg flex items-center bg-white/70 backdrop-blur-xl dark:bg-black/40 dark:border-white/10 gap-2 outline-none">
           <div className="pl-4 text-gray-400">
             <MagnifyingGlass className="w-5 h-5" weight="bold" />
           </div>
@@ -200,7 +206,7 @@ export default function InvestorsPage() {
             placeholder="Search investors by name, focus, or location..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white"
+            className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white outline-none"
           />
           <button
             onClick={() => setIsMatchModalOpen(true)}
@@ -210,7 +216,10 @@ export default function InvestorsPage() {
             <span className="hidden sm:inline">Match Me</span>
             <span className="sm:hidden">Match</span>
           </button>
-          <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20">
+          <button 
+            onClick={() => setIsFilterModalOpen(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
+          >
             <FadersHorizontal className="w-4 h-4" weight="bold" />
             Filters
           </button>

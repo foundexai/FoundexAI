@@ -10,13 +10,13 @@ interface Note {
   title: string;
   content: string;
   tags: string[];
-  createdAt: string;
+  created_at: string;
 }
 
 const availableTags = ["Weekly", "Monthly", "Product", "Business", "Personal"];
 
 export default function NotesPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, token, activeStartupId } = useAuth();
   const router = useRouter();
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState({
@@ -31,52 +31,70 @@ export default function NotesPage() {
       router.push("/");
       return;
     }
-    if (user) {
+    if (user && activeStartupId) {
       loadNotes();
+    } else if (user && !loading && !activeStartupId) {
+        setIsLoading(false);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, activeStartupId]);
 
   async function loadNotes() {
+    if (!activeStartupId || !token) return;
     setIsLoading(true);
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    const r = await fetch("/api/notes", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (r.ok) {
-      const data = await r.json();
-      setNotes(data.notes);
+    try {
+        const r = await fetch(`/api/notes?startup_id=${activeStartupId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        });
+        if (r.ok) {
+        const data = await r.json();
+        setNotes(data.notes);
+        }
+    } catch (e) {
+        console.error("Failed to load notes", e);
     }
     setIsLoading(false);
   }
 
   async function addNote(e: any) {
     e.preventDefault();
-    const token = localStorage.getItem("token");
-    await fetch("/api/notes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newNote),
-    });
-    setNewNote({ title: "", content: "", tags: [] });
-    loadNotes();
+    if (!activeStartupId || !token) return;
+    
+    try {
+        await fetch("/api/notes", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+            ...newNote,
+            startup_id: activeStartupId
+        }),
+        });
+        setNewNote({ title: "", content: "", tags: [] });
+        loadNotes();
+    } catch (e) {
+        console.error("Failed to add note", e);
+    }
   }
 
   async function deleteNote(id: string) {
     if (!confirm("Are you sure you want to delete this note?")) return;
-    const token = localStorage.getItem("token");
-    await fetch(`/api/notes/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    loadNotes();
+    if (!token) return;
+    
+    try {
+        await fetch(`/api/notes/${id}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        });
+        loadNotes();
+    } catch (e) {
+        console.error("Failed to delete note", e);
+    }
   }
 
   const handleTaggleTag = (tag: string) => {
@@ -197,7 +215,7 @@ export default function NotesPage() {
                   ))}
                 </div>
                 <p className="text-xs text-gray-400 font-medium dark:text-gray-600">
-                  {new Date(note.createdAt).toLocaleDateString(undefined, {
+                  {new Date(note.created_at).toLocaleDateString(undefined, {
                     dateStyle: "long",
                   })}
                 </p>

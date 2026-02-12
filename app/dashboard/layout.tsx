@@ -121,9 +121,11 @@ export default function DashboardLayout({
             <p className="text-[11px] text-zinc-400 leading-relaxed mb-4">
               Unlock investor insights and dedicated deal support.
             </p>
-            <button className="w-full bg-white text-black py-2 rounded-xl text-xs font-black hover:bg-zinc-200 transition-colors cursor-pointer">
-              Upgrade Now
-            </button>
+            <Link href="/dashboard/pricing">
+                <button className="w-full bg-white text-black py-2 rounded-xl text-xs font-black hover:bg-zinc-200 transition-colors cursor-pointer">
+                Upgrade Now
+                </button>
+            </Link>
           </div>
         </div>
       </div>

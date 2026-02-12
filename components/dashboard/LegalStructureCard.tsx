@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MagicWand, CircleNotch, Check, Scales, NotePencil, X, FloppyDiskBack } from "@phosphor-icons/react";
+import { MagicWand, CircleNotch, Check, NotePencil, X, FloppyDiskBack } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface LegalStructureCardProps {
@@ -72,8 +72,7 @@ export default function LegalStructureCard({
   return (
     <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 dark:text-white">
-          <Scales className="w-5 h-5 text-gray-400" weight="bold" />
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
           Legal Structure
         </h3>
 
