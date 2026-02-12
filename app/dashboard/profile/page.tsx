@@ -20,6 +20,8 @@ import {
 } from "@phosphor-icons/react";
 import { InvestorCard } from "@/components/InvestorCard";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { InvestorCardSkeleton } from "@/components/ui/skeletons/InvestorCardSkeleton";
+import { StartupSmallCardSkeleton } from "@/components/ui/skeletons/StartupSmallCardSkeleton";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
 
 interface Startup {
@@ -574,7 +576,13 @@ export default function ProfilePage() {
                     )}
                 </div>
 
-                {startups.length === 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <StartupSmallCardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : startups.length === 0 ? (
                     <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-white/10">
                         <p className="text-gray-400 font-bold italic">No startups registered yet.</p>
                     </div>
@@ -609,7 +617,13 @@ export default function ProfilePage() {
                   <Star className="w-6 h-6 text-yellow-500" weight="bold" />
                   Saved Investors
                 </h2>
-                {savedInvestors.length > 0 ? (
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <InvestorCardSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : savedInvestors.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {savedInvestors.map((inv) => (
                       <InvestorCard

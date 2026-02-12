@@ -16,6 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import AddInvestorModal from "@/components/AddInvestorModal";
 import { Pagination } from "@/components/Pagination";
+import { InvestorCardSkeleton } from "@/components/ui/skeletons/InvestorCardSkeleton";
 
 export default function InvestorsPage() {
   const { token, user, refreshUser } = useAuth();
@@ -236,9 +237,9 @@ export default function InvestorsPage() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 opacity-60">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
            {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-64 rounded-2xl bg-gray-100 animate-pulse dark:bg-white/5" />
+            <InvestorCardSkeleton key={i} />
           ))}
         </div>
       ) : (

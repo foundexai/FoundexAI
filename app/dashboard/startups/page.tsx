@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { MOCK_STARTUPS } from "@/lib/data";
 import { X, Plus, CaretDown } from "@phosphor-icons/react";
+import { StartupCardSkeleton } from "@/components/ui/skeletons/StartupCardSkeleton";
 
 export default function StartupsPage() {
   const { user, token } = useAuth();
@@ -199,8 +200,10 @@ export default function StartupsPage() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <CircleNotch className="w-10 h-10 animate-spin text-yellow-500" weight="bold" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <StartupCardSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
