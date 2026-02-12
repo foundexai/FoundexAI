@@ -1,22 +1,37 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { CircleNotch, Lightning, User, EnvelopeSimple, Lock, Eye, EyeSlash } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
+import LandingSkeleton from "@/components/auth/LandingSkeleton";
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect if authenticated
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  if (loading || user) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex flex-col font-sans dark:from-black dark:to-zinc-900">
+        <main className="grow flex items-center justify-center p-4">
+          <LandingSkeleton />
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans dark:bg-black">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex flex-col font-sans dark:from-black dark:to-zinc-900">
       <main className="grow flex items-center justify-center p-4">
-        <Suspense
-          fallback={
-            <div className="text-yellow-600 animate-pulse font-semibold">
-              Loading authentication...
-            </div>
-          }
-        >
+        <Suspense fallback={<LandingSkeleton />}>
           <AuthForm />
         </Suspense>
       </main>
