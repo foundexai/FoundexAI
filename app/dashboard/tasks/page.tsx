@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { CheckCircle, Circle, Trash } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
 interface Task {
   _id: string;
@@ -18,6 +19,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: "", category: "Operations" });
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -60,16 +62,22 @@ export default function TasksPage() {
     loadTasks();
   }
 
-  async function deleteTask(id: string) {
-    if (!confirm("Are you sure you want to delete this task?")) return;
+  function deleteTask(id: string) {
+    setDeleteTaskId(id);
+  }
+
+  async function confirmDeleteTask() {
+    if (!deleteTaskId) return;
     const token = localStorage.getItem("token");
-    await fetch(`/api/tasks/${id}`, {
+    if (!token) return;
+    await fetch(`/api/tasks/${deleteTaskId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     loadTasks();
+    setDeleteTaskId(null);
   }
 
   async function toggleTask(id: string, status: string) {
@@ -199,6 +207,15 @@ export default function TasksPage() {
           </ul>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={!!deleteTaskId}
+        onClose={() => setDeleteTaskId(null)}
+        onConfirm={confirmDeleteTask}
+        title="Delete Task?"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmLabel="Delete"
+        isDestructive
+      />
     </main>
   );
 }

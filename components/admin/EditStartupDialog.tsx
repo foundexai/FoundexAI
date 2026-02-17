@@ -1,87 +1,78 @@
 import { useState, useEffect } from "react";
 import {
   X,
-  Check,
   CircleNotch,
-  CurrencyCircleDollar,
   GlobeSimple,
   MapPin,
   Briefcase,
-  EnvelopeSimple,
-  LinkedinLogo,
   FileText,
-  CloudArrowUp,
+  TrendUp,
   Buildings,
+  CloudArrowUp,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { Investor } from "@/components/InvestorCard";
+import { Startup } from "@/components/StartupCard";
 import { uploadImage } from "@/lib/upload";
 
-interface EditInvestorDialogProps {
+interface EditStartupDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  investor: Investor | null;
+  startup: Startup | null;
 }
 
-export default function EditInvestorDialog({
+export default function EditStartupDialog({
   isOpen,
   onClose,
   onSuccess,
-  investor,
-}: EditInvestorDialogProps) {
+  startup,
+}: EditStartupDialogProps) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState<any>({
-    name: "",
-    type: "VC",
-    focus: "",
+    company_name: "",
+    business_description: "",
+    sector: "",
+    stage: "",
     location: "",
-    description: "",
-    investmentRange: "",
-    website: "",
+    website_url: "",
+    logo_url: "",
     logoInitial: "",
     logoColor: "from-blue-500 to-indigo-600",
-    logo_url: "",
+    traction: "",
   });
 
   useEffect(() => {
-    if (investor) {
+    if (startup) {
       setFormData({
-        name: investor.name || "",
-        type: investor.type || "VC",
-        focus: Array.isArray(investor.focus) ? investor.focus.join(", ") : investor.focus || "",
-        location: investor.location || "",
-        description: investor.description || "",
-        investmentRange: investor.investmentRange || "",
-        website: investor.website || "",
-        logoInitial: investor.logoInitial || "",
-        logoColor: investor.logoColor || "from-blue-500 to-indigo-600",
-        logo_url: investor.logo_url || "",
+        company_name: startup.name || "",
+        business_description: startup.description || "",
+        sector: startup.sector || "",
+        stage: startup.stage || "",
+        location: startup.location || "",
+        website_url: startup.website || "",
+        logo_url: (startup as any).logo_url || "",
+        logoInitial: startup.logoInitial || "",
+        logoColor: startup.logoColor || "from-blue-500 to-indigo-600",
+        traction: startup.traction || "",
       });
     }
-  }, [investor]);
+  }, [startup]);
 
-  if (!isOpen || !investor) return null;
+  if (!isOpen || !startup) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const focusArray = formData.focus
-        .split(",")
-        .map((tag: string) => tag.trim())
-        .filter((tag: string) => tag.length > 0);
-
       const payload = {
         ...formData,
-        focus: focusArray,
       };
 
-      const res = await fetch(`/api/admin/investors/${investor.id}`, {
+      const res = await fetch(`/api/admin/startups/${startup.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -91,14 +82,14 @@ export default function EditInvestorDialog({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update investor");
+        throw new Error("Failed to update startup");
       }
 
-      toast.success("Investor updated successfully!");
+      toast.success("Startup updated successfully!");
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error("Failed to update investor. Please try again.");
+      toast.error("Failed to update startup. Please try again.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -128,10 +119,10 @@ export default function EditInvestorDialog({
         <div className="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
           <div>
             <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-              Edit Investor Profile
+              Edit Startup Profile
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Update investor details in the global database.
+              Update startup details in the global directory.
             </p>
           </div>
           <button
@@ -145,7 +136,7 @@ export default function EditInvestorDialog({
         {/* Form Body */}
         <div className="overflow-y-auto p-8 custom-scrollbar">
           <form
-            id="edit-investor-form"
+            id="edit-startup-form"
             onSubmit={handleSubmit}
             className="space-y-6"
           >
@@ -153,38 +144,33 @@ export default function EditInvestorDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Firm Name
+                  Company Name
                 </label>
                 <input
                   required
                   type="text"
-                  placeholder="e.g. Sequoia Capital"
+                  placeholder="e.g. Acme Corp"
                   className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-semibold focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
-                  value={formData.name}
+                  value={formData.company_name}
                   onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+                    setFormData({ ...formData, company_name: e.target.value })
                   }
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Type
+                  Sector
                 </label>
-                <select
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white"
-                  value={formData.type}
+                <input
+                  required
+                  type="text"
+                  placeholder="e.g. Fintech, AI"
+                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-semibold focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
+                  value={formData.sector}
                   onChange={(e) =>
-                    setFormData({ ...formData, type: e.target.value })
+                    setFormData({ ...formData, sector: e.target.value })
                   }
-                >
-                  <option value="VC">Venture Capital</option>
-                  <option value="Angel">Angel Investor</option>
-                  <option value="Accelerator">Accelerator</option>
-                  <option value="PE">Private Equity</option>
-                  <option value="Family Office">Family Office</option>
-                  <option value="Corporate">Corporate VC</option>
-                  <option value="Other">Other</option>
-                </select>
+                />
               </div>
             </div>
 
@@ -196,11 +182,11 @@ export default function EditInvestorDialog({
               <textarea
                 required
                 rows={3}
-                placeholder="Brief description of their investment thesis..."
+                placeholder="Brief description of the startup..."
                 className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
-                value={formData.description}
+                value={formData.business_description}
                 onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                  setFormData({ ...formData, business_description: e.target.value })
                 }
               />
             </div>
@@ -209,17 +195,21 @@ export default function EditInvestorDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                  <Briefcase className="w-3.5 h-3.5" weight="bold" /> Focus (Comma separated)
+                  <Briefcase className="w-3.5 h-3.5" weight="bold" /> Stage
                 </label>
-                <input
-                  type="text"
-                  placeholder="Fintech, SaaS, AI..."
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
-                  value={formData.focus}
+                 <select
+                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white"
+                  value={formData.stage}
                   onChange={(e) =>
-                    setFormData({ ...formData, focus: e.target.value })
+                    setFormData({ ...formData, stage: e.target.value })
                   }
-                />
+                >
+                  <option value="Pre-seed">Pre-seed</option>
+                  <option value="Seed">Seed</option>
+                  <option value="Series A">Series A</option>
+                  <option value="Series B">Series B</option>
+                  <option value="Growth">Growth</option>
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
@@ -236,35 +226,17 @@ export default function EditInvestorDialog({
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                  <CurrencyCircleDollar className="w-3.5 h-3.5" weight="bold" /> Range
-                </label>
-                <input
-                  type="text"
-                  placeholder="$50k - $500k"
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
-                  value={formData.investmentRange}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      investmentRange: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <GlobeSimple className="w-3.5 h-3.5" weight="bold" /> Website
                 </label>
                 <input
                   type="text"
-                  placeholder="www.sequoia.com"
+                  placeholder="www.example.com"
                   className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
-                  value={formData.website}
+                  value={formData.website_url}
                   onChange={(e) =>
-                    setFormData({ ...formData, website: e.target.value })
+                    setFormData({ ...formData, website_url: e.target.value })
                   }
                 />
               </div>
@@ -272,7 +244,8 @@ export default function EditInvestorDialog({
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <FileText className="w-3.5 h-3.5" weight="bold" /> Logo
                 </label>
-                <div className="flex items-center gap-4">
+                
+                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 shrink-0 group">
                     {formData.logo_url ? (
                       <img
@@ -337,12 +310,25 @@ export default function EditInvestorDialog({
                 </div>
               </div>
             </div>
-            </div>
+             <div className="space-y-2 pt-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <TrendUp className="w-3.5 h-3.5" weight="bold" /> Traction (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. $10k MRR, 5k users"
+                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
+                  value={formData.traction}
+                  onChange={(e) =>
+                    setFormData({ ...formData, traction: e.target.value })
+                  }
+                />
+              </div>
 
             {/* Visuals */}
             <div className="space-y-3 pt-2">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Logo Style (Admin Only)
+                Logo Style (Fallback)
               </label>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -389,7 +375,7 @@ export default function EditInvestorDialog({
           </button>
           <button
             type="submit"
-            form="edit-investor-form"
+            form="edit-startup-form"
             disabled={loading}
             className="px-10 py-3 rounded-xl bg-gray-900 border border-black text-white hover:bg-black text-sm font-black shadow-xl transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-black dark:border-white"
           >

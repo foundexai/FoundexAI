@@ -101,26 +101,8 @@ export default function BusinessModelCard({
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">
           Business Model
         </h3>
-
-        {isEditing ? (
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                setIsEditing(false);
-                setCurrentModels(selectedModels);
-              }}
-              className="p-1 hover:bg-gray-100 rounded text-gray-500 dark:hover:bg-white/10"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleManualSave}
-              className="p-1 hover:bg-green-100 rounded text-green-600 dark:hover:bg-green-900/20"
-            >
-              <FloppyDiskBack className="w-4 h-4" weight="bold" />
-            </button>
-          </div>
-        ) : (
+        
+        {!isEditing && (
           <button
             onClick={handleSuggest}
             disabled={isSuggesting}
@@ -175,13 +157,34 @@ export default function BusinessModelCard({
                 No models selected.
               </div>
             )}
-
+          </div>
+        )}
+      </div>
+      
+      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+        {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-50 text-gray-500 text-xs font-bold border border-gray-100 hover:bg-gray-100 transition-colors dark:bg-white/5 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-white/10"
+              className="w-full py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors dark:bg-white/5 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-white/10"
             >
-              <Plus className="w-3 h-3" weight="bold" />
-              Edit
+              Edit Business Model
+            </button>
+        ) : (
+             <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                setCurrentModels(selectedModels);
+              }}
+              className="flex-1 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold dark:bg-transparent dark:border-zinc-700 dark:text-gray-400"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleManualSave}
+              className="flex-1 py-2 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-500/30"
+            >
+              Save Changes
             </button>
           </div>
         )}

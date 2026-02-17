@@ -13,6 +13,7 @@ export interface Startup {
   description: string;
   website?: string;
   traction?: string;
+  logo_url?: string;
 }
 
 interface StartupCardProps {
@@ -37,8 +38,22 @@ export function StartupCard({
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-6">
             <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center bg-yellow-400 shadow-lg shrink-0"
+              className={cn(
+                "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative",
+                !startup.logo_url && "bg-yellow-400"
+              )}
             >
+              {startup.logo_url ? (
+                <img
+                  src={startup.logo_url}
+                  alt={startup.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="font-black text-2xl text-black">
+                  {startup.logoInitial || startup.name.charAt(0)}
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
               {/* Save button could go here if we implement saving for startups later */}

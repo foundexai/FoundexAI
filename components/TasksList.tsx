@@ -122,12 +122,6 @@ export default function TasksList({ startupId }: { startupId: string }) {
         <h2 className="text-xl font-bold text-gray-900 tracking-tight dark:text-white">
           Tasks
         </h2>
-        <Link href="/dashboard/tasks">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-xl dark:hover:bg-white/10 dark:hover:text-gray-300 flex items-center gap-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Details</span>
-            <ArrowUpRight className="h-4 w-4" weight="bold" />
-          </button>
-        </Link>
       </div>
 
       <div className="space-y-8 relative z-10">
@@ -174,6 +168,15 @@ export default function TasksList({ startupId }: { startupId: string }) {
             </p>
           </div>
         )}
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+        <Link href="/dashboard/tasks">
+          <button className="w-full py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors dark:bg-white/5 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-white/10 flex items-center justify-center gap-2">
+            View All Tasks
+            <ArrowUpRight className="h-4 w-4" weight="bold" />
+          </button>
+        </Link>
       </div>
     </div>
   );

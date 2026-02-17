@@ -17,6 +17,8 @@ interface User {
   saved_investors: string[]; // Store IDs of saved investors
   user_type?: "founder" | "investor";
   isAdmin?: boolean;
+  profile_image_url?: string;
+  linkedin_url?: string;
 }
 
 export interface Startup {

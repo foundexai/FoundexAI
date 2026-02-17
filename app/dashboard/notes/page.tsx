@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Trash } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
 interface Note {
   _id: string;
@@ -25,6 +26,7 @@ export default function NotesPage() {
     tags: [] as string[],
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -80,12 +82,15 @@ export default function NotesPage() {
     }
   }
 
-  async function deleteNote(id: string) {
-    if (!confirm("Are you sure you want to delete this note?")) return;
-    if (!token) return;
+  function deleteNote(id: string) {
+    setDeleteNoteId(id);
+  }
+
+  async function confirmDeleteNote() {
+    if (!deleteNoteId || !token) return;
     
     try {
-        await fetch(`/api/notes/${id}`, {
+        await fetch(`/api/notes/${deleteNoteId}`, {
         method: "DELETE",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -95,6 +100,7 @@ export default function NotesPage() {
     } catch (e) {
         console.error("Failed to delete note", e);
     }
+    setDeleteNoteId(null);
   }
 
   const handleTaggleTag = (tag: string) => {
@@ -229,6 +235,15 @@ export default function NotesPage() {
           </ul>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={!!deleteNoteId}
+        onClose={() => setDeleteNoteId(null)}
+        onConfirm={confirmDeleteNote}
+        title="Delete Note?"
+        message="Are you sure you want to delete this note? This action cannot be undone."
+        confirmLabel="Delete"
+        isDestructive
+      />
     </main>
   );
 }

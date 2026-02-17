@@ -116,9 +116,19 @@ export default function Header() {
                     onClick={toggleDesktopDropdown}
                     className="flex items-center space-x-3 bg-white/40 hover:bg-white/80 border border-white/50 rounded-full pl-1 pr-4 py-1 transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
                   >
-                    <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner shrink-0">
-                      {user.full_name?.charAt(0)?.toUpperCase() || "U"}
-                    </div>
+                    {user.profile_image_url ? (
+                      <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200 dark:border-white/10">
+                        <img
+                          src={user.profile_image_url}
+                          alt={user.full_name || "Profile"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner shrink-0">
+                        {user.full_name?.charAt(0)?.toUpperCase() || "U"}
+                      </div>
+                    )}
                     <span className="hidden lg:block text-sm font-bold text-gray-800 dark:text-gray-200">
                       {user.full_name}
                     </span>
@@ -189,9 +199,19 @@ export default function Header() {
                 onClick={toggleMobileDropdown}
                 className="flex items-center space-x-2"
               >
-                <div className="w-9 h-9 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold shadow-md shrink-0">
-                  {user.full_name?.charAt(0)?.toUpperCase() || "U"}
-                </div>
+                  {user.profile_image_url ? (
+                    <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 shadow-md border border-gray-200 dark:border-white/10">
+                      <img
+                        src={user.profile_image_url}
+                        alt={user.full_name || "Profile"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-9 h-9 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold shadow-md shrink-0">
+                      {user.full_name?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                  )}
               </button>
               <div
                 className={`absolute right-0 mt-3 w-56 glass-card border border-white/50 rounded-2xl shadow-xl py-2 z-50 transform origin-top-right transition-all duration-200 dark:bg-zinc-900/90 dark:border-zinc-800 ${

@@ -6,11 +6,15 @@ import { toast } from "sonner";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
 import { InvestorCard } from "./InvestorCard";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 interface MatchInvestorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  investors: Investor[]; // Passed from parent to include real data
+  /* 
+   * Passed from parent to include real data 
+   */
+  investors: Investor[]; 
 }
 
 export function MatchInvestorModal({
@@ -18,7 +22,9 @@ export function MatchInvestorModal({
   onClose,
   investors,
 }: MatchInvestorModalProps) {
+  const { startups } = useAuth();
   const [step, setStep] = useState<"input" | "matching" | "results">("input");
+  const [selectedStartupId, setSelectedStartupId] = useState<string>("manual");
   const [formData, setFormData] = useState({
     name: "",
     sector: "Fintech",
@@ -67,6 +73,7 @@ export function MatchInvestorModal({
 
   const reset = () => {
     setStep("input");
+    setSelectedStartupId("manual");
     setFormData({
       name: "",
       sector: "Fintech",
@@ -74,6 +81,29 @@ export function MatchInvestorModal({
       description: "",
     });
     setMatches([]);
+  };
+
+  const handleStartupSelect = (startupId: string) => {
+    setSelectedStartupId(startupId);
+    if (startupId === "manual") {
+       setFormData({
+         name: "",
+         sector: "Fintech",
+         stage: "Pre-seed",
+         description: "",
+       });
+       return;
+    }
+
+    const startup = startups.find(s => s._id === startupId);
+    if (startup) {
+      setFormData({
+        name: startup.company_name,
+        sector: startup.sector || "Fintech",
+        stage: "Pre-seed", // Default as stage is not on startup object yet
+        description: startup.business_description || "",
+      });
+    }
   };
 
   return (
@@ -108,6 +138,33 @@ export function MatchInvestorModal({
         <div className="p-8 grow overflow-y-auto custom-scrollbar">
           {step === "input" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              
+              {/* Startup Selection Dropdown */}
+              {startups.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Select Startup Profile
+                  </label>
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none bg-yellow-50/50 border border-yellow-200 rounded-xl px-4 py-3 font-bold text-gray-900 focus:ring-2 focus:ring-yellow-500 focus:outline-none dark:bg-yellow-900/10 dark:border-yellow-500/20 dark:text-yellow-500"
+                      value={selectedStartupId}
+                      onChange={(e) => handleStartupSelect(e.target.value)}
+                    >
+                      <option value="manual">Enter Manually</option>
+                      {startups.map((s) => (
+                        <option key={s._id} value={s._id}>
+                          {s.company_name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <CaretDown className="w-4 h-4" weight="bold" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">

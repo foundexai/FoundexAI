@@ -13,6 +13,7 @@ import {
   UserCircle,
   Lightning,
   ShieldCheck,
+  ChartLineUp,
 } from "@phosphor-icons/react";
 
 interface NavItem {
@@ -39,6 +40,7 @@ const NAVIGATION_GROUPS: NavGroup[] = [
     items: [
       { name: "Investors", href: "/dashboard/investors", icon: Compass },
       { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
+      { name: "Reports", href: "/dashboard/reports", icon: ChartLineUp },
     ],
   },
   {
@@ -131,6 +133,27 @@ export default function DashboardLayout({
       </div>
 
       <div className="px-4 mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800">
+        <Link href="/dashboard/profile" className="flex items-center gap-3 mb-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors group">
+          {user?.profile_image_url ? (
+            <img 
+              src={user.profile_image_url} 
+              alt={user.full_name} 
+              className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-white/10" 
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center border border-gray-200 dark:border-white/10">
+              <UserCircle className="w-6 h-6 text-gray-400 dark:text-gray-500" weight="fill" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-yellow-600 dark:group-hover:text-yellow-500 transition-colors">
+              {user?.full_name || 'User'}
+            </p>
+            <p className="text-[10px] text-gray-500 font-medium truncate uppercase tracking-wider">
+              {user?.user_type || 'Account'}
+            </p>
+          </div>
+        </Link>
         <button
           onClick={async () => {
             await logout();

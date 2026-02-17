@@ -105,9 +105,6 @@ export default function Dashboard() {
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
               <div className="md:col-span-2 space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
-                    {currentStartup.sector || "Technology"}
-                  </div>
                   <StartupSwitcher />
                 </div>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -121,6 +118,11 @@ export default function Dashboard() {
                     {/* <Sparkle className="w-5 h-5 text-yellow-500" weight="bold" /> */}
                     Find Matches
                   </Link>
+                </div>
+                <div>
+                  <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
+                    {currentStartup.sector || "Technology"}
+                  </div>
                 </div>
                 <p className="text-lg text-gray-500 font-medium dark:text-gray-400 max-w-lg">
                   Welcome back, {user?.full_name?.split(" ")[0]}! Let's build something great.
@@ -191,6 +193,7 @@ function DescriptionBlock({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(startup.business_description);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [improving, setImproving] = useState(false);
 
@@ -198,11 +201,7 @@ function DescriptionBlock({
     setDescription(startup.business_description);
   }, [startup.business_description]);
 
-  async function handleImprove() {
-    if (!description) {
-      toast.error("Please add a basic description first");
-      return;
-    }
+  async function handleAskSophia() {
     setImproving(true);
     const token = localStorage.getItem("token");
     try {
@@ -213,20 +212,26 @@ function DescriptionBlock({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          description: description,
+          description: description, // Send current edited description as base
           company_name: startup.company_name,
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        setDescription(data.improved);
-        setIsEditing(true);
-        toast.success("Description optimized by AI!");
+        setAiSuggestion(data.improved);
+        toast.success("Sophia has a suggestion for you!");
       }
     } catch (e) {
       toast.error("Error connecting to AI");
     } finally {
       setImproving(false);
+    }
+  }
+
+  function handleCopySuggestion() {
+    if (aiSuggestion) {
+      setDescription(aiSuggestion);
+      toast.success("Suggestion copied to description");
     }
   }
 
@@ -244,6 +249,7 @@ function DescriptionBlock({
       });
       if (res.ok) {
         setIsEditing(false);
+        setAiSuggestion(null); // Clear suggestion on save
         onUpdate();
         toast.success("Description updated");
       }
@@ -260,26 +266,64 @@ function DescriptionBlock({
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">
           Business Description
         </h3>
-
-        {!isEditing && (
-          <button
-            onClick={handleImprove}
-            disabled={improving}
-            className="text-xs font-bold text-yellow-700 bg-yellow-100 hover:bg-yellow-200 px-3 py-1.5 rounded-full flex items-center gap-1.5"
-          >
-            {improving ? <CircleNotch className="w-3 h-3 animate-spin" weight="bold" /> : <MagicWand className="w-3 h-3" weight="bold" />}
-            {improving ? "Optimizing..." : "AI Improve"}
-          </button>
-        )}
       </div>
 
-      <div className="grow">
+      <div className="grow space-y-4">
         {isEditing ? (
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 min-h-[150px] dark:bg-black/50 dark:border-zinc-700 dark:text-gray-200"
-          />
+          <>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 min-h-[150px] font-medium leading-relaxed dark:bg-black/50 dark:border-zinc-700 dark:text-gray-200 focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none transition-all"
+              placeholder="Describe your business model, target audience, and value proposition..."
+            />
+            
+            {/* Ask Sophia Section */}
+            <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 dark:bg-black/80 dark:border-zinc-800 relative overflow-hidden group">
+               {aiSuggestion && (
+                   <div className="flex justify-end items-center mb-3">
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={handleCopySuggestion}
+                                className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                            >
+                                <NotePencil className="w-3.5 h-3.5" weight="bold" />
+                                Copy
+                            </button>
+                            <button 
+                                onClick={handleAskSophia}
+                                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                            >
+                                <div className={`w-3.5 h-3.5 ${improving ? 'animate-spin' : ''}`}>
+                                    <MagicWand weight="bold" />
+                                </div>
+                                Regenerate
+                            </button>
+                        </div>
+                   </div>
+               )}
+
+               {aiSuggestion ? (
+                   <div className="text-sm text-gray-300 leading-relaxed bg-white/5 p-3 rounded-xl border border-white/5">
+                       {aiSuggestion}
+                   </div>
+               ) : (
+                   <div className="text-center py-4">
+                       <p className="text-gray-500 text-xs mb-3">
+                           Need help refining your description? Sophia can generate a professional version for you.
+                       </p>
+                       <button
+                        onClick={handleAskSophia}
+                        disabled={improving}
+                        className="bg-yellow-500 text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-yellow-600 hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed shadow-yellow-500/20"
+                       >
+                           {improving && <CircleNotch className="w-4 h-4 animate-spin" />}
+                           {improving ? "Generating..." : "Generate Suggestion"}
+                       </button>
+                   </div>
+               )}
+            </div>
+          </>
         ) : (
           <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap dark:text-gray-300 line-clamp-6">
             {description}
@@ -301,6 +345,7 @@ function DescriptionBlock({
               onClick={() => {
                 setIsEditing(false);
                 setDescription(startup.business_description);
+                setAiSuggestion(null);
               }}
               className="flex-1 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold dark:bg-transparent dark:border-zinc-700 dark:text-gray-400"
             >
@@ -309,7 +354,7 @@ function DescriptionBlock({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-bold hover:bg-green-600"
+              className="flex-1 py-2 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-500/30"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>

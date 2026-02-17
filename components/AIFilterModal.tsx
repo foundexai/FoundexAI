@@ -79,19 +79,20 @@ export function AIFilterModal({
       {/* Modal Container */}
       <div className="relative w-full sm:max-w-4xl bg-white dark:bg-zinc-900 shadow-2xl rounded-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-white/20 dark:border-white/10">
         {/* Header */}
-        <div className="bg-zinc-900 p-6 relative shrink-0 dark:bg-black">
+        {/* Header */}
+        <div className="bg-white p-6 relative shrink-0 border-b border-gray-100 dark:bg-black dark:border-white/10">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors dark:text-gray-500 dark:hover:text-white"
           >
             <X className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-2xl font-black text-white tracking-tight">
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
               AI Power Search
             </h2>
           </div>
-          <p className="text-zinc-400 font-medium">
+          <p className="text-gray-500 dark:text-gray-400 font-medium">
             Describe your ideal investor in natural language.
           </p>
         </div>

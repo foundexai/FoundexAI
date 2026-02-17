@@ -178,6 +178,12 @@ export default function InvestorsPage() {
           <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1 rounded-xl shadow-sm flex dark:bg-white/5 dark:border-white/10 overflow-x-auto max-w-[200px] md:max-w-none custom-scrollbar">
             {/* Simple Scrollable Types */}
             <div className="flex gap-1">
+              <button
+                className="px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-2"
+              >
+                <Funnel weight="bold" />
+                Filter
+              </button>
               {["All", "VC", "Angel", "Accelerator", "Grants"].map((type) => (
                 <button
                   key={type}
@@ -219,10 +225,10 @@ export default function InvestorsPage() {
           </button>
           <button 
             onClick={() => setIsFilterModalOpen(true)}
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
+            className="w-[9rem] hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
           >
-            <FadersHorizontal className="w-4 h-4" weight="bold" />
-            Filters
+            {/* <Sparkle className="w-4 h-4" weight="bold" /> */}
+            AI Search
           </button>
 
           <button

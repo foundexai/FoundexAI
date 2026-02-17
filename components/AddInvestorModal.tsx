@@ -110,7 +110,12 @@ export default function AddInvestorModal({
               reviewed.
             </p>
           </div>
-            <X className="w-5 h-5" weight="bold" />
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+            >
+              <X className="w-5 h-5" weight="bold" />
+            </button>
         </div>
 
         {/* Form Body */}

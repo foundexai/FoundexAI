@@ -13,6 +13,7 @@ export interface Investor {
   description: string;
   investmentRange?: string;
   website?: string;
+  logo_url?: string;
 }
 
 interface InvestorCardProps {

@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { InvestorCardSkeleton } from "@/components/ui/skeletons/InvestorCardSkeleton";
 import { StartupSmallCardSkeleton } from "@/components/ui/skeletons/StartupSmallCardSkeleton";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
 interface Startup {
   _id: string;
@@ -48,6 +49,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [startups, setStartups] = useState<Startup[]>([]);
   const [editingStartup, setEditingStartup] = useState<Startup | null>(null);
+  const [deleteStartupId, setDeleteStartupId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [profile, setProfile] = useState({
     full_name: "",
@@ -66,6 +68,7 @@ export default function ProfilePage() {
     full_name: "",
     user_type: "",
     linkedin_url: "",
+    profile_image_url: "",
   });
   const [uploading, setUploading] = useState(false);
   const [savedInvestors, setSavedInvestors] = useState<Investor[]>([]);
@@ -103,11 +106,15 @@ export default function ProfilePage() {
     }
   };
 
-  const handleDeleteStartup = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this startup?")) return;
+  const handleDeleteStartup = (id: string) => {
+    setDeleteStartupId(id);
+  };
+
+  const confirmDeleteStartup = async () => {
+    if (!deleteStartupId) return;
     const token = localStorage.getItem("token");
     if (!token) return;
-    const res = await fetch(`/api/startups/${id}`, {
+    const res = await fetch(`/api/startups/${deleteStartupId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -119,6 +126,7 @@ export default function ProfilePage() {
     } else {
       toast.error("Failed to delete startup");
     }
+    setDeleteStartupId(null);
   };
 
   const handleSaveMetadata = async () => {
@@ -191,7 +199,10 @@ export default function ProfilePage() {
 
     try {
       const imageUrl = await uploadImage(file);
+      // Update both profiles to ensure consistency depending on user type
       setProfile((prev) => ({ ...prev, profile_image_url: imageUrl }));
+      setBasicInfo((prev) => ({ ...prev, profile_image_url: imageUrl }));
+      
       toast.success("Image uploaded successfully!");
     } catch (error) {
       toast.error("Failed to upload image");
@@ -224,7 +235,13 @@ export default function ProfilePage() {
             full_name: data.user.full_name || "",
             user_type: data.user.user_type || "",
             linkedin_url: data.user.linkedin_url || "",
+            profile_image_url: data.user.profile_image_url || "",
           });
+          // Ensure profile state also has the image url for display in the form
+          setProfile((prev) => ({
+            ...prev,
+            profile_image_url: data.user.profile_image_url || prev.profile_image_url || "",
+          }));
         }
 
         if (data.user.user_type === "investor") {
@@ -558,63 +575,8 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* Startups Section at the Bottom */}
-              <div className="mt-20 border-t border-gray-200 dark:border-white/10 pt-10">
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-                        <RocketLaunch className="h-6 w-6 text-yellow-500" weight="bold" />
-                        My Startups
-                    </h2>
-                    {!showAddForm && !editingStartup && (
-                        <button
-                            onClick={() => setShowAddForm(true)}
-                            className="text-yellow-500 font-black flex items-center gap-2 hover:gap-3 transition-all text-sm uppercase tracking-wider"
-                        >
-                            <Plus className="h-4 w-4" weight="bold" />
-                            Add Startup
-                        </button>
-                    )}
-                </div>
-
-                {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                            <StartupSmallCardSkeleton key={i} />
-                        ))}
-                    </div>
-                ) : startups.length === 0 ? (
-                    <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-white/10">
-                        <p className="text-gray-400 font-bold italic">No startups registered yet.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {startups.map((startup) => (
-                            <div
-                                key={startup._id}
-                                className="glass-card border border-white/60 rounded-2xl p-4 flex flex-col hover:border-yellow-500/50 transition-all duration-300 group bg-white shadow-sm dark:bg-white/5 dark:border-white/10 relative overflow-hidden"
-                            >
-                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                    <button onClick={() => setEditingStartup(startup)} className="p-1.5 bg-white shadow-md rounded-lg text-gray-400 hover:text-yellow-500 dark:bg-zinc-900"><NotePencil className="h-3.5 w-3.5" /></button>
-                                    <button onClick={() => handleDeleteStartup(startup._id)} className="p-1.5 bg-white shadow-md rounded-lg text-gray-400 hover:text-red-500 dark:bg-zinc-900"><Trash className="h-3.5 w-3.5" /></button>
-                                </div>
-                                <div className="aspect-square w-10 h-10 bg-yellow-400 rounded-lg mb-3 flex items-center justify-center font-black text-xs text-gray-900 shadow-sm shrink-0">
-                                    {startup.company_name.charAt(0)}
-                                </div>
-                                <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1 truncate pr-8">
-                                    {startup.company_name}
-                                </h3>
-                                <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight">
-                                    {startup.business_description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                )}
-              </div>
-
               <div className="mt-20 border-t border-gray-200 dark:border-white/10 pt-10 pb-20">
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-8 flex items-center gap-2">
-                  <Star className="w-6 h-6 text-yellow-500" weight="bold" />
                   Saved Investors
                 </h2>
                 {loading ? (
@@ -644,6 +606,16 @@ export default function ProfilePage() {
           )}
         </div>
       </main>
+
+      <ConfirmationModal
+        isOpen={!!deleteStartupId}
+        onClose={() => setDeleteStartupId(null)}
+        onConfirm={confirmDeleteStartup}
+        title="Delete Startup?"
+        message="Are you sure you want to delete this startup? This action cannot be undone."
+        confirmLabel="Delete"
+        isDestructive
+      />
     </div>
   );
 }

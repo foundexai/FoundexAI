@@ -21,11 +21,14 @@ export async function GET(req: Request) {
     const userId = (decoded.user as any).id || (decoded.user as any)._id;
     const startups = await Startup.find({ user_id: userId });
     
+    const userObj = {
+      ...((decoded.user as any).toObject ? (decoded.user as any).toObject() : decoded.user),
+      isAdmin: isAdmin(decoded.user.email)
+    };
+    console.log("API /auth/me returning user:", JSON.stringify(userObj, null, 2));
+    
     return NextResponse.json({ 
-      user: {
-        ...((decoded.user as any).toObject ? (decoded.user as any).toObject() : decoded.user),
-        isAdmin: isAdmin(decoded.user.email)
-      },
+      user: userObj,
       startups 
     });
 
