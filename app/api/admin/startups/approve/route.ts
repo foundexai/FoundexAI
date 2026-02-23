@@ -30,6 +30,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Startup not found" }, { status: 404 });
     }
 
+    // Notify User
+    const { notifyUser, notifyAdmins } = await import("@/lib/notifications");
+    await notifyUser(
+      startup.user_id.toString(),
+      "🎉 Startup Approved!",
+      `Your startup "${startup.company_name}" has been approved! You can now access full dashboard features.`,
+      "approval",
+      "/dashboard"
+    );
+
+    // Notify Admins
+    await notifyAdmins(
+      "🎉 Startup Approved",
+      `An admin approved the startup "${startup.company_name}".`,
+      "approval",
+      "/admin"
+    );
+
     return NextResponse.json(
       { message: "Startup approved", startup },
       { status: 200 },

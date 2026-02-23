@@ -20,13 +20,43 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const fetchNotifications = async () => {
+    if (!user || !localStorage.getItem("token")) return;
+    try {
+      const res = await fetch("/api/notifications", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.notifications?.filter((n: any) => !n.is_read).length || 0);
+      }
+    } catch (e) {
+      console.error("Error fetching notifications:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      // Polling every 60 seconds
+      const interval = setInterval(fetchNotifications, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
   const desktopDropdownRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     await logout();
@@ -39,6 +69,31 @@ export default function Header() {
 
   const toggleMobileDropdown = () => {
     setIsMobileDropdownOpen(!isMobileDropdownOpen);
+  };
+
+  const toggleNotifications = () => {
+    setIsNotificationsOpen(!isNotificationsOpen);
+    if (!isNotificationsOpen) {
+      fetchNotifications();
+    }
+  };
+
+  const markAsRead = async (id?: string) => {
+    try {
+      const res = await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(id ? { id } : { markAll: true }),
+      });
+      if (res.ok) {
+        fetchNotifications();
+      }
+    } catch (e) {
+      console.error("Error marking notification as read:", e);
+    }
   };
 
   useEffect(() => {
@@ -54,6 +109,12 @@ export default function Header() {
         !mobileDropdownRef.current.contains(event.target as Node)
       ) {
         setIsMobileDropdownOpen(false);
+      }
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
+        setIsNotificationsOpen(false);
       }
     }
 
@@ -108,9 +169,79 @@ export default function Header() {
 
             {user ? (
               <>
-                <button className="p-2.5 rounded-full bg-gray-100/50 hover:bg-white border border-white/50 transition-all shadow-sm hover:shadow-md group dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20">
-                  <Bell className="h-5 w-5 text-gray-600 group-hover:text-yellow-600 transition-colors dark:text-gray-400 dark:group-hover:text-yellow-400" weight="bold" />
-                </button>
+                <div className="relative" ref={notificationsRef}>
+                    <button 
+                        onClick={toggleNotifications}
+                        className={`p-2.5 rounded-full border transition-all shadow-sm hover:shadow-md group relative ${isNotificationsOpen ? 'bg-white border-yellow-200 dark:bg-white/20' : 'bg-gray-100/50 border-white/50 dark:bg-white/10 dark:border-white/10 hover:bg-white dark:hover:bg-white/20'}`}
+                    >
+                        <Bell className={`h-5 w-5 transition-colors ${isNotificationsOpen ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-600 group-hover:text-yellow-600 dark:text-gray-400 dark:group-hover:text-yellow-400'}`} weight="bold" />
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white items-center justify-center font-black">
+                                    {unreadCount}
+                                </span>
+                            </span>
+                        )}
+                    </button>
+                    
+                    {/* Notifications Dropdown */}
+                    <div
+                        className={`absolute right-0 mt-2 w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
+                            isNotificationsOpen
+                                ? "opacity-100 scale-100 translate-y-0"
+                                : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                        }`}
+                    >
+                        <div className="p-5 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                            <h3 className="font-black text-gray-900 dark:text-white tracking-tight">Notifications</h3>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">
+                                {unreadCount} New
+                            </span>
+                        </div>
+                        
+                        <div className="max-h-[400px] overflow-y-auto">
+                            {notifications.length > 0 ? (
+                                <div className="divide-y divide-gray-50 dark:divide-zinc-800">
+                                    {notifications.map((n) => (
+                                        <div 
+                                            key={n._id}
+                                            onClick={() => !n.is_read && markAsRead(n._id)}
+                                            className={`p-4 hover:bg-gray-50/50 transition-colors cursor-pointer dark:hover:bg-white/5 ${!n.is_read ? 'bg-yellow-50/10' : ''}`}
+                                        >
+                                            <div className="flex gap-3">
+                                                {!n.is_read && <span className="w-2 h-2 rounded-full bg-yellow-500 mt-1.5 shrink-0" />}
+                                                <div className="grow">
+                                                    <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">{n.title}</p>
+                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-0.5 line-clamp-2">{n.message}</p>
+                                                    <p className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">{new Date(n.created_at).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="p-8 text-center">
+                                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 dark:bg-white/5">
+                                        <Bell className="w-6 h-6 text-gray-300 dark:text-zinc-600" weight="bold" />
+                                    </div>
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">No notifications yet</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Sophia will notify you here about updates to your startup profile.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-3 bg-gray-50/50 border-t border-gray-100 rounded-b-3xl dark:bg-black/20 dark:border-zinc-800">
+                             <button 
+                                onClick={() => markAsRead()}
+                                className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white"
+                             >
+                                Mark all as read
+                             </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="relative" ref={desktopDropdownRef}>
                   <button
                     onClick={toggleDesktopDropdown}

@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle, Circle, ArrowUpRight } from "@phosphor-icons/react";
+import { ArrowRight, CheckCircle, Circle, ArrowUpRight, CircleNotch } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 interface Task {
@@ -23,6 +24,8 @@ const categoryOrder = ["Finance", "Market", "Legal", "Operations"];
 export default function TasksList({ startupId }: { startupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     loadTasks();
@@ -69,6 +72,36 @@ export default function TasksList({ startupId }: { startupId: string }) {
     }
   }
 
+  async function handleAddTask() {
+    if (!newTaskTitle.trim()) return;
+    setIsAdding(true);
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          startup_id: startupId,
+          title: newTaskTitle,
+          category: "Operations", // Default category for quick add
+          status: "pending",
+        }),
+      });
+      if (res.ok) {
+        setNewTaskTitle("");
+        loadTasks();
+        toast.success("Task added successfully");
+      }
+    } catch (e) {
+      toast.error("Failed to add task");
+    } finally {
+      setIsAdding(false);
+    }
+  }
+
   const tasksByCategory = tasks.reduce((acc, task) => {
     const { category } = task;
     if (!acc[category]) {
@@ -89,7 +122,7 @@ export default function TasksList({ startupId }: { startupId: string }) {
 
   if (isLoading) {
     return (
-      <div className="glass-card p-6 rounded-2xl border border-white/50">
+      <div className="glass-card p-6 rounded-3xl border border-white/50 dark:bg-zinc-900/60 dark:border-zinc-800">
         <div className="flex justify-between items-center mb-6">
           <Skeleton className="h-6 w-24" />
           <Skeleton className="h-5 w-5 rounded-full" />
@@ -112,19 +145,20 @@ export default function TasksList({ startupId }: { startupId: string }) {
   return (
     <div
       id="tasks"
-      className="glass-card p-6 rounded-2xl border border-white/50 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800"
+      className="glass-card p-6 rounded-3xl border border-white/50 relative overflow-hidden flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800"
     >
-      {/* <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none">
-        <CheckCircle className="w-48 h-48 text-gray-900 dark:text-white" weight="bold" />
-      </div> */}
-
       <div className="flex justify-between items-center mb-6 relative z-10">
         <h2 className="text-xl font-bold text-gray-900 tracking-tight dark:text-white">
           Tasks
         </h2>
+        <Link href="/dashboard/tasks">
+          <button className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-xl dark:hover:bg-white/10 dark:hover:text-gray-300 flex items-center gap-1">
+            <ArrowUpRight className="h-5 w-5" weight="bold" />
+          </button>
+        </Link>
       </div>
 
-      <div className="space-y-8 relative z-10">
+      <div className="space-y-8 relative z-10 grow overflow-y-auto pr-2 max-h-[300px]">
         {sortedCategories.map((category) => (
           <div key={category}>
             <span
@@ -171,12 +205,24 @@ export default function TasksList({ startupId }: { startupId: string }) {
       </div>
 
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
-        <Link href="/dashboard/tasks">
-          <button className="w-full py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors dark:bg-white/5 dark:border-zinc-700 dark:text-gray-300 dark:hover:bg-white/10 flex items-center justify-center gap-2">
-            View All Tasks
-            <ArrowUpRight className="h-4 w-4" weight="bold" />
+        <div className="relative">
+          <input
+            type="text"
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+            placeholder="Type a quick task..."
+            className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-100 focus:border-yellow-300 outline-none transition-all dark:bg-white/5 dark:border-zinc-700 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:ring-white/10"
+            disabled={isAdding}
+          />
+          <button 
+            onClick={handleAddTask}
+            disabled={!newTaskTitle.trim() || isAdding}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:hover:bg-yellow-500 transition-colors shadow-lg shadow-yellow-500/20 cursor-pointer"
+          >
+            {isAdding ? <CircleNotch className="w-4 h-4 animate-spin" weight="bold" /> : <ArrowRight className="w-4 h-4" weight="bold" />}
           </button>
-        </Link>
+        </div>
       </div>
     </div>
   );

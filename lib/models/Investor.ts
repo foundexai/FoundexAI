@@ -11,6 +11,7 @@ const InvestorSchema = new mongoose.Schema({
       "PE",
       "Family Office",
       "Corporate",
+      "Grant",
       "Other",
     ],
     required: true,

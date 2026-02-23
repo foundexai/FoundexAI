@@ -12,16 +12,17 @@ interface BusinessModelCardProps {
 }
 
 const COMMON_MODELS = [
+  "B2B (Business-to-Business)",
+  "B2C (Business-to-Consumer)",
+  "SaaS",
+  "Subscription",
+  "Marketplace",
+  "Freemium",
+  "Direct to Consumer",
+  "On-Demand Delivery Model",
   "Revenue Model",
   "Customer Segments",
-  "B2B (Business-to-Business)",
   "Unique Value",
-  "On-Demand Delivery Model",
-  "Subscription",
-  "Freemium",
-  "Marketplace",
-  "SaaS",
-  "Direct to Consumer",
 ];
 
 export default function BusinessModelCard({
@@ -33,6 +34,7 @@ export default function BusinessModelCard({
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentModels, setCurrentModels] = useState<string[]>(selectedModels);
+  const [customModel, setCustomModel] = useState("");
 
   useEffect(() => {
     setCurrentModels(selectedModels);
@@ -60,7 +62,6 @@ export default function BusinessModelCard({
     setIsSuggesting(true);
     // Simulate AI suggestion
     setTimeout(async () => {
-      // Just pick random relevant models for now as a "suggestion"
       const suggestions = [
         "Revenue Model",
         "Customer Segments",
@@ -95,6 +96,13 @@ export default function BusinessModelCard({
     }
   };
 
+  const handleAddCustomModel = () => {
+    if (customModel.trim() && !currentModels.includes(customModel.trim())) {
+      setCurrentModels([...currentModels, customModel.trim()]);
+      setCustomModel("");
+    }
+  };
+
   return (
     <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
       <div className="flex justify-between items-start mb-4">
@@ -121,25 +129,58 @@ export default function BusinessModelCard({
       <div className="grow">
         <p className="text-sm text-gray-500 mb-4 dark:text-gray-400">
           {isEditing
-            ? "Select applicable models:"
+            ? "Custom models or select from tags:"
             : `${selectedModels.length} models selected`}
         </p>
 
         {isEditing ? (
-          <div className="flex flex-wrap gap-2">
-            {COMMON_MODELS.map((model) => (
-              <button
-                key={model}
-                onClick={() => toggleModel(model)}
-                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                  currentModels.includes(model)
-                    ? "bg-yellow-50 text-yellow-700 border-yellow-200 shadow-sm dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/50"
-                    : "bg-white text-gray-500 border-gray-100 hover:bg-gray-50 dark:bg-white/5 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-white/10"
-                }`}
-              >
-                {model}
-              </button>
-            ))}
+          <div className="space-y-4">
+            {/* Custom Model Input */}
+            <div className="flex gap-2">
+                <input 
+                    type="text" 
+                    value={customModel}
+                    onChange={(e) => setCustomModel(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomModel())}
+                    placeholder="Type a custom model..."
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:ring-2 focus:ring-white/10 outline-none dark:bg-black/50 dark:border-zinc-800 dark:text-gray-200"
+                />
+                <button 
+                    onClick={handleAddCustomModel}
+                    disabled={!customModel.trim()}
+                    className="p-2 bg-yellow-500 text-white rounded-xl hover:bg-yellow-600 disabled:opacity-50 transition-colors"
+                >
+                    <Plus className="w-4 h-4" weight="bold" />
+                </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+                {/* Custom tags currently in currentModels but not in COMMON_MODELS */}
+                {currentModels.filter(m => !COMMON_MODELS.includes(m)).map((model) => (
+                    <button
+                        key={model}
+                        onClick={() => toggleModel(model)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-200 shadow-sm dark:bg-yellow-900/40 dark:text-yellow-400 dark:border-yellow-900/50"
+                    >
+                        {model}
+                        <X className="w-3 h-3" weight="bold" />
+                    </button>
+                ))}
+                
+                {COMMON_MODELS.map((model) => (
+                    <button
+                        key={model}
+                        onClick={() => toggleModel(model)}
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        currentModels.includes(model)
+                            ? "bg-yellow-50 text-yellow-700 border-yellow-200 shadow-sm dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/50"
+                            : "bg-white text-gray-500 border-gray-100 hover:bg-gray-50 dark:bg-white/5 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-white/10"
+                        }`}
+                    >
+                        {model}
+                    </button>
+                ))}
+            </div>
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -175,6 +216,7 @@ export default function BusinessModelCard({
               onClick={() => {
                 setIsEditing(false);
                 setCurrentModels(selectedModels);
+                setCustomModel("");
               }}
               className="flex-1 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold dark:bg-transparent dark:border-zinc-700 dark:text-gray-400"
             >

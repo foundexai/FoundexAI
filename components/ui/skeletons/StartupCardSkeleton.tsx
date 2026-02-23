@@ -24,7 +24,7 @@ export function StartupCardSkeleton() {
         </div>
       </div>
 
-      <div className="border-t border-gray-100 pt-4 flex flex-col gap-2 dark:border-zinc-800">
+      <div className="pt-4 flex flex-col gap-2 dark:border-zinc-800">
         <Skeleton className="h-4 w-32 rounded-md" />
         <Skeleton className="h-4 w-28 rounded-md" />
       </div>

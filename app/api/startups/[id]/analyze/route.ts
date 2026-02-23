@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Startup from "@/lib/models/Startup";
+import Task from "@/lib/models/Task";
 import { verifyToken } from "@/lib/auth";
 
 export async function POST(
@@ -95,6 +96,24 @@ export async function POST(
         "Complete your Legal Structure details",
       ];
       await startup.save();
+
+      // Create Tasks for each feedback item (Fallback)
+      try {
+        const existingTasks = await Task.find({ startup_id: startup._id, status: "pending" });
+        const existingTitles = new Set(existingTasks.map(t => t.title));
+        for (const tip of startup.readiness_feedback) {
+          if (!existingTitles.has(tip)) {
+            await Task.create({
+              startup_id: startup._id,
+              title: tip,
+              category: "Operations",
+              status: "pending",
+              priority: "medium"
+            });
+          }
+        }
+      } catch (e) {}
+
       return NextResponse.json({
         score: mockScore,
         reason: "AI unavailable, calculated based on completeness.",
@@ -122,6 +141,29 @@ export async function POST(
       "Add more details to improve your score.",
     ];
     await startup.save();
+
+    // Create Tasks for each feedback item
+    try {
+      const existingTasks = await Task.find({ 
+        startup_id: startup._id,
+        status: "pending"
+      });
+      const existingTitles = new Set(existingTasks.map(t => t.title));
+
+      for (const tip of startup.readiness_feedback) {
+        if (!existingTitles.has(tip)) {
+          await Task.create({
+            startup_id: startup._id,
+            title: tip,
+            category: "Operations",
+            status: "pending",
+            priority: "medium"
+          });
+        }
+      }
+    } catch (taskErr) {
+      console.error("Error creating tasks from analysis:", taskErr);
+    }
 
     return NextResponse.json({
       score: result.score,

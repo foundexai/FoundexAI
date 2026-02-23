@@ -104,6 +104,7 @@ export async function POST(req: Request) {
 
     const newInvestor = await Investor.create({
       ...body,
+      submittedBy: decoded.user._id,
       // Ensure defaults/fallbacks if needed
       focus: body.focus || [],
       logoColor: body.logoColor || "from-blue-500 to-indigo-600",
@@ -112,6 +113,15 @@ export async function POST(req: Request) {
 
     // Explicitly cast to any or correct type to avoid TS errors with toObject/_id
     const createdInv = newInvestor as any;
+
+    // Notify Admins
+    const { notifyAdmins } = await import("@/lib/notifications");
+    await notifyAdmins(
+      "💎 New Investor Submission",
+      `${body.name} (${body.type}) has been submitted for approval.`,
+      "submission",
+      "/admin"
+    );
 
     return NextResponse.json(
       {

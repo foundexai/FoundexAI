@@ -129,36 +129,30 @@ export default function ReadinessScore({
             Key Improvements
           </h4>
           <div className="space-y-1">
-            {feedback.map((tip, i) => (
-              <div
-                key={i}
-                onClick={handleAnalyze}
-                className={`group flex items-start gap-3 p-2 rounded-xl transition-all cursor-pointer border border-transparent ${
-                  analyzing
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-white hover:shadow-sm hover:border-gray-100 dark:hover:bg-white/10 dark:hover:border-white/5"
-                }`}
-                title="Click to re-analyze after completing this step"
-              >
+              {feedback.map((tip, i) => (
                 <div
-                  className={`mt-0.5 w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
+                  key={i}
+                  onClick={handleAnalyze}
+                  className={`group flex items-start gap-3 p-2.5 rounded-xl transition-all border border-transparent ${
                     analyzing
-                      ? "border-gray-200 bg-gray-50"
-                      : "border-gray-300 bg-white group-hover:border-blue-400 dark:border-zinc-600 dark:bg-zinc-800"
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-white hover:shadow-sm hover:border-gray-100 dark:hover:bg-white/10 dark:hover:border-white/5 cursor-pointer"
                   }`}
+                  title="Click to re-analyze profile"
                 >
-                  {analyzing && (
-                    <CircleNotch className="w-2.5 h-2.5 animate-spin text-blue-500" weight="bold" />
+                  <div className="mt-0.5 w-4 h-4 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  </div>
+                  <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed flex-1 group-hover:text-gray-900 dark:group-hover:text-gray-200 pr-4">
+                    {tip}
+                  </span>
+                  {!analyzing && (
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                       <ArrowsClockwise className="w-3.5 h-3.5 text-blue-500" weight="bold" />
+                    </div>
                   )}
                 </div>
-                <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed flex-1 group-hover:text-gray-900 dark:group-hover:text-gray-200">
-                  {tip}
-                </span>
-                <span className="opacity-0 group-hover:opacity-100 text-[10px] text-blue-500 font-medium whitespace-nowrap">
-                  Check
-                </span>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       )}

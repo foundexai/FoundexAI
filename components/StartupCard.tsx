@@ -78,7 +78,7 @@ export function StartupCard({
             </p>
           </div>
 
-          <div className="border-t border-gray-100 pt-4 flex flex-col gap-2 dark:border-zinc-800">
+          <div className="pt-4 flex flex-col gap-2 dark:border-zinc-800">
             <div className="flex items-center text-gray-500 text-sm font-medium dark:text-gray-400">
               <MapPin className="w-4 h-4 mr-2 text-gray-400" weight="bold" />
               {startup.location}

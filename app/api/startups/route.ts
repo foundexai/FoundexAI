@@ -40,6 +40,15 @@ export async function POST(req: NextRequest) {
       business_description,
     });
 
+    // Notify Admins
+    const { notifyAdmins } = await import("@/lib/notifications");
+    await notifyAdmins(
+      "🚀 New Startup Submission",
+      `${company_name} has been submitted for review. \n"${business_description.substring(0, 100)}..."`,
+      "submission",
+      "/admin"
+    );
+
     return NextResponse.json({ startup: newStartup }, { status: 201 });
   } catch (error) {
     console.error("Error creating startup:", error);

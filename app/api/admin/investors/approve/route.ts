@@ -19,7 +19,29 @@ export async function POST(req: Request) {
     if (!id)
       return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-    await Investor.findByIdAndUpdate(id, { isApproved: true });
+    const investor = await Investor.findByIdAndUpdate(id, { isApproved: true }, { new: true });
+
+    if (investor) {
+      // Notify Submitter
+      const { notifyUser, notifyAdmins } = await import("@/lib/notifications");
+      if (investor.submittedBy) {
+        await notifyUser(
+          investor.submittedBy,
+          "✅ Investor Profile Approved",
+          `The investor profile for "${investor.name}" has been approved and is now live in the database.`,
+          "approval",
+          "/dashboard"
+        );
+      }
+      
+      // Notify Admins
+      await notifyAdmins(
+        "✅ Investor Approved",
+        `An admin approved the investor profile for ${investor.name}.`,
+        "approval",
+        "/admin"
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
