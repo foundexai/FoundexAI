@@ -131,11 +131,11 @@ export default function StartupsPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 px-4 sm:px-8 lg:px-0">
+    <div className="space-y-8 animate-in fade-in duration-500 px-4 sm:px-6 lg:px-8 pb-10">
       {/* Header Area */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
+          <div className="flex-1">
             <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2 dark:text-white">
               Startup Directory
             </h1>
@@ -146,15 +146,20 @@ export default function StartupsPage() {
 
           <button
             onClick={() => setShowSubmitModal(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-xl font-bold transition-all shadow-lg hover:shadow-yellow-400/20 active:scale-95 w-full md:w-auto"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-xl font-bold transition-all shadow-lg hover:shadow-yellow-400/20 active:scale-95 w-full md:w-auto shrink-0"
           >
             <Plus className="w-5 h-5" weight="bold" />
-            Add New Startup
+            <span className="hidden sm:inline">Add New Startup</span>
+            <span className="sm:hidden">Add</span>
           </button>
         </div>
 
         <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1.5 rounded-2xl shadow-sm dark:bg-white/5 dark:border-white/10 overflow-hidden w-full">
           <div className="flex gap-1 overflow-x-auto custom-scrollbar pb-1 px-1">
+             <div className="px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap text-gray-500 dark:text-gray-400 flex items-center gap-2 border-r border-gray-100 dark:border-white/5 mr-1 shrink-0">
+                <Funnel weight="bold" />
+                Filter
+              </div>
             {sectors.map((type) => (
               <button
                 key={type}
@@ -165,7 +170,7 @@ export default function StartupsPage() {
                   (type === "All" && !selectedSector) ||
                   selectedSector === type
                     ? "bg-white shadow-sm text-gray-900 dark:bg-white/10 dark:text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
                 }`}
               >
                 {type}
@@ -186,14 +191,14 @@ export default function StartupsPage() {
             placeholder="Search startups by name, sector, or keywords..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white outline-none"
+            className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white outline-none min-w-0"
           />
           <button 
             onClick={() => toast.info("Advanced filters coming soon!")}
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0"
           >
             <FadersHorizontal className="w-4 h-4" weight="bold" />
-            Filters
+            <span className="hidden lg:inline">Filters</span>
           </button>
         </div>
       </div>

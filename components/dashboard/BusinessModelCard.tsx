@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MagicWand, CircleNotch, Plus, X, FloppyDiskBack } from "@phosphor-icons/react";
+import { MagicWand, CircleNotch, Plus, X, FloppyDiskBack, NotePencil } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface BusinessModelCardProps {
@@ -35,6 +35,7 @@ export default function BusinessModelCard({
   const [isEditing, setIsEditing] = useState(false);
   const [currentModels, setCurrentModels] = useState<string[]>(selectedModels);
   const [customModel, setCustomModel] = useState("");
+  const [aiSuggestions, setAiSuggestions] = useState<string[] | null>(null);
 
   useEffect(() => {
     setCurrentModels(selectedModels);
@@ -60,6 +61,7 @@ export default function BusinessModelCard({
 
   const handleSuggest = async () => {
     setIsSuggesting(true);
+    setAiSuggestions(null);
     // Simulate AI suggestion
     setTimeout(async () => {
       const suggestions = [
@@ -68,15 +70,18 @@ export default function BusinessModelCard({
         "B2B (Business-to-Business)",
         "Unique Value",
       ];
-
-      try {
-        await saveModels(suggestions);
-      } catch (e) {
-        toast.error("Failed to apply suggestions");
-      } finally {
-        setIsSuggesting(false);
-      }
+      setAiSuggestions(suggestions);
+      setIsSuggesting(false);
+      toast.success("Sophia generated suggestions!");
     }, 1500);
+  };
+
+  const handleApplySuggestions = () => {
+    if (aiSuggestions) {
+      setCurrentModels([...new Set([...currentModels, ...aiSuggestions])]);
+      setAiSuggestions(null);
+      toast.success("Suggestions added to your models");
+    }
   };
 
   const handleManualSave = async () => {
@@ -110,20 +115,6 @@ export default function BusinessModelCard({
           Business Model
         </h3>
         
-        {!isEditing && (
-          <button
-            onClick={handleSuggest}
-            disabled={isSuggesting}
-            className="text-xs font-bold text-yellow-600 bg-yellow-100 hover:bg-yellow-200 px-2 py-1 rounded-full flex items-center gap-1 transition-colors disabled:opacity-50 dark:bg-yellow-900/30 dark:text-yellow-400"
-          >
-            {isSuggesting ? (
-              <CircleNotch className="w-3 h-3 animate-spin" weight="bold" />
-            ) : (
-              <MagicWand className="w-3 h-3" weight="bold" />
-            )}
-            AI Suggestion
-          </button>
-        )}
       </div>
 
       <div className="grow">
@@ -135,6 +126,56 @@ export default function BusinessModelCard({
 
         {isEditing ? (
           <div className="space-y-4">
+            {/* Sophia AI Card */}
+            <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 dark:bg-black/80 dark:border-zinc-800 relative overflow-hidden group mb-4">
+              {aiSuggestions && (
+                <div className="flex justify-end items-center mb-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleApplySuggestions}
+                      className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <NotePencil className="w-3.5 h-3.5" weight="bold" />
+                      Add All
+                    </button>
+                    <button
+                      onClick={handleSuggest}
+                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <div className={`w-3.5 h-3.5 ${isSuggesting ? "animate-spin" : ""}`}>
+                        <MagicWand weight="bold" />
+                      </div>
+                      Regenerate
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {aiSuggestions ? (
+                <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-xl border border-white/5">
+                  {aiSuggestions.map((s, i) => (
+                    <span key={i} className="text-[10px] font-bold text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-lg border border-yellow-500/20">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-500 text-xs mb-3">
+                    Not sure which models fit? Sophia can suggest types based on your industry.
+                  </p>
+                  <button
+                    onClick={handleSuggest}
+                    disabled={isSuggesting}
+                    className="bg-yellow-500 text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-yellow-600 hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed shadow-yellow-500/20"
+                  >
+                    {isSuggesting && <CircleNotch className="w-4 h-4 animate-spin" />}
+                    {isSuggesting ? "Analyzing..." : "Generate Suggestion"}
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Custom Model Input */}
             <div className="flex gap-2">
                 <input 
@@ -217,6 +258,7 @@ export default function BusinessModelCard({
                 setIsEditing(false);
                 setCurrentModels(selectedModels);
                 setCustomModel("");
+                setAiSuggestions(null);
               }}
               className="flex-1 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold dark:bg-transparent dark:border-zinc-700 dark:text-gray-400"
             >

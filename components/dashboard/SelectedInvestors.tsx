@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MagnifyingGlass, FadersHorizontal, Trash, ChatCircleDots, X, PaperPlaneTilt, CircleNotch, ArrowRight } from "@phosphor-icons/react";
+import { MagnifyingGlass, FadersHorizontal, Trash, ChatCircleDots, X, PaperPlaneTilt, CircleNotch, ArrowRight, RocketLaunch } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ interface SavedInvestor {
   last_investment?: string;
   actively_deploying?: boolean;
   match_count?: number;
+  status?: "Not Contacted" | "Emailed" | "In Conversation" | "Due Diligence";
 }
 
 export default function SelectedInvestors() {
@@ -203,6 +204,25 @@ export default function SelectedInvestors() {
             ))}
           </tbody>
         </table>
+
+        <div className="mt-8 p-4 rounded-3xl bg-gray-50/50 border border-gray-100 dark:bg-black/20 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center dark:bg-zinc-800">
+                    <RocketLaunch className="w-6 h-6 text-yellow-500" weight="bold" />
+                </div>
+                <div>
+                    <h4 className="font-bold text-gray-900 dark:text-white">Track your Deal Flow</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Manage outreach status and move deals across the pipeline.</p>
+                </div>
+            </div>
+            <Link 
+                href="/dashboard/pipeline"
+                className="w-full md:w-auto px-6 py-3 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 dark:hover:bg-gray-400 hover:bg-gray-100 hover:text-black dark:hover:text-black transition-all shadow-xl dark:bg-white dark:text-black"
+            >
+                Manage Deal Pipeline
+                <ArrowRight className="w-4 h-4" weight="bold" />
+            </Link>
+        </div>
 
         {loading && (
           <div className="text-center py-10 text-gray-400">

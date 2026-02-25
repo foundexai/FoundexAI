@@ -234,7 +234,7 @@ export default function Header() {
                         <div className="p-3 bg-gray-50/50 border-t border-gray-100 rounded-b-3xl dark:bg-black/20 dark:border-zinc-800">
                              <button 
                                 onClick={() => markAsRead()}
-                                className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white"
+                                className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white cursor-pointer"
                              >
                                 Mark all as read
                              </button>

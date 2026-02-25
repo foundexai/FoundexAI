@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuth, Startup as StartupModel } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { Check, X, CircleNotch, ShieldWarning, FileText, MagnifyingGlass, Funnel, RocketLaunch, PencilSimple } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+import { Check, X, CircleNotch, ShieldWarning, FileText, MagnifyingGlass, Funnel, RocketLaunch, PencilSimple, Star } from "@phosphor-icons/react";
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { toast } from "sonner";
 import EditInvestorDialog from "@/components/admin/EditInvestorDialog";
@@ -87,8 +88,8 @@ export default function AdminPage() {
     }
   }
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const loadData = async (silent = false) => {
+    if (!silent) setIsLoading(true);
     // Always fetch pending counts for the tabs
     await Promise.all([
         fetchPending(),
@@ -100,7 +101,7 @@ export default function AdminPage() {
       await fetchAllApproved();
     }
     
-    setIsLoading(false);
+    if (!silent) setIsLoading(false);
   };
 
   useEffect(() => {
@@ -141,6 +142,35 @@ export default function AdminPage() {
   const handleEdit = (investor: Investor) => {
     setSelectedInvestor(investor);
     setIsEditOpen(true);
+  };
+
+  const handleToggleFeatured = async (investor: Investor) => {
+    const newFeatured = !investor.isFeatured;
+    
+    // Optimistic Update
+    setAllInvestors(prev => prev.map(inv => 
+      inv.id === investor.id ? { ...inv, isFeatured: newFeatured } : inv
+    ));
+
+    try {
+      const res = await fetch(`/api/admin/investors/${investor.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isFeatured: newFeatured }),
+      });
+
+      if (!res.ok) throw new Error("Failed");
+      toast.success(newFeatured ? "Investor Featured!" : "Featured Status Removed");
+    } catch (e) {
+      toast.error("Failed to update featured status");
+      // Rollback
+      setAllInvestors(prev => prev.map(inv => 
+        inv.id === investor.id ? { ...inv, isFeatured: !newFeatured } : inv
+      ));
+    }
   };
 
   const handleReject = async (id: string, type: "investor" | "startup") => {
@@ -197,7 +227,7 @@ export default function AdminPage() {
       <EditInvestorDialog 
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        onSuccess={loadData}
+        onSuccess={() => loadData(true)}
         investor={selectedInvestor}
       />
       
@@ -404,14 +434,28 @@ export default function AdminPage() {
                             <X className="w-5 h-5" weight="bold" />
                         </button>
                         </>
-                    ) : (
-                        <button
-                        onClick={() => handleEdit(inv)}
-                        className="w-full py-2.5 bg-gray-900 hover:bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                        >
-                        <FileText className="w-4 h-4" weight="bold" />
-                        Edit Details
-                        </button>
+                     ) : (
+                        <div className="flex gap-2 w-full">
+                          <button
+                            onClick={() => handleToggleFeatured(inv)}
+                            className={cn(
+                              "p-2.5 rounded-xl font-bold transition-all border",
+                              inv.isFeatured 
+                                ? "bg-yellow-400 border-yellow-500 text-black shadow-lg shadow-yellow-500/20" 
+                                : "bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:border-white/10 dark:text-gray-400"
+                            )}
+                            title={inv.isFeatured ? "Remove from Featured" : "Mark as Featured"}
+                          >
+                            <Star weight={inv.isFeatured ? "fill" : "bold"} className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(inv)}
+                            className="flex-1 py-2.5 bg-gray-900 hover:bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                          >
+                            <FileText className="w-4 h-4" weight="bold" />
+                            Edit Details
+                          </button>
+                        </div>
                     )}
                     </div>
                 </div>

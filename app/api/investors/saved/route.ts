@@ -25,8 +25,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get IDs
+    // Get IDs and Statuses
     const savedIds = user.saved_investors || [];
+    const statuses = user.investor_statuses || new Map();
 
     // Fetch Investors from DB
     const dbIds = savedIds.filter((id: string) =>
@@ -34,23 +35,30 @@ export async function GET(req: Request) {
     );
     const investorsDocs = await Investor.find({ _id: { $in: dbIds } });
 
-    const formattedDBInvestors = investorsDocs.map((inv) => ({
-      id: inv._id.toString(),
-      name: inv.name,
-      type: inv.type,
-      focus: inv.focus,
-      location: inv.location,
-      logoInitial: inv.logoInitial,
-      logoColor: inv.logoColor,
-      description: inv.description,
-      investmentRange: inv.investmentRange || inv.investment_range,
-      website: inv.website,
-    }));
+    const formattedDBInvestors = investorsDocs.map((inv) => {
+      const id = inv._id.toString();
+      return {
+        id,
+        name: inv.name,
+        type: inv.type,
+        focus: inv.focus,
+        location: inv.location,
+        logoInitial: inv.logoInitial,
+        logoColor: inv.logoColor,
+        description: inv.description,
+        investmentRange: inv.investmentRange || inv.investment_range,
+        website: inv.website,
+        status: (statuses as any).get ? (statuses as any).get(id) : statuses[id] || "Not Contacted",
+      };
+    });
 
     // Fetch saved Mock Investors
     const savedMocks = MOCK_INVESTORS.filter((inv) =>
       savedIds.includes(inv.id),
-    );
+    ).map(inv => ({
+        ...inv,
+        status: (statuses as any).get ? (statuses as any).get(inv.id) : statuses[inv.id] || "Not Contacted",
+    }));
 
     const allSaved = [...formattedDBInvestors, ...savedMocks];
 

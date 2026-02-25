@@ -26,14 +26,18 @@ export async function GET(req: Request) {
     }
 
     if (type) {
-      query.type = type;
+      if (type === "Featured") {
+        query.isFeatured = true;
+      } else {
+        query.type = type;
+      }
     }
 
     const skip = (page - 1) * limit;
 
     const [investors, total] = await Promise.all([
       Investor.find(query)
-        .sort({ created_at: -1 })
+        .sort({ isFeatured: -1, created_at: -1 })
         .skip(skip)
         .limit(limit),
       Investor.countDocuments(query),
@@ -58,6 +62,7 @@ export async function GET(req: Request) {
       email: inv.email,
       active_status: inv.active_status,
       notes: inv.notes,
+      isFeatured: inv.isFeatured,
     }));
 
     return NextResponse.json({

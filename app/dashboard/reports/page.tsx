@@ -54,7 +54,7 @@ export default function ReportsPage() {
             
             <div className="space-y-6">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white leading-tight">
-                Data-Driven Insights for the New Century
+                Data-Driven Insights for the Deals
               </h2>
               <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed max-w-xl">
                 Access downloadable PDF reports and an interactive data dashboard covering industries, companies, and recent deals. Track funding rounds, investors, sector trends, and market activity in one place.

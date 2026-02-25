@@ -12,11 +12,13 @@ import {
   FileText,
   CloudArrowUp,
   Buildings,
+  Star,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { Investor } from "@/components/InvestorCard";
 import { uploadImage } from "@/lib/upload";
+import { cn } from "@/lib/utils";
 
 interface EditInvestorDialogProps {
   isOpen: boolean;
@@ -45,6 +47,7 @@ export default function EditInvestorDialog({
     logoInitial: "",
     logoColor: "from-blue-500 to-indigo-600",
     logo_url: "",
+    isFeatured: false,
   });
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function EditInvestorDialog({
         logoInitial: investor.logoInitial || "",
         logoColor: investor.logoColor || "from-blue-500 to-indigo-600",
         logo_url: investor.logo_url || "",
+        isFeatured: (investor as any).isFeatured || false,
       });
     }
   }, [investor]);
@@ -373,6 +377,49 @@ export default function EditInvestorDialog({
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Featured Toggle */}
+            <div className="pt-4 border-t border-gray-100 dark:border-white/5">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, isFeatured: !formData.isFeatured })}
+                className={cn(
+                  "flex items-center gap-3 px-6 py-4 rounded-2xl border transition-all w-full md:w-auto",
+                  formData.isFeatured 
+                    ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/30" 
+                    : "bg-gray-50 border-gray-100 dark:bg-white/5 dark:border-white/10"
+                )}
+              >
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                  formData.isFeatured 
+                    ? "bg-yellow-400 text-white" 
+                    : "bg-gray-200 text-gray-400 dark:bg-white/10 dark:text-gray-500"
+                )}>
+                  <Star weight={formData.isFeatured ? "fill" : "bold"} className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className={cn(
+                    "font-bold text-sm",
+                    formData.isFeatured ? "text-yellow-700 dark:text-yellow-500" : "text-gray-700 dark:text-gray-300"
+                  )}>
+                    Featured Investor
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Showcase this investor at the top of the database
+                  </p>
+                </div>
+                <div className={cn(
+                  "ml-auto w-12 h-6 rounded-full relative transition-colors",
+                  formData.isFeatured ? "bg-yellow-400" : "bg-gray-300 dark:bg-zinc-700"
+                )}>
+                  <div className={cn(
+                    "absolute top-1 w-4 h-4 bg-white rounded-full transition-all",
+                    formData.isFeatured ? "left-7" : "left-1"
+                  )} />
+                </div>
+              </button>
             </div>
           </form>
         </div>

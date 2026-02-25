@@ -28,6 +28,7 @@ export async function GET(req: Request) {
       description: inv.description,
       investmentRange: inv.investmentRange || inv.investment_range,
       website: inv.website,
+      isFeatured: inv.isFeatured,
     }));
 
     return NextResponse.json({ investors });

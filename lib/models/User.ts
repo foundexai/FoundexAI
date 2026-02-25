@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   password_hash: { type: String, required: true },
   user_type: { type: String, enum: ["founder", "investor"], required: true },
   saved_investors: [{ type: String }],
+  investor_statuses: { type: Map, of: String, default: {} }, // investorId -> status
   linkedin_url: { type: String },
   profile_image_url: { type: String },
   reset_code: { type: String },

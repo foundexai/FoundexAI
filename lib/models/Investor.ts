@@ -36,6 +36,7 @@ const InvestorSchema = new mongoose.Schema({
   email: { type: String },
 
   isApproved: { type: Boolean, default: false },
+  isFeatured: { type: Boolean, default: false },
   submittedBy: { type: String }, // User ID of the submitter
   created_at: { type: Date, default: Date.now },
 });

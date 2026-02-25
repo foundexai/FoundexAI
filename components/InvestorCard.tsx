@@ -1,4 +1,4 @@
-import { MapPin, ArrowRight, Buildings, GlobeSimple, Heart } from "@phosphor-icons/react";
+import { MapPin, ArrowRight, Buildings, GlobeSimple, Heart, Star, CircleNotch } from "@phosphor-icons/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -14,18 +14,21 @@ export interface Investor {
   investmentRange?: string;
   website?: string;
   logo_url?: string;
+  isFeatured?: boolean;
 }
 
 interface InvestorCardProps {
   investor: Investor;
   isSaved?: boolean;
   onToggleSave?: (id: string) => void;
+  isSaving?: boolean;
 }
 
 export function InvestorCard({
   investor,
   isSaved = false,
   onToggleSave,
+  isSaving = false,
 }: InvestorCardProps) {
   const handleSaveClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,21 +53,32 @@ export function InvestorCard({
           <div className="flex flex-col items-end gap-2">
             <button
               onClick={handleSaveClick}
-              className="p-2 rounded-full bg-white/50 border border-white/50 hover:bg-white transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+              disabled={isSaving}
+              className="p-2 rounded-full bg-white/50 border border-white/50 hover:bg-white transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 disabled:opacity-50"
             >
-              <Heart
-                weight={isSaved ? "fill" : "bold"}
-                className={cn(
-                  "w-5 h-5 transition-colors",
-                  isSaved
-                    ? "text-red-500"
-                    : "text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400",
-                )}
-              />
+              {isSaving ? (
+                <CircleNotch className="w-5 h-5 animate-spin text-yellow-500" weight="bold" />
+              ) : (
+                <Heart
+                  weight={isSaved ? "fill" : "bold"}
+                  className={cn(
+                    "w-5 h-5 transition-colors",
+                    isSaved
+                      ? "text-red-500"
+                      : "text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400",
+                  )}
+                />
+              )}
             </button>
             <div className="px-3 py-1 rounded-full bg-white/50 border border-white/50 text-[10px] font-bold uppercase tracking-wider text-gray-600 shadow-sm backdrop-blur-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
               {investor.type}
             </div>
+            {investor.isFeatured && (
+               <div className="px-3 py-1 rounded-full bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
+                <Star weight="fill" className="w-3 h-3" />
+                Featured
+              </div>
+            )}
           </div>
         </div>
 

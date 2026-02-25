@@ -26,6 +26,7 @@ export default function InvestorsPage() {
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [savedInvestorIds, setSavedInvestorIds] = useState<string[]>([]);
+  const [savingIds, setSavingIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -104,6 +105,10 @@ export default function InvestorsPage() {
       return;
     }
 
+    if (savingIds.includes(id)) return; // Prevent double clicks
+    
+    setSavingIds(prev => [...prev, id]);
+
     const isCurrentlySaved = savedInvestorIds.includes(id);
     const newSavedIds = isCurrentlySaved
       ? savedInvestorIds.filter((savedId) => savedId !== id)
@@ -123,13 +128,16 @@ export default function InvestorsPage() {
 
       if (!res.ok) throw new Error("Failed to save");
 
-      if (refreshUser) refreshUser();
+      if (refreshUser) await refreshUser();
+      
       toast.success(
         isCurrentlySaved ? "Removed from saved" : "Investor saved!",
       );
     } catch (error) {
       setSavedInvestorIds(savedInvestorIds);
       toast.error("Something went wrong.");
+    } finally {
+      setSavingIds(prev => prev.filter(savingId => savingId !== id));
     }
   };
 
@@ -139,7 +147,7 @@ export default function InvestorsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 px-1.5 lg:px-0">
+    <div className="space-y-8 animate-in fade-in duration-500 px-4 sm:px-6 lg:px-8 pb-10">
       <MatchInvestorModal
         isOpen={isMatchModalOpen}
         onClose={() => setIsMatchModalOpen(false)}
@@ -156,49 +164,48 @@ export default function InvestorsPage() {
       />
 
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2 dark:text-white">
-            Investor Database
-          </h1>
-          <p className="text-gray-500 max-w-xl text-lg dark:text-gray-400">
-            Connect with the leading VCs, Angels, and Accelerators powering the
-            next generation of African startups.
-          </p>
-        </div>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex-1">
+            <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2 dark:text-white">
+              Investor Database
+            </h1>
+            <p className="text-gray-500 max-w-xl text-lg dark:text-gray-400">
+              Connect with the leading VCs, Angels, and Accelerators powering the
+              next generation of African startups.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="md:hidden bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-xl shadow-lg shadow-yellow-500/30 transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-yellow-500/20 active:scale-95 w-full md:w-auto shrink-0"
           >
             <Plus className="w-5 h-5" weight="bold" />
+            <span className="hidden sm:inline">Add New Investor</span>
+            <span className="sm:hidden">Add</span>
           </button>
+        </div>
 
-          <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1 rounded-xl shadow-sm flex dark:bg-white/5 dark:border-white/10 overflow-x-auto max-w-[200px] md:max-w-none custom-scrollbar">
-            {/* Simple Scrollable Types */}
-            <div className="flex gap-1">
-              <button
-                className="px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-2"
-              >
+        <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1.5 rounded-2xl shadow-sm dark:bg-white/5 dark:border-white/10 overflow-hidden w-full">
+           <div className="flex gap-1 overflow-x-auto custom-scrollbar pb-1 px-1">
+              <div className="px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap text-gray-500 dark:text-gray-400 flex items-center gap-2 border-r border-gray-100 dark:border-white/5 mr-1 shrink-0">
                 <Funnel weight="bold" />
                 Filter
-              </button>
-              {["All", "VC", "Angel", "Accelerator", "Grants"].map((type) => (
+              </div>
+              {["All", "Featured", "VC", "Angel", "Accelerator", "Grant"].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleTypeChange(type === "All" ? null : type)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
                     (type === "All" && !selectedType) || selectedType === type
                       ? "bg-white shadow-sm text-gray-900 dark:bg-white/10 dark:text-white"
-                      : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
                   }`}
                 >
-                  {type}
+                  {type === "Grant" ? "Grants" : type}
                 </button>
               ))}
-            </div>
-          </div>
+           </div>
         </div>
       </div>
 
@@ -217,26 +224,27 @@ export default function InvestorsPage() {
           />
           <button
             onClick={() => setIsMatchModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer shrink-0"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer shrink-0"
           >
             <Sparkle className="w-4 h-4" weight="bold" />
-            <span className="hidden sm:inline">Match Me</span>
-            <span className="sm:hidden">Match</span>
+            <span className="hidden lg:inline">Match Me</span>
+            <span className="hidden sm:inline lg:hidden">Match</span>
           </button>
+          
           <button 
             onClick={() => setIsFilterModalOpen(true)}
-            className="w-[9rem] hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0"
           >
-            {/* <Sparkle className="w-4 h-4" weight="bold" /> */}
-            AI Search
+            <FadersHorizontal className="w-4 h-4" weight="bold" />
+            <span className="hidden lg:inline">AI Search</span>
           </button>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="hidden md:flex items-center gap-2 px-2.5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-yellow-500/20 hover:shadow-lg hover:scale-105 cursor-pointer"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-yellow-500/20 hover:shadow-lg hover:scale-105 cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" weight="bold" />
-            Investor
+            <span className="hidden lg:inline">Investor</span>
           </button>
         </div>
       </div>
@@ -257,6 +265,7 @@ export default function InvestorsPage() {
                 investor={investor}
                 isSaved={savedInvestorIds.includes(investor.id)}
                 onToggleSave={handleToggleSave}
+                isSaving={savingIds.includes(investor.id)}
               />
             ))}
           </div>
