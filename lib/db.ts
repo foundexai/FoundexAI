@@ -21,9 +21,12 @@ export async function connectDB() {
   if (!cached.promise || mongoose.connection.readyState === 0) {
     const opts = {
       bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000, // 10s for initial selection
-      socketTimeoutMS: 45000,
+      maxPoolSize: 5, // Reduced for stability in serverless/local
+      minPoolSize: 1,
+      serverSelectionTimeoutMS: 5000, // Fail faster if server is down
+      socketTimeoutMS: 30000,
+      connectTimeoutMS: 10000,
+      heartbeatFrequencyMS: 10000,
       family: 4,
     };
 

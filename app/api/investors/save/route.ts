@@ -29,27 +29,24 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await User.findById(decoded.user._id);
+    // Toggle logic using atomic findOneAndUpdate for better consistency and speed
+    const isSavedAlready = decoded.user.saved_investors.includes(investorId);
+    
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: decoded.user._id },
+      isSavedAlready 
+        ? { $pull: { saved_investors: investorId } }
+        : { $addToSet: { saved_investors: investorId } },
+      { new: true, lean: true }
+    );
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    if (!updatedUser) {
+        return NextResponse.json({ error: "Update failed" }, { status: 500 });
     }
-
-    // Toggle logic
-    const isSaved = user.saved_investors.includes(investorId);
-    if (isSaved) {
-      user.saved_investors = user.saved_investors.filter(
-        (id: string) => id !== investorId,
-      );
-    } else {
-      user.saved_investors.push(investorId);
-    }
-
-    await user.save();
 
     return NextResponse.json({
-      saved_investors: user.saved_investors,
-      isSaved: !isSaved,
+      saved_investors: updatedUser.saved_investors,
+      isSaved: !isSavedAlready,
     });
   } catch (error) {
     console.error("Error saving investor:", error);

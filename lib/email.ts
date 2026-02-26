@@ -3,7 +3,6 @@ export async function sendEmail({ to, subject, body }: { to: string; subject: st
 
   if (!PLUNK_API_KEY) {
     console.warn("PLUNK_API_KEY not found. Logging email content instead.");
-    console.log(`To: ${to}\nSubject: ${subject}\nBody: ${body}`);
     return { success: true, mock: true };
   }
 

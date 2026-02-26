@@ -155,6 +155,7 @@ export default function AddInvestorModal({
                 >
                   <option value="VC">Venture Capital</option>
                   <option value="Angel">Angel Investor</option>
+                  <option value="Grant">Grant / Non-dilutive</option>
                   <option value="Accelerator">Accelerator</option>
                   <option value="PE">Private Equity</option>
                   <option value="Family Office">Family Office</option>

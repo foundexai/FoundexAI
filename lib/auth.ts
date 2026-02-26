@@ -18,21 +18,27 @@ export const isAdmin = (email: string) => ADMIN_EMAILS.includes(email);
 export const verifyToken = async (token: string) => {
   const start = Date.now();
   try {
-    await connectDB();
-    const dbTime = Date.now() - start;
-    
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
-    const user = await User.findById(decoded.id).select('-password');
+    
+    // Check if we already connected to DB
+    await connectDB();
+    const dbConnectTime = Date.now() - start;
+
+    const user = await User.findById(decoded.id).select('-password -password_hash').lean();
     
     const totalTime = Date.now() - start;
-    if (totalTime > 1000) {
-      console.warn(`[verifyToken] Slow verification: ${totalTime}ms (DB connection: ${dbTime}ms)`);
+    if (totalTime > 2000) {
+      console.warn(`[verifyToken] Warning: Slow fetch for ${decoded.id}: ${totalTime}ms (Connect: ${dbConnectTime}ms)`);
     }
 
     if (!user) return null;
-    return { user };
+    return { user: { ...user, _id: user._id.toString() } as any };
   } catch (error) {
-    console.error("Error in verifyToken:", error);
+    if (error instanceof jwt.TokenExpiredError) {
+        console.log("Token expired");
+    } else {
+        console.error("Error in verifyToken:", error);
+    }
     return null;
   }
 };

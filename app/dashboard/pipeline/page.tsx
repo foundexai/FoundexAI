@@ -12,7 +12,10 @@ import {
   ChatCircleDots, 
   Handshake,
   MagnifyingGlass,
-  Funnel
+  Funnel,
+  ChartBar,
+  ChartPie,
+  TrendUp
 } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -130,6 +133,107 @@ export default function PipelinePage() {
         </div>
       </div>
 
+      {/* Analytics Section */}
+      {!loading && investors.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Main Funnel Statistics */}
+          <div className="lg:col-span-3 glass-card p-8 rounded-[2.5rem] border border-white/50 dark:bg-zinc-900/60 dark:border-zinc-800 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                  <ChartBar className="w-6 h-6 text-white" weight="bold" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Stage Distribution</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">Pipeline Health</p>
+                </div>
+              </div>
+              <div className="px-4 py-2 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 flex items-center gap-2">
+                <TrendUp className="w-4 h-4 text-green-500" weight="bold" />
+                <span className="text-xs font-black text-gray-700 dark:text-gray-300">Active Outreach</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4 items-end h-48 px-4">
+              {STATUS_OPTIONS.map((opt) => {
+                const count = investors.filter(i => (i.status || "Not Contacted") === opt.value).length;
+                const maxCount = Math.max(...STATUS_OPTIONS.map(o => investors.filter(i => (i.status || "Not Contacted") === o.value).length), 1);
+                const heightPercent = (count / maxCount) * 100;
+                
+                return (
+                  <div key={opt.value} className="flex flex-col items-center gap-4 group">
+                    <div className="relative w-full h-full flex flex-col justify-end">
+                      {/* Bar Background */}
+                      <div className="absolute inset-0 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-100 dark:border-white/5"></div>
+                      
+                      {/* Bar Fill */}
+                      <div 
+                        style={{ height: `${heightPercent}%` }}
+                        className={cn(
+                          "relative rounded-2xl transition-all duration-1000 ease-out group-hover:opacity-80 shadow-lg",
+                          opt.color.split(" ")[0].replace("bg-gray-100", "bg-zinc-300 dark:bg-zinc-700")
+                        )}
+                      >
+                         <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white px-3 py-1.5 rounded-lg text-xs font-black opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                           {count} Investors
+                         </div>
+                      </div>
+                    </div>
+                    <div className="text-center space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 truncate max-w-[80px]">
+                        {opt.label.split(" ")[0]}
+                      </p>
+                      <p className="text-sm font-black text-gray-900 dark:text-white">{count}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Efficiency Metric */}
+          <div className="glass-card p-8 rounded-[2.5rem] border border-white/50 dark:bg-zinc-900/60 dark:border-zinc-800 flex flex-col justify-center items-center text-center space-y-6">
+             <div className="relative w-32 h-32">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    className="text-gray-100 dark:text-white/5"
+                    strokeWidth="8"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="58"
+                    cx="64"
+                    cy="64"
+                  />
+                  <circle
+                    className="text-yellow-500 transition-all duration-1000 ease-out"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={364}
+                    strokeDashoffset={364 - (364 * (investors.filter(i => i.status && i.status !== "Not Contacted").length / (investors.length || 1)))}
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="58"
+                    cx="64"
+                    cy="64"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-black text-gray-900 dark:text-white">
+                    {Math.round((investors.filter(i => i.status && i.status !== "Not Contacted").length / (investors.length || 1)) * 100)}%
+                  </span>
+                  <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Engaged</span>
+                </div>
+             </div>
+             <div>
+                <h4 className="font-black text-gray-900 dark:text-white tracking-tight">Outreach Index</h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed max-w-[140px] mt-1">
+                  Ratio of contacted investors vs. total shortlisted.
+                </p>
+             </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Card */}
       <div className="glass-card rounded-[2.5rem] border border-white/50 overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800 shadow-2xl shadow-black/5">
         <div className="overflow-x-auto">
@@ -213,7 +317,7 @@ export default function PipelinePage() {
 
           {!loading && filteredInvestors.length === 0 && (
             <div className="text-center py-20 px-8">
-               <div className="w-20 h-20 bg-gray-50 dark:bg-black/40 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+               <div className="w-20 h-20 bg-gray-50 dark:bg-black/40 rounded-4xl flex items-center justify-center mx-auto mb-6">
                   <Handshake className="w-10 h-10 text-gray-300 dark:text-zinc-700" />
                </div>
                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No investors in your pipeline</h3>

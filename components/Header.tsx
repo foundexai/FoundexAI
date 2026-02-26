@@ -13,7 +13,7 @@ interface HeaderProps {
 }
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const { toggle } = useMobileMenu();
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -167,7 +167,12 @@ export default function Header() {
               )}
             </button>
 
-            {user ? (
+            {loading ? (
+              <div className="flex items-center space-x-4">
+                 <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse dark:bg-white/10" />
+                 <div className="w-32 h-10 rounded-full bg-gray-200 animate-pulse hidden lg:block dark:bg-white/10" />
+              </div>
+            ) : user ? (
               <>
                 <div className="relative" ref={notificationsRef}>
                     <button 
@@ -324,7 +329,9 @@ export default function Header() {
               <Moon className="h-6 w-6" />
             )}
           </button>
-          {user && (
+          {loading ? (
+            <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse dark:bg-white/10" />
+          ) : user ? (
             <div className="relative" ref={mobileDropdownRef}>
               <button
                 onClick={toggleMobileDropdown}
@@ -378,8 +385,7 @@ export default function Header() {
                 </button>
               </div>
             </div>
-          )}
-          {!user && (
+          ) : (
             <Link
               href="/"
               className="px-4 py-2 text-sm font-bold text-white bg-gray-900 rounded-lg dark:bg-white dark:text-black"

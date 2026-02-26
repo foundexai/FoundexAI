@@ -26,29 +26,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await User.findById(decoded.user._id);
+    // Use atomic update for Map efficiency
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: decoded.user._id },
+      { $set: { [`investor_statuses.${investorId}`]: status } },
+      { new: true, lean: true }
+    );
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    if (!updatedUser) {
+        return NextResponse.json({ error: "Update failed" }, { status: 500 });
     }
-
-    // Ensure investor_statuses exists and is a Map
-    if (!user.investor_statuses) {
-      user.investor_statuses = new Map();
-    }
-
-    // Using .set() for Mongoose Map
-    if (user.investor_statuses instanceof Map) {
-      user.investor_statuses.set(investorId, status);
-    } else {
-      // Fallback for plain objects if necessary
-      user.investor_statuses[investorId] = status;
-    }
-
-    // Mark as modified if it's a map
-    user.markModified('investor_statuses');
-    
-    await user.save();
 
     return NextResponse.json({
       success: true,

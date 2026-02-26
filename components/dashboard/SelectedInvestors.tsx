@@ -30,7 +30,8 @@ export default function SelectedInvestors() {
   useEffect(() => {
     async function fetchSaved() {
       if (!user) return;
-      setLoading(true);
+      const shouldShowLoading = investors.length === 0;
+      if (shouldShowLoading) setLoading(true);
       try {
         const res = await fetch("/api/investors/saved", {
           headers: { Authorization: `Bearer ${token}` },

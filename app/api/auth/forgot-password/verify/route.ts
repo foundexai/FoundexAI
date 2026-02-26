@@ -15,18 +15,6 @@ export async function POST(req: Request) {
     await connectDB();
     const user = await User.findOne({ email });
 
-    console.log(`[Verify Debug] Email: ${email}, Code Provided: ${code}`);
-    if (user) {
-      console.log(`[Verify Debug] User Object:`, {
-        _id: user._id,
-        email: user.email,
-        reset_code: user.reset_code,
-        reset_code_expires: user.reset_code_expires
-      });
-    } else {
-      console.log(`[Verify Debug] User Not Found for email: ${email}`);
-    }
-
     if (!user || user.reset_code !== code) {
       return NextResponse.json({ error: "Invalid code" }, { status: 400 });
     }

@@ -87,10 +87,8 @@ export default function InvestorsPage() {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchData(currentPage, debouncedSearch, selectedType);
-    }
-  }, [user, currentPage, debouncedSearch, selectedType]);
+    fetchData(currentPage, debouncedSearch, selectedType);
+  }, [currentPage, debouncedSearch, selectedType]);
 
   // Sync saved list
   useEffect(() => {

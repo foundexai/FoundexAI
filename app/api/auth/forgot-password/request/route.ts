@@ -29,8 +29,6 @@ export async function POST(req: Request) {
       { new: true }
     );
 
-    console.log(`[Request Debug] Email: ${email}, Code Generated: ${resetCode}, Stored: ${updatedUser?.reset_code}`);
-
     if (!updatedUser) {
       // For security reasons, don't reveal if user exists or not
       return NextResponse.json({ success: true, message: "If an account exists, a code has been sent." });

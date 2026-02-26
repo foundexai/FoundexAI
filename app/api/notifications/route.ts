@@ -5,7 +5,6 @@ import Notification from "@/lib/models/Notification";
 
 export async function GET(req: Request) {
   try {
-    await connectDB();
     const token = req.headers.get("Authorization")?.split(" ")[1];
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -14,7 +13,8 @@ export async function GET(req: Request) {
 
     const notifications = await Notification.find({ recipient_id: decoded.user._id })
       .sort({ created_at: -1 })
-      .limit(20);
+      .limit(20)
+      .lean();
 
     return NextResponse.json({ notifications });
   } catch (error) {

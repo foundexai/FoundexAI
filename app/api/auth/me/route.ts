@@ -25,8 +25,7 @@ export async function GET(req: Request) {
       ...((decoded.user as any).toObject ? (decoded.user as any).toObject() : decoded.user),
       isAdmin: isAdmin(decoded.user.email)
     };
-    console.log("API /auth/me returning user:", JSON.stringify(userObj, null, 2));
-    
+        
     return NextResponse.json({ 
       user: userObj,
       startups 
