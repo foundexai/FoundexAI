@@ -8,6 +8,7 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 
 interface User {
@@ -59,6 +60,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [activeStartupId, setActiveStartupIdState] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const setActiveStartupId = (id: string) => {
     localStorage.setItem("activeStartupId", id);
@@ -102,9 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error(
             "Failed to fetch user data. Token might be invalid or expired.",
           );
-          localStorage.removeItem("token");
-          setToken(null);
-          setUser(null);
+          await logout();
         } else {
           console.error(
             "Failed to fetch user data, but keeping session.",
@@ -167,6 +168,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setToken(null);
     setUser(null);
   };
+
+  // Global redirect effect for protected routes
+  useEffect(() => {
+    if (!loading && !user) {
+      const isProtectedRoute = 
+        pathname.startsWith("/dashboard") || 
+        pathname.startsWith("/admin") || 
+        pathname.startsWith("/profile") || 
+        pathname.startsWith("/startup-profile");
+        
+      if (isProtectedRoute) {
+        router.push("/");
+      }
+    }
+  }, [loading, user, pathname, router]);
 
   return (
     <AuthContext.Provider

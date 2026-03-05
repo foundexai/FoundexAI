@@ -61,6 +61,7 @@ export async function GET(req: Request) {
       linkedin: inv.linkedin,
       email: inv.email,
       active_status: inv.active_status,
+      logo_url: inv.logo_url,
       notes: inv.notes,
       isFeatured: inv.isFeatured,
     }));

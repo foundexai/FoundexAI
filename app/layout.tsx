@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { MobileMenuProvider } from "@/context/MobileMenuContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -32,12 +33,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <MobileMenuProvider>
-              <Header />
-              {children}
-            </MobileMenuProvider>
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <MobileMenuProvider>
+                <Header />
+                {children}
+              </MobileMenuProvider>
+            </AuthProvider>
+          </QueryProvider>
           <Toaster />
         </ThemeProvider>
       </body>

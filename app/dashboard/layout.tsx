@@ -90,9 +90,9 @@ export default function DashboardLayout({
 
     return (
       <div className="flex flex-col h-full py-6">
-        <div className="flex-1 px-4 space-y-8 overflow-y-auto no-scrollbar pt-20 md:pt-4">
+        <div className="flex-1 px-4 space-y-8 overflow-y-auto thin-scrollbar pt-20 md:pt-4">
           {groups.map((group) => (
-          <div key={group.title} className={cn("space-y-3 lg:mt-[4rem]", isCollapsed && "items-center flex flex-col")}>
+          <div key={group.title} className={cn("space-y-3 lg:mt-16", isCollapsed && "items-center flex flex-col")}>
             {!isCollapsed && (
               <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500">
                 {group.title}

@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
     "/dashboard",
     "/dashboard/tasks",
     "/dashboard/notes",
+    "/admin",
   ];
 
   // Check if the current path is protected
@@ -37,5 +38,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/startup-profile/:path*", "/dashboard/:path*"],
+  matcher: ["/profile/:path*", "/startup-profile/:path*", "/dashboard/:path*", "/admin/:path*"],
 };

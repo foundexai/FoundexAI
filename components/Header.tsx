@@ -7,52 +7,58 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Bell, CaretDown, List } from "@phosphor-icons/react";
-
-interface HeaderProps {
-  onMobileMenuToggle?: () => void;
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Header() {
-  const { user, logout, loading } = useAuth();
+  const { user, logout, loading, token } = useAuth();
   const { toggle } = useMobileMenu();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const fetchNotifications = async () => {
-    if (!user || !localStorage.getItem("token")) return;
-    try {
+  const { data: notificationData } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      if (!token) return { notifications: [] };
       const res = await fetch("/api/notifications", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.notifications?.filter((n: any) => !n.is_read).length || 0);
-      }
-    } catch (e) {
-      console.error("Error fetching notifications:", e);
-    }
-  };
+      if (!res.ok) throw new Error("Failed to fetch notifications");
+      return res.json();
+    },
+    enabled: !!token && !!user,
+    refetchInterval: 60000, // Background poll every minute
+    staleTime: 30000,
+  });
 
-  useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      // Polling every 60 seconds
-      const interval = setInterval(fetchNotifications, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
+  const notifications = notificationData?.notifications || [];
+  const unreadCount = notifications.filter((n: any) => !n.is_read).length;
+
+  const markReadMutation = useMutation({
+    mutationFn: async (id?: string) => {
+      const res = await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(id ? { id } : { markAll: true }),
+      });
+      if (!res.ok) throw new Error("Failed to mark notification");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
 
   const desktopDropdownRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
@@ -63,71 +69,29 @@ export default function Header() {
     window.location.href = "/";
   };
 
-  const toggleDesktopDropdown = () => {
-    setIsDesktopDropdownOpen(!isDesktopDropdownOpen);
-  };
-
-  const toggleMobileDropdown = () => {
-    setIsMobileDropdownOpen(!isMobileDropdownOpen);
-  };
-
-  const toggleNotifications = () => {
-    setIsNotificationsOpen(!isNotificationsOpen);
-    if (!isNotificationsOpen) {
-      fetchNotifications();
-    }
-  };
-
-  const markAsRead = async (id?: string) => {
-    try {
-      const res = await fetch("/api/notifications", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(id ? { id } : { markAll: true }),
-      });
-      if (res.ok) {
-        fetchNotifications();
-      }
-    } catch (e) {
-      console.error("Error marking notification as read:", e);
-    }
-  };
+  const toggleDesktopDropdown = () => setIsDesktopDropdownOpen(!isDesktopDropdownOpen);
+  const toggleMobileDropdown = () => setIsMobileDropdownOpen(!isMobileDropdownOpen);
+  const toggleNotifications = () => setIsNotificationsOpen(!isNotificationsOpen);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        desktopDropdownRef.current &&
-        !desktopDropdownRef.current.contains(event.target as Node)
-      ) {
+      if (desktopDropdownRef.current && !desktopDropdownRef.current.contains(event.target as Node)) {
         setIsDesktopDropdownOpen(false);
       }
-      if (
-        mobileDropdownRef.current &&
-        !mobileDropdownRef.current.contains(event.target as Node)
-      ) {
+      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target as Node)) {
         setIsMobileDropdownOpen(false);
       }
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node)
-      ) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <header className="w-full sticky top-0 z-50 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10 transition-all duration-300">
       <div className="mx-auto p-4 lg:px-6 py-3 flex justify-between items-center bg-transparent">
-        {/* Logo Section - Visible on all screens now */}
         <div className="flex items-center space-x-3">
           <div className="relative w-8 h-8 md:w-10 md:h-10">
             <Image
@@ -144,6 +108,7 @@ export default function Header() {
             FoundexAI
           </Link>
         </div>
+
         <nav className="hidden md:flex items-center space-x-8 ml-auto">
           <Link
             href="/dashboard/investors"
@@ -154,10 +119,8 @@ export default function Header() {
 
           <div className="flex items-center space-x-6">
             <button
-              onClick={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-              }
-              className="p-2.5 rounded-full bg-gray-100/50 hover:bg-white border border-white/50 transition-all shadow-sm hover:shadow-md group dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="p-2.5 rounded-full bg-gray-100/50 hover:bg-white border border-white/50 transition-all shadow-sm hover:shadow-md group dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer"
               aria-label="Toggle theme"
             >
               {mounted && resolvedTheme === "dark" ? (
@@ -177,7 +140,7 @@ export default function Header() {
                 <div className="relative" ref={notificationsRef}>
                     <button 
                         onClick={toggleNotifications}
-                        className={`p-2.5 rounded-full border transition-all shadow-sm hover:shadow-md group relative ${isNotificationsOpen ? 'bg-white border-yellow-200 dark:bg-white/20' : 'bg-gray-100/50 border-white/50 dark:bg-white/10 dark:border-white/10 hover:bg-white dark:hover:bg-white/20'}`}
+                        className={`p-2.5 rounded-full border transition-all shadow-sm hover:shadow-md group relative cursor-pointer ${isNotificationsOpen ? 'bg-white border-yellow-200 dark:bg-white/20' : 'bg-gray-100/50 border-white/50 dark:bg-white/10 dark:border-white/10 hover:bg-white dark:hover:bg-white/20'}`}
                     >
                         <Bell className={`h-5 w-5 transition-colors ${isNotificationsOpen ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-600 group-hover:text-yellow-600 dark:text-gray-400 dark:group-hover:text-yellow-400'}`} weight="bold" />
                         {unreadCount > 0 && (
@@ -190,7 +153,6 @@ export default function Header() {
                         )}
                     </button>
                     
-                    {/* Notifications Dropdown */}
                     <div
                         className={`absolute right-0 mt-2 w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
                             isNotificationsOpen
@@ -205,13 +167,13 @@ export default function Header() {
                             </span>
                         </div>
                         
-                        <div className="max-h-[400px] overflow-y-auto">
+                        <div className="max-h-[400px] overflow-y-auto thin-scrollbar">
                             {notifications.length > 0 ? (
                                 <div className="divide-y divide-gray-50 dark:divide-zinc-800">
-                                    {notifications.map((n) => (
+                                    {notifications.map((n: any) => (
                                         <div 
                                             key={n._id}
-                                            onClick={() => !n.is_read && markAsRead(n._id)}
+                                            onClick={() => !n.is_read && markReadMutation.mutate(n._id)}
                                             className={`p-4 hover:bg-gray-50/50 transition-colors cursor-pointer dark:hover:bg-white/5 ${!n.is_read ? 'bg-yellow-50/10' : ''}`}
                                         >
                                             <div className="flex gap-3">
@@ -238,7 +200,7 @@ export default function Header() {
 
                         <div className="p-3 bg-gray-50/50 border-t border-gray-100 rounded-b-3xl dark:bg-black/20 dark:border-zinc-800">
                              <button 
-                                onClick={() => markAsRead()}
+                                onClick={() => markReadMutation.mutate(undefined)}
                                 className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white cursor-pointer"
                              >
                                 Mark all as read
@@ -250,7 +212,7 @@ export default function Header() {
                 <div className="relative" ref={desktopDropdownRef}>
                   <button
                     onClick={toggleDesktopDropdown}
-                    className="flex items-center space-x-3 bg-white/40 hover:bg-white/80 border border-white/50 rounded-full pl-1 pr-4 py-1 transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+                    className="flex items-center space-x-3 bg-white/40 hover:bg-white/80 border border-white/50 rounded-full pl-1 pr-4 py-1 transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer"
                   >
                     {user.profile_image_url ? (
                       <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200 dark:border-white/10">
@@ -299,7 +261,7 @@ export default function Header() {
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300"
+                      className="block w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 cursor-pointer"
                     >
                       Sign Out
                     </button>
@@ -318,10 +280,8 @@ export default function Header() {
         </nav>
         <div className="md:hidden flex items-center space-x-3">
           <button
-            onClick={() =>
-              setTheme(resolvedTheme === "dark" ? "light" : "dark")
-            }
-            className="p-2.5 rounded-xl bg-white/50 text-gray-700 hover:text-gray-900 hover:bg-white transition-colors border border-white/50 dark:bg-white/10 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/20"
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="p-2.5 rounded-xl bg-white/50 text-gray-700 hover:text-gray-900 hover:bg-white transition-colors border border-white/50 dark:bg-white/10 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer"
           >
             {mounted && resolvedTheme === "dark" ? (
               <Sun className="h-6 w-6" />
@@ -395,7 +355,7 @@ export default function Header() {
           )}
           <button
             onClick={toggle}
-            className="p-2.5 rounded-xl bg-white/50 text-gray-700 hover:text-gray-900 hover:bg-white transition-colors border border-white/50 dark:bg-white/10 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/20"
+            className="p-2.5 rounded-xl bg-white/50 text-gray-700 hover:text-gray-900 hover:bg-white transition-colors border border-white/50 dark:bg-white/10 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer"
           >
             <List className="h-6 w-6" weight="bold" />
           </button>

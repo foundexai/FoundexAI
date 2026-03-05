@@ -37,4 +37,40 @@ body {
   .glass-header {
     @apply bg-white/60 backdrop-blur-md border-b border-gray-100/50 sticky top-0 z-50 dark:bg-black/60 dark:border-zinc-800;
   }
+
+  .thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.1) transparent;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.1);
+    border-radius: 20px;
+    transition: background 0.2s;
+  }
+
+  .thin-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+  }
+
+  .dark .thin-scrollbar {
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+
+  .dark .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .dark .thin-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+  }
 }

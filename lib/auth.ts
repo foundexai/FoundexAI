@@ -34,11 +34,13 @@ export const verifyToken = async (token: string) => {
     if (!user) return null;
     return { user: { ...user, _id: user._id.toString() } as any };
   } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-        console.log("Token expired");
-    } else {
-        console.error("Error in verifyToken:", error);
+    if (error instanceof jwt.TokenExpiredError || error instanceof jwt.JsonWebTokenError) {
+        console.log("Token invalid or expired");
+        return null;
     }
-    return null;
+    
+    // For other errors (database timeouts, etc), re-throw so the caller can return a 500
+    console.error("Critical error in verifyToken:", error);
+    throw error;
   }
 };

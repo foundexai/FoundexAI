@@ -21,19 +21,18 @@ export async function connectDB() {
   if (!cached.promise || mongoose.connection.readyState === 0) {
     const opts = {
       bufferCommands: false,
-      maxPoolSize: 5, // Reduced for stability in serverless/local
-      minPoolSize: 1,
-      serverSelectionTimeoutMS: 5000, // Fail faster if server is down
-      socketTimeoutMS: 30000,
-      connectTimeoutMS: 10000,
-      heartbeatFrequencyMS: 10000,
-      family: 4,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 20000, // 20 seconds
+      socketTimeoutMS: 45000,        // 45 seconds
+      connectTimeoutMS: 20000,       // 20 seconds
+      heartbeatFrequencyMS: 10000,   // 10 seconds
+      retryWrites: true,
+      retryReads: true,
     };
 
-    console.log("=> MongoDB: Attempting to connect...");
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
-      console.log("=> MongoDB: Connected successfully");
-      return m;
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log("=> MongoDB: New connection established");
+      return mongoose;
     });
   }
 
@@ -44,5 +43,6 @@ export async function connectDB() {
     cached.promise = null;
     throw e;
   }
+
   return cached.conn;
 }

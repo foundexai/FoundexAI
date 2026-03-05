@@ -44,6 +44,7 @@ export async function GET(
       linkedin: dbFound.linkedin,
       email: dbFound.email,
       active_status: dbFound.active_status,
+      logo_url: dbFound.logo_url,
       notes: dbFound.notes,
     };
 

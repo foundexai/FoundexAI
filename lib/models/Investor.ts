@@ -23,6 +23,7 @@ const InvestorSchema = new mongoose.Schema({
 
   logoInitial: { type: String, required: true },
   logoColor: { type: String, required: true }, // Tailwind class string
+  logo_url: { type: String }, // URL to custom logo image
   
   description: { type: String, required: true },
   thesis: { type: String },

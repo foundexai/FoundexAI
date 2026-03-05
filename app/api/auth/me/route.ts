@@ -13,7 +13,6 @@ export async function GET(req: Request) {
     }
 
     const decoded = await verifyToken(token);
-
     if (!decoded) {
       return NextResponse.json({ error: 'Invalid token.' }, { status: 401 });
     }
@@ -33,6 +32,6 @@ export async function GET(req: Request) {
 
   } catch (error) {
     console.error('Error verifying token or fetching user:', error);
-    return NextResponse.json({ error: 'Session expired or token is invalid.' }, { status: 401 });
+    return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
   }
 }

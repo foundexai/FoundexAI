@@ -10,19 +10,14 @@ import { toast } from "sonner";
 import EditInvestorDialog from "@/components/admin/EditInvestorDialog";
 import EditStartupDialog from "@/components/admin/EditStartupDialog";
 import { StartupCard, Startup } from "@/components/StartupCard";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function AdminPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"pending" | "all" | "startups">("pending");
-  
-  const [pendingInvestors, setPendingInvestors] = useState<Investor[]>([]);
-  const [allInvestors, setAllInvestors] = useState<Investor[]>([]);
-  const [pendingStartups, setPendingStartups] = useState<StartupModel[]>([]);
-  
   const [searchQuery, setSearchQuery] = useState("");
-  const [processingId, setProcessingId] = useState<string | null>(null);
   
   // Edit State
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -35,7 +30,6 @@ export default function AdminPage() {
       router.push("/dashboard");
       return;
     }
-
     if (!loading && user && !user.isAdmin) {
       toast.error("Unauthorized access");
       router.push("/dashboard");
@@ -43,78 +37,53 @@ export default function AdminPage() {
     }
   }, [user, loading, router]);
 
-  const fetchPending = async () => {
-    try {
+  // Queries
+  const pendingInvestorsQuery = useQuery({
+    queryKey: ["admin", "investors", "pending"],
+    queryFn: async () => {
       const res = await fetch("/api/admin/investors/pending", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setPendingInvestors(data.investors || []);
-      }
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to load pending requests");
-    }
-  };
+      if (!res.ok) throw new Error("Failed to load pending investors");
+      const data = await res.json();
+      return (data.investors || []) as Investor[];
+    },
+    enabled: !!token && user?.isAdmin,
+    staleTime: 30000,
+  });
 
-  const fetchAllApproved = async () => {
-    try {
+  const allInvestorsQuery = useQuery({
+    queryKey: ["admin", "investors", "all"],
+    queryFn: async () => {
       const res = await fetch("/api/investors?limit=100", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setAllInvestors(data.investors || []);
-      }
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to load database");
-    }
-  };
+      if (!res.ok) throw new Error("Failed to load database");
+      const data = await res.json();
+      return (data.investors || []) as Investor[];
+    },
+    enabled: !!token && user?.isAdmin && activeTab === "all",
+    staleTime: 60000,
+  });
 
-  const fetchPendingStartups = async () => {
-     try {
+  const pendingStartupsQuery = useQuery({
+    queryKey: ["admin", "startups", "pending"],
+    queryFn: async () => {
       const res = await fetch("/api/admin/startups/pending", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setPendingStartups(data.startups || []);
-      }
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to load pending startups");
-    }
-  }
+      if (!res.ok) throw new Error("Failed to load pending startups");
+      const data = await res.json();
+      return (data.startups || []) as StartupModel[];
+    },
+    enabled: !!token && user?.isAdmin,
+    staleTime: 30000,
+  });
 
-  const loadData = async (silent = false) => {
-    if (!silent) setIsLoading(true);
-    // Always fetch pending counts for the tabs
-    await Promise.all([
-        fetchPending(),
-        fetchPendingStartups()
-    ]);
-    
-    // If 'all' tab is active, we also need that data
-    if (activeTab === "all") {
-      await fetchAllApproved();
-    }
-    
-    if (!silent) setIsLoading(false);
-  };
-
-  useEffect(() => {
-    if (token && user?.isAdmin) {
-      loadData();
-    }
-  }, [token, user, activeTab]);
-
-  const handleApprove = async (id: string, type: "investor" | "startup") => {
-    setProcessingId(id);
-    const endpoint = type === "investor" ? "/api/admin/investors/approve" : "/api/admin/startups/approve";
-    
-    try {
+  // Mutations
+  const approveMutation = useMutation({
+    mutationFn: async ({ id, type }: { id: string; type: "investor" | "startup" }) => {
+      const endpoint = type === "investor" ? "/api/admin/investors/approve" : "/api/admin/startups/approve";
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -123,35 +92,37 @@ export default function AdminPage() {
         },
         body: JSON.stringify({ id }),
       });
-
-      if (!res.ok) throw new Error("Failed");
-
-      toast.success(`${type === "investor" ? "Investor" : "Startup"} Approved!`);
-      if (type === "investor") {
-          setPendingInvestors((prev) => prev.filter((inv) => inv.id !== id));
-      } else {
-          setPendingStartups((prev) => prev.filter((s) => s._id !== id));
-      }
-    } catch (e) {
-      toast.error("Approval failed");
-    } finally {
-      setProcessingId(null);
+      if (!res.ok) throw new Error("Approval failed");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      toast.success(`${variables.type === "investor" ? "Investor" : "Startup"} Approved!`);
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
     }
-  };
+  });
 
-  const handleEdit = (investor: Investor) => {
-    setSelectedInvestor(investor);
-    setIsEditOpen(true);
-  };
+  const rejectMutation = useMutation({
+    mutationFn: async ({ id, type }: { id: string; type: "investor" | "startup" }) => {
+      const endpoint = type === "investor" ? "/api/admin/investors/reject" : "/api/admin/startups/reject";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) throw new Error("Rejection failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Submission Rejected");
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+    }
+  });
 
   const handleToggleFeatured = async (investor: Investor) => {
     const newFeatured = !investor.isFeatured;
-    
-    // Optimistic Update
-    setAllInvestors(prev => prev.map(inv => 
-      inv.id === investor.id ? { ...inv, isFeatured: newFeatured } : inv
-    ));
-
     try {
       const res = await fetch(`/api/admin/investors/${investor.id}`, {
         method: "PATCH",
@@ -161,48 +132,23 @@ export default function AdminPage() {
         },
         body: JSON.stringify({ isFeatured: newFeatured }),
       });
-
       if (!res.ok) throw new Error("Failed");
-      toast.success(newFeatured ? "Investor Featured!" : "Featured Status Removed");
+      toast.success(newFeatured ? "Investor Featured!" : "Removed from Featured");
+      queryClient.invalidateQueries({ queryKey: ["admin", "investors"] });
     } catch (e) {
-      toast.error("Failed to update featured status");
-      // Rollback
-      setAllInvestors(prev => prev.map(inv => 
-        inv.id === investor.id ? { ...inv, isFeatured: !newFeatured } : inv
-      ));
+      toast.error("Failed to update status");
     }
   };
 
-  const handleReject = async (id: string, type: "investor" | "startup") => {
-    if (!confirm("Are you sure you want to reject and delete this submission?"))
-      return;
-    setProcessingId(id);
-    const endpoint = type === "investor" ? "/api/admin/investors/reject" : "/api/admin/startups/reject";
-
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ id }),
-      });
-
-      if (!res.ok) throw new Error("Failed");
-
-      toast.success("Submission Rejected");
-       if (type === "investor") {
-          setPendingInvestors((prev) => prev.filter((inv) => inv.id !== id));
-      } else {
-          setPendingStartups((prev) => prev.filter((s) => s._id !== id));
-      }
-    } catch (e) {
-      toast.error("Rejection failed");
-    } finally {
-      setProcessingId(null);
-    }
+  const handleEdit = (investor: Investor) => {
+    setSelectedInvestor(investor);
+    setIsEditOpen(true);
   };
+
+  const isLoading = pendingInvestorsQuery.isLoading || pendingStartupsQuery.isLoading;
+  const pendingInvestors = pendingInvestorsQuery.data || [];
+  const allInvestors = allInvestorsQuery.data || [];
+  const pendingStartups = pendingStartupsQuery.data || [];
 
   const filteredInvestors = (activeTab === "pending" ? pendingInvestors : allInvestors).filter(inv => 
     inv.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -213,6 +159,8 @@ export default function AdminPage() {
       s.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.business_description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const processingId = approveMutation.isPending ? approveMutation.variables?.id : (rejectMutation.isPending ? rejectMutation.variables?.id : null);
 
   if (!user || !user.isAdmin) {
     return (
@@ -227,14 +175,14 @@ export default function AdminPage() {
       <EditInvestorDialog 
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        onSuccess={() => loadData(true)}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["admin", "investors"] })}
         investor={selectedInvestor}
       />
       
       <EditStartupDialog
         isOpen={isEditStartupOpen}
         onClose={() => setIsEditStartupOpen(false)}
-        onSuccess={loadData}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["admin", "startups"] })}
         startup={selectedStartup}
       />
 
@@ -272,7 +220,7 @@ export default function AdminPage() {
             <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1 rounded-2xl shadow-sm flex dark:bg-white/5 dark:border-white/10 overflow-x-auto">
                 <button
                 onClick={() => setActiveTab("pending")}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeTab === "pending"
                     ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
                     : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -282,7 +230,7 @@ export default function AdminPage() {
                 </button>
                  <button
                 onClick={() => setActiveTab("startups")}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
                     activeTab === "startups"
                     ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
                     : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -293,7 +241,7 @@ export default function AdminPage() {
                 </button>
                 <button
                 onClick={() => setActiveTab("all")}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                     activeTab === "all"
                     ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
                     : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -318,7 +266,7 @@ export default function AdminPage() {
                     </p>
                 </div>
              ) : (
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredStartups.map(startup => (
                         <div key={startup._id} className="relative group">
                             <StartupCard startup={{
@@ -338,7 +286,6 @@ export default function AdminPage() {
                             <div className="absolute inset-x-0 bottom-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 rounded-b-3xl flex gap-2 dark:bg-zinc-900/95 dark:border-white/10 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-200 z-20">
                                 <button 
                                     onClick={() => {
-                                      // Map backend startup to frontend Startup interface
                                       const mapped: Startup = {
                                         id: startup._id,
                                         name: startup.company_name,
@@ -355,14 +302,14 @@ export default function AdminPage() {
                                       setSelectedStartup(mapped);
                                       setIsEditStartupOpen(true);
                                     }}
-                                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
+                                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 cursor-pointer"
                                 >
                                     <PencilSimple weight="bold" /> Edit
                                 </button>
                                 <button
-                                    onClick={() => handleApprove(startup._id, "startup")}
+                                    onClick={() => approveMutation.mutate({ id: startup._id, type: "startup" })}
                                     disabled={!!processingId}
-                                    className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                                    className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
                                 >
                                     {processingId === startup._id ? (
                                     <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
@@ -372,9 +319,13 @@ export default function AdminPage() {
                                     Approve
                                 </button>
                                 <button
-                                    onClick={() => handleReject(startup._id, "startup")}
+                                    onClick={() => {
+                                      if (confirm("Reject this submission?")) {
+                                        rejectMutation.mutate({ id: startup._id, type: "startup" });
+                                      }
+                                    }}
                                     disabled={!!processingId}
-                                    className="p-2.5 bg-red-100 hover:bg-red-500 hover:text-white text-red-600 rounded-xl font-bold transition-all disabled:opacity-50"
+                                    className="p-2.5 bg-red-100 hover:bg-red-500 hover:text-white text-red-600 rounded-xl font-bold transition-all disabled:opacity-50 cursor-pointer"
                                     title="Reject & Delete"
                                 >
                                     <X className="w-5 h-5" weight="bold" />
@@ -382,7 +333,7 @@ export default function AdminPage() {
                             </div>
                         </div>
                     ))}
-                 </div>
+                  </div>
              )
         ) : (
             // INVESTORS VIEW
@@ -397,9 +348,10 @@ export default function AdminPage() {
                 {filteredInvestors.map((inv) => (
                 <div key={inv.id} className="relative group">
                     <InvestorCard
-                    investor={inv}
-                    isSaved={false}
-                    onToggleSave={() => {}}
+                      investor={inv}
+                      isSaved={false}
+                      onToggleSave={() => {}}
+                      onEdit={handleEdit}
                     />
 
                     {/* Admin Controls Overlay */}
@@ -407,9 +359,9 @@ export default function AdminPage() {
                     {activeTab === "pending" ? (
                         <>
                         <button
-                            onClick={() => handleApprove(inv.id, "investor")}
+                            onClick={() => approveMutation.mutate({ id: inv.id, type: "investor" })}
                             disabled={!!processingId}
-                            className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                            className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
                         >
                             {processingId === inv.id ? (
                             <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
@@ -419,16 +371,23 @@ export default function AdminPage() {
                             Approve
                         </button>
                         <button
-                            onClick={() => handleEdit(inv)}
-                            className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                            onClick={() => {
+                              setSelectedInvestor(inv);
+                              setIsEditOpen(true);
+                            }}
+                            className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors dark:bg-white/10 dark:text-white dark:hover:bg-white/20 cursor-pointer"
                             title="Edit Submission"
                         >
                             <FileText className="w-5 h-5" weight="bold" />
                         </button>
                         <button
-                            onClick={() => handleReject(inv.id, "investor")}
+                            onClick={() => {
+                              if (confirm("Reject this submission?")) {
+                                rejectMutation.mutate({ id: inv.id, type: "investor" });
+                              }
+                            }}
                             disabled={!!processingId}
-                            className="p-2.5 bg-red-100 hover:bg-red-500 hover:text-white text-red-600 rounded-xl font-bold transition-all disabled:opacity-50"
+                            className="p-2.5 bg-red-100 hover:bg-red-500 hover:text-white text-red-600 rounded-xl font-bold transition-all disabled:opacity-50 cursor-pointer"
                             title="Reject & Delete"
                         >
                             <X className="w-5 h-5" weight="bold" />
@@ -439,7 +398,7 @@ export default function AdminPage() {
                           <button
                             onClick={() => handleToggleFeatured(inv)}
                             className={cn(
-                              "p-2.5 rounded-xl font-bold transition-all border",
+                              "p-2.5 rounded-xl font-bold transition-all border cursor-pointer",
                               inv.isFeatured 
                                 ? "bg-yellow-400 border-yellow-500 text-black shadow-lg shadow-yellow-500/20" 
                                 : "bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:border-white/10 dark:text-gray-400"
@@ -449,8 +408,11 @@ export default function AdminPage() {
                             <Star weight={inv.isFeatured ? "fill" : "bold"} className="w-5 h-5" />
                           </button>
                           <button
-                            onClick={() => handleEdit(inv)}
-                            className="flex-1 py-2.5 bg-gray-900 hover:bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                            onClick={() => {
+                              setSelectedInvestor(inv);
+                              setIsEditOpen(true);
+                            }}
+                            className="flex-1 py-2.5 bg-gray-900 hover:bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors dark:bg-white dark:text-black dark:hover:bg-zinc-200 cursor-pointer"
                           >
                             <FileText className="w-4 h-4" weight="bold" />
                             Edit Details

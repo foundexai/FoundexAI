@@ -15,106 +15,61 @@ import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import AddInvestorModal from "@/components/AddInvestorModal";
+import EditInvestorDialog from "@/components/admin/EditInvestorDialog";
 import { Pagination } from "@/components/Pagination";
 import { InvestorCardSkeleton } from "@/components/ui/skeletons/InvestorCardSkeleton";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function InvestorsPage() {
   const { token, user, refreshUser } = useAuth();
+  const queryClient = useQueryClient();
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [investors, setInvestors] = useState<Investor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [savedInvestorIds, setSavedInvestorIds] = useState<string[]>([]);
-  const [savingIds, setSavingIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  
-  // Pagination State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedInvestorForEdit, setSelectedInvestorForEdit] = useState<Investor | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({
-    total: 0,
-    pages: 1,
-    limit: 12,
-  });
 
   // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setCurrentPage(1); // Reset to page 1 on search
+      setCurrentPage(1); 
     }, 400);
 
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const fetchData = async (page: number, search: string, type: string | null) => {
-    setIsLoading(true);
-    try {
-      // 1. Saved Investors
-      if (user && user.saved_investors) {
-        setSavedInvestorIds(user.saved_investors || []);
-      }
+  // UseQuery for fetching investors
+  const { data, isLoading } = useQuery({
+    queryKey: ["investors", currentPage, debouncedSearch, selectedType],
+    queryFn: async () => {
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: "12",
+        search: debouncedSearch,
+        type: selectedType || "",
+      });
 
-      // 2. Real Investors (Server-side paginated & filtered)
-      try {
-        const queryParams = new URLSearchParams({
-          page: page.toString(),
-          limit: "12",
-          search: search,
-          type: type || "",
-        });
+      const res = await fetch(`/api/investors?${queryParams.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch investors");
+      return res.json();
+    },
+    staleTime: 60 * 1000, 
+    retry: 2,
+  });
 
-        const res = await fetch(`/api/investors?${queryParams.toString()}`);
-        if (res.ok) {
-          const data = await res.json();
-          setInvestors(data.investors || []);
-          setPagination(data.pagination);
-        } else {
-          setInvestors([]);
-        }
-      } catch (e) {
-        console.log("Failed to fetch real investors", e);
-        setInvestors([]);
-      }
-    } catch (error) {
-      console.error("Failed to load data", error);
-      toast.error("Failed to load investors");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const investors = (data?.investors || []) as Investor[];
+  const pagination = data?.pagination || { total: 0, pages: 1, limit: 12 };
+  const savedInvestorIds = user?.saved_investors || [];
 
-  useEffect(() => {
-    fetchData(currentPage, debouncedSearch, selectedType);
-  }, [currentPage, debouncedSearch, selectedType]);
-
-  // Sync saved list
-  useEffect(() => {
-    if (user && user.saved_investors) {
-      setSavedInvestorIds(user.saved_investors);
-    }
-  }, [user]);
-
-  const handleToggleSave = async (id: string) => {
-    if (!token) {
-      toast.error("Please sign in to save investors");
-      return;
-    }
-
-    if (savingIds.includes(id)) return; // Prevent double clicks
-    
-    setSavingIds(prev => [...prev, id]);
-
-    const isCurrentlySaved = savedInvestorIds.includes(id);
-    const newSavedIds = isCurrentlySaved
-      ? savedInvestorIds.filter((savedId) => savedId !== id)
-      : [...savedInvestorIds, id];
-
-    setSavedInvestorIds(newSavedIds); // Optimistic / Local update
-
-    try {
+  // UseMutation for saving investors
+  const saveMutation = useMutation({
+    mutationFn: async (id: string) => {
       const res = await fetch("/api/investors/save", {
         method: "POST",
         headers: {
@@ -125,23 +80,33 @@ export default function InvestorsPage() {
       });
 
       if (!res.ok) throw new Error("Failed to save");
-
-      if (refreshUser) await refreshUser();
-      
-      toast.success(
-        isCurrentlySaved ? "Removed from saved" : "Investor saved!",
-      );
-    } catch (error) {
-      setSavedInvestorIds(savedInvestorIds);
-      toast.error("Something went wrong.");
-    } finally {
-      setSavingIds(prev => prev.filter(savingId => savingId !== id));
+      return res.json();
+    },
+    onSuccess: () => {
+      if (refreshUser) refreshUser();
+      queryClient.invalidateQueries({ queryKey: ["investors"] });
+    },
+    onError: () => {
+      toast.error("Cloud synchronization failed.");
     }
+  });
+
+  const handleToggleSave = (id: string) => {
+    if (!token) {
+      toast.error("Please sign in to save investors");
+      return;
+    }
+    saveMutation.mutate(id);
   };
 
   const handleTypeChange = (type: string | null) => {
     setSelectedType(type);
-    setCurrentPage(1); // Reset to page 1 on filter
+    setCurrentPage(1);
+  };
+
+  const handleEdit = (investor: Investor) => {
+    setSelectedInvestorForEdit(investor);
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -158,7 +123,17 @@ export default function InvestorsPage() {
       <AddInvestorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={() => fetchData(currentPage, debouncedSearch, selectedType)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["investors"] });
+        }}
+      />
+      <EditInvestorDialog
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        investor={selectedInvestorForEdit}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["investors"] });
+        }}
       />
 
       {/* Header Area */}
@@ -176,7 +151,7 @@ export default function InvestorsPage() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-yellow-500/20 active:scale-95 w-full md:w-auto shrink-0"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-yellow-500/20 active:scale-95 w-full md:w-auto shrink-0 cursor-pointer"
           >
             <Plus className="w-5 h-5" weight="bold" />
             <span className="hidden sm:inline">Add New Investor</span>
@@ -185,7 +160,7 @@ export default function InvestorsPage() {
         </div>
 
         <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1.5 rounded-2xl shadow-sm dark:bg-white/5 dark:border-white/10 overflow-hidden w-full">
-           <div className="flex gap-1 overflow-x-auto custom-scrollbar pb-1 px-1">
+           <div className="flex gap-1 overflow-x-auto thin-scrollbar pb-1 px-1">
               <div className="px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap text-gray-500 dark:text-gray-400 flex items-center gap-2 border-r border-gray-100 dark:border-white/5 mr-1 shrink-0">
                 <Funnel weight="bold" />
                 Filter
@@ -194,7 +169,7 @@ export default function InvestorsPage() {
                 <button
                   key={type}
                   onClick={() => handleTypeChange(type === "All" ? null : type)}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                     (type === "All" && !selectedType) || selectedType === type
                       ? "bg-white shadow-sm text-gray-900 dark:bg-white/10 dark:text-white"
                       : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
@@ -231,7 +206,7 @@ export default function InvestorsPage() {
           
           <button 
             onClick={() => setIsFilterModalOpen(true)}
-            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0 cursor-pointer"
           >
             <FadersHorizontal className="w-4 h-4" weight="bold" />
             <span className="hidden lg:inline">AI Search</span>
@@ -263,7 +238,8 @@ export default function InvestorsPage() {
                 investor={investor}
                 isSaved={savedInvestorIds.includes(investor.id)}
                 onToggleSave={handleToggleSave}
-                isSaving={savingIds.includes(investor.id)}
+                isSaving={saveMutation.isPending && saveMutation.variables === investor.id}
+                onEdit={user?.isAdmin ? handleEdit : undefined}
               />
             ))}
           </div>

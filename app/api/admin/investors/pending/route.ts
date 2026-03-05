@@ -28,6 +28,7 @@ export async function GET(req: Request) {
       description: inv.description,
       investmentRange: inv.investmentRange || inv.investment_range,
       website: inv.website,
+      logo_url: inv.logo_url,
       isFeatured: inv.isFeatured,
     }));
 
