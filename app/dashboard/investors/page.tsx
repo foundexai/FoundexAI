@@ -239,7 +239,6 @@ export default function InvestorsPage() {
                 isSaved={savedInvestorIds.includes(investor.id)}
                 onToggleSave={handleToggleSave}
                 isSaving={saveMutation.isPending && saveMutation.variables === investor.id}
-                onEdit={user?.isAdmin ? handleEdit : undefined}
               />
             ))}
           </div>

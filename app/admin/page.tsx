@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import EditInvestorDialog from "@/components/admin/EditInvestorDialog";
 import EditStartupDialog from "@/components/admin/EditStartupDialog";
 import { StartupCard, Startup } from "@/components/StartupCard";
+import { InvestorCardSkeleton } from "@/components/ui/skeletons/InvestorCardSkeleton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function AdminPage() {
@@ -145,7 +146,11 @@ export default function AdminPage() {
     setIsEditOpen(true);
   };
 
-  const isLoading = pendingInvestorsQuery.isLoading || pendingStartupsQuery.isLoading;
+  const isLoading = 
+    (activeTab === "pending" && (pendingInvestorsQuery.isLoading || pendingStartupsQuery.isLoading)) ||
+    (activeTab === "all" && allInvestorsQuery.isLoading) ||
+    (activeTab === "startups" && pendingStartupsQuery.isLoading);
+    
   const pendingInvestors = pendingInvestorsQuery.data || [];
   const allInvestors = allInvestorsQuery.data || [];
   const pendingStartups = pendingStartupsQuery.data || [];
@@ -254,8 +259,10 @@ export default function AdminPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <CircleNotch className="w-10 h-10 animate-spin text-yellow-500" weight="bold" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <InvestorCardSkeleton key={i} />
+            ))}
           </div>
         ) : activeTab === "startups" ? (
              // STARTUPS VIEW

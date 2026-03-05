@@ -1,5 +1,6 @@
 import { MapPin, ArrowRight, Buildings, GlobeSimple, Heart, Star, CircleNotch, PencilSimple } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export interface Investor {
@@ -34,9 +35,6 @@ export function InvestorCard({
 }: InvestorCardProps) {
   const router = useRouter();
 
-  const handleCardClick = () => {
-    router.push(`/dashboard/investors/${investor.id}`);
-  };
   const handleSaveClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,9 +43,12 @@ export function InvestorCard({
     }
   };
 
-  return (
+  const cardContent = (
     <div 
-      className="glass-card group flex flex-col p-6 rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden h-full dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10"
+      className={cn(
+        "glass-card group flex flex-col p-6 rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden h-full dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10",
+        !onEdit && "hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+      )}
     >
       {/* Decorative gradient blur */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500 dark:from-white/5"></div>
@@ -148,33 +149,49 @@ export function InvestorCard({
         </div>
 
         <div className="flex gap-2">
-          {onEdit && (
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(investor);
-              }}
-              type="button"
-              className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-900 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white dark:hover:text-black cursor-pointer"
-              title="Edit Profile"
-            >
-              <PencilSimple className="w-4 h-4" weight="bold" />
-            </button>
-          )}
+          {onEdit ? (
+            <>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(investor);
+                }}
+                type="button"
+                className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-900 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white dark:hover:text-black cursor-pointer"
+                title="Edit Profile"
+              >
+                <PencilSimple className="w-4 h-4" weight="bold" />
+              </button>
 
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/dashboard/investors/${investor.id}`);
-            }}
-            type="button"
-            className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-yellow-500 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-yellow-500 dark:hover:text-black cursor-pointer"
-            title="View Profile"
-          >
-            <ArrowRight className="w-4 h-4" weight="bold" />
-          </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/investors/${investor.id}`);
+                }}
+                type="button"
+                className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-yellow-500 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-yellow-500 dark:hover:text-black cursor-pointer"
+                title="View Profile"
+              >
+                <ArrowRight className="w-4 h-4" weight="bold" />
+              </button>
+            </>
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white group-hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:group-hover:bg-white dark:group-hover:text-black">
+              <ArrowRight className="w-4 h-4" weight="bold" />
+            </div>
+          )}
         </div>
       </div>
     </div>
+  );
+
+  if (onEdit) {
+    return cardContent;
+  }
+
+  return (
+    <Link href={`/dashboard/investors/${investor.id}`} className="block h-full">
+      {cardContent}
+    </Link>
   );
 }
