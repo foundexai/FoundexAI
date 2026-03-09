@@ -85,5 +85,8 @@ StartupSchema.pre("save", async function () {
   }
 });
 
+StartupSchema.index({ user_id: 1, created_at: -1 });
+StartupSchema.index({ isApproved: 1, created_at: -1 });
+
 export default mongoose.models.Startup ||
   mongoose.model("Startup", StartupSchema);

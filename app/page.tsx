@@ -14,15 +14,20 @@ export default function Home() {
   // Redirect if authenticated
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/dashboard");
+      window.location.href = "/dashboard";
     }
-  }, [user, loading, router]);
+  }, [user, loading]);
 
   if (loading || user) {
     return (
       <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex flex-col font-sans dark:from-black dark:to-zinc-900">
         <main className="grow flex items-center justify-center p-4">
-          <LandingSkeleton />
+          <div className="text-center flex flex-col items-center">
+            <LandingSkeleton />
+            <div className="mt-8 animate-pulse text-gray-500 font-medium dark:text-gray-400">
+               Sophia is preparing your workspace...
+            </div>
+          </div>
         </main>
       </div>
     );

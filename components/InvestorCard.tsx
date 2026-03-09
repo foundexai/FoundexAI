@@ -57,10 +57,7 @@ export function InvestorCard({
       <div className="flex justify-between items-start mb-4 z-10">
         <div
           className={cn(
-            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden",
-            investor.logo_url 
-              ? "bg-white" 
-              : cn("bg-linear-to-br", investor.logoColor || "from-yellow-400 to-orange-500")
+            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden bg-yellow-400",
           )}
         >
           {investor.logo_url ? (
@@ -70,8 +67,8 @@ export function InvestorCard({
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-xl font-black text-white">
-              {investor.logoInitial}
+            <span className="text-xl font-black text-black">
+              {investor.logoInitial || investor.name.charAt(0)}
             </span>
           )}
         </div>

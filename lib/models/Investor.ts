@@ -42,5 +42,9 @@ const InvestorSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
 });
 
+InvestorSchema.index({ isApproved: 1, isFeatured: -1, created_at: -1 });
+InvestorSchema.index({ type: 1 });
+InvestorSchema.index({ submittedBy: 1 });
+
 export default mongoose.models.Investor ||
   mongoose.model("Investor", InvestorSchema);

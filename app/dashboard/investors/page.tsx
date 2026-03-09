@@ -110,7 +110,7 @@ export default function InvestorsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 px-4 sm:px-6 lg:px-8 pb-10">
+    <div className="space-y-8 animate-in fade-in duration-500 px-4 sm:px-6 lg:px-10 pb-10">
       <MatchInvestorModal
         isOpen={isMatchModalOpen}
         onClose={() => setIsMatchModalOpen(false)}
@@ -197,11 +197,9 @@ export default function InvestorsPage() {
           />
           <button
             onClick={() => setIsMatchModalOpen(true)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer shrink-0"
+            className="flex items-center gap-2 px-6 py-2 bg-black hover:bg-zinc-900 text-yellow-400 rounded-xl font-black text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
           >
-            <Sparkle className="w-4 h-4" weight="bold" />
-            <span className="hidden lg:inline">Match Me</span>
-            <span className="hidden sm:inline lg:hidden">Match</span>
+            Match Me
           </button>
           
           <button 

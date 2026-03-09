@@ -199,7 +199,7 @@ export default function DashboardLayout({
         {/* Mobile Sidebar */}
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-50 w-72 bg-white transform transition-transform duration-500 ease-spring md:hidden dark:bg-zinc-950",
+            "fixed inset-y-0 left-0 z-50 w-72 bg-white transform transition-transform duration-500 ease-spring lg:hidden dark:bg-zinc-950",
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
@@ -208,7 +208,7 @@ export default function DashboardLayout({
 
         {/* Desktop Sidebar */}
         <aside className={cn(
-          "hidden md:flex bg-white dark:bg-zinc-950 border-r border-gray-100 dark:border-zinc-900 flex-col h-screen fixed top-0 left-0 z-40 transition-all duration-300",
+          "hidden lg:flex bg-white dark:bg-zinc-950 border-r border-gray-100 dark:border-zinc-900 flex-col h-screen fixed top-0 left-0 z-40 transition-all duration-300",
           isCollapsed ? "w-20" : "w-72"
         )}>
           {/* Toggle Button */}
@@ -223,9 +223,9 @@ export default function DashboardLayout({
 
         <main className={cn(
           "w-full flex-1 min-h-screen bg-gray-50/50 dark:bg-black transition-all duration-300",
-          isCollapsed ? "md:ml-20" : "md:ml-72"
+          isCollapsed ? "lg:ml-20" : "lg:ml-72"
         )}>
-          <div className="max-w-7xl mx-auto p-4 py-8 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {children}
           </div>
         </main>

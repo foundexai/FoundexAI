@@ -23,7 +23,7 @@ export async function POST(
     const { id } = await params;
     const startup = await Startup.findOne({
       _id: id,
-      user_id: decoded.user.id,
+      user_id: decoded.user._id,
     });
 
     if (!startup) {

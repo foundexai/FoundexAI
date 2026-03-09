@@ -102,8 +102,8 @@ export default function Dashboard() {
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-100/30 rounded-full mix-blend-multiply filter blur-3xl opacity-40 translate-y-1/2 -translate-x-1/2 dark:bg-yellow-900/10"></div>
             </div>
 
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-              <div className="md:col-span-2 space-y-6">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+              <div className="lg:col-span-2 space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <StartupSwitcher />
                 </div>
@@ -115,8 +115,7 @@ export default function Dashboard() {
                     href="/dashboard/investors"
                     className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg dark:bg-white dark:text-black"
                   >
-                    {/* <Sparkle className="w-5 h-5 text-yellow-500" weight="bold" /> */}
-                    Find Matches
+                    Get Connected
                   </Link>
                 </div>
                 <div>

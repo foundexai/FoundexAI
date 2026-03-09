@@ -15,4 +15,6 @@ const NotificationSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now }
 });
 
+NotificationSchema.index({ recipient_id: 1, created_at: -1 });
+
 export default mongoose.models.Notification || mongoose.model("Notification", NotificationSchema);

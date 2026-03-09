@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ message: 'Startup not found' }, { status: 404 });
     }
 
-    if (startup.user_id.toString() !== decoded.user.id) {
+    if (startup.user_id.toString() !== decoded.user._id) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
     }
 
@@ -50,7 +50,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id: startupId } = await params;
     const deletedStartup = await Startup.findOneAndDelete({
       _id: startupId,
-      user_id: decoded.user.id
+      user_id: decoded.user._id
     });
 
     if (!deletedStartup) {
@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
 
     const updatedStartup = await Startup.findOneAndUpdate(
-      { _id: startupId, user_id: decoded.user.id },
+      { _id: startupId, user_id: decoded.user._id },
       body,
       { new: true }
     );

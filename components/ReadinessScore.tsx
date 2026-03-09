@@ -122,40 +122,7 @@ export default function ReadinessScore({
         </button>
       </div>
 
-      {feedback && feedback.length > 0 && (
-        <div className="mt-6 w-full text-left bg-gray-50 dark:bg-white/5 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2 duration-500">
-          <h4 className="text-xs font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-            Key Improvements
-          </h4>
-          <div className="space-y-1">
-              {feedback.map((tip, i) => (
-                <div
-                  key={i}
-                  onClick={handleAnalyze}
-                  className={`group flex items-start gap-3 p-2.5 rounded-xl transition-all border border-transparent ${
-                    analyzing
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-white hover:shadow-sm hover:border-gray-100 dark:hover:bg-white/10 dark:hover:border-white/5 cursor-pointer"
-                  }`}
-                  title="Click to re-analyze profile"
-                >
-                  <div className="mt-0.5 w-4 h-4 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  </div>
-                  <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed flex-1 group-hover:text-gray-900 dark:group-hover:text-gray-200 pr-4">
-                    {tip}
-                  </span>
-                  {!analyzing && (
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                       <ArrowsClockwise className="w-3.5 h-3.5 text-blue-500" weight="bold" />
-                    </div>
-                  )}
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
+      {/* Feedback moved to separate section/tasks */}
     </div>
   );
 }

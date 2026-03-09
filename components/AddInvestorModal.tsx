@@ -129,7 +129,7 @@ export default function AddInvestorModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Firm Name
+                  Firm Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   required
@@ -144,10 +144,11 @@ export default function AddInvestorModal({
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Type
+                  Type <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white"
+                  required
+                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 pr-10 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white"
                   value={formData.type}
                   onChange={(e) =>
                     setFormData({ ...formData, type: e.target.value })
@@ -168,7 +169,7 @@ export default function AddInvestorModal({
             {/* Description */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Description
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 required
@@ -203,7 +204,6 @@ export default function AddInvestorModal({
                   <MapPin className="w-3.5 h-3.5" weight="bold" /> Location
                 </label>
                 <input
-                  required
                   type="text"
                   placeholder="Lagos, Nigeria"
                   className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
@@ -232,10 +232,11 @@ export default function AddInvestorModal({
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                  <GlobeSimple className="w-3.5 h-3.5" weight="bold" /> Website
+                  <GlobeSimple className="w-3.5 h-3.5" weight="bold" /> Website <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="url"
+                  required
                   placeholder="https://..."
                   className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white placeholder:font-normal"
                   value={formData.website}
@@ -246,29 +247,7 @@ export default function AddInvestorModal({
               </div>
             </div>
 
-            {/* Visuals */}
-            <div className="space-y-3 pt-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Brand Color Style
-              </label>
-              <div className="flex flex-wrap gap-3">
-                {colorOptions.map((opt) => (
-                  <button
-                    key={opt.name}
-                    type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, logoColor: opt.class })
-                    }
-                    className={`h-10 px-4 rounded-xl text-xs font-bold text-white transition-all transform hover:scale-105 flex items-center gap-2 bg-linear-to-br ${opt.class} ${formData.logoColor === opt.class ? "ring-4 ring-offset-2 ring-yellow-500/50 scale-105 shadow-lg" : "opacity-70 hover:opacity-100"}`}
-                  >
-                    {formData.logoColor === opt.class && (
-                      <Check className="w-3 h-3" weight="bold" />
-                    )}
-                    {opt.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Brand Color selection removed */}
           </form>
         </div>
 

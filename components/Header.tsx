@@ -35,8 +35,8 @@ export default function Header() {
       return res.json();
     },
     enabled: !!token && !!user,
-    refetchInterval: 60000, // Background poll every minute
-    staleTime: 30000,
+    refetchInterval: 120000, 
+    staleTime: 60000,
   });
 
   const notifications = notificationData?.notifications || [];
@@ -109,7 +109,7 @@ export default function Header() {
           </Link>
         </div>
 
-        <nav className="hidden md:flex items-center space-x-8 ml-auto">
+        <nav className="hidden lg:flex items-center space-x-8 ml-auto">
           <Link
             href="/dashboard/investors"
             className="text-sm font-bold text-gray-700 uppercase tracking-widest cursor-pointer opacity-60 hover:opacity-80 transition-opacity dark:text-gray-300"
@@ -118,7 +118,8 @@ export default function Header() {
           </Link>
 
           <div className="flex items-center space-x-6">
-            <button
+{/* Theme toggle temporarily hidden */}
+            {/* <button
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
               className="p-2.5 rounded-full bg-gray-100/50 hover:bg-white border border-white/50 transition-all shadow-sm hover:shadow-md group dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer"
               aria-label="Toggle theme"
@@ -128,7 +129,7 @@ export default function Header() {
               ) : (
                 <Moon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors dark:text-gray-400" weight="bold" />
               )}
-            </button>
+            </button> */}
 
             {loading ? (
               <div className="flex items-center space-x-4">
@@ -230,7 +231,7 @@ export default function Header() {
                     <span className="hidden lg:block text-sm font-bold text-gray-800 dark:text-gray-200">
                       {user.full_name}
                     </span>
-                    <CaretDown className="h-4 w-4 text-gray-500 dark:text-gray-400" weight="bold" />
+                    <CaretDown className="h-4 w-4 text-gray-500 lg:dark:text-gray-400" weight="bold" />
                   </button>
                   <div
                     className={`absolute right-0 mt-2 w-56 glass-card border border-white/50 rounded-2xl shadow-xl py-2 z-50 transform origin-top-right transition-all duration-200 dark:bg-zinc-900/90 dark:border-zinc-800 ${
@@ -278,8 +279,9 @@ export default function Header() {
             )}
           </div>
         </nav>
-        <div className="md:hidden flex items-center space-x-3">
-          <button
+        <div className="lg:hidden flex items-center space-x-3">
+{/* Theme toggle temporarily hidden */}
+          {/* <button
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             className="p-2.5 rounded-xl bg-white/50 text-gray-700 hover:text-gray-900 hover:bg-white transition-colors border border-white/50 dark:bg-white/10 dark:text-gray-300 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer"
           >
@@ -288,7 +290,8 @@ export default function Header() {
             ) : (
               <Moon className="h-6 w-6" />
             )}
-          </button>
+          </button> */}
+          
           {loading ? (
             <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse dark:bg-white/10" />
           ) : user ? (
@@ -325,13 +328,13 @@ export default function Header() {
                   Dashboard
                 </Link>
                 <Link
-                  href="/profile"
+                  href="/dashboard/profile"
                   className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 mx-2 rounded-lg dark:text-gray-300 dark:hover:bg-white/5"
                 >
                   Profile
                 </Link>
                 <Link
-                  href="/settings"
+                  href="/dashboard/settings"
                   className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 mx-2 rounded-lg dark:text-gray-300 dark:hover:bg-white/5"
                 >
                   Settings

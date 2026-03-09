@@ -111,7 +111,7 @@ export async function POST(req: Request) {
           "X-Title": "FoundexAI",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash-001",
+          model: "openai/gpt-4o-mini",
           messages: [
             {
               role: "system",
