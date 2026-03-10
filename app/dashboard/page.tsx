@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Onboarding from "@/components/Onboarding";
 import TasksList from "@/components/TasksList";
 import NotesList from "@/components/NotesList";
@@ -19,6 +20,7 @@ import { NotePencil, FloppyDiskBack, X, MagicWand, Sparkle, CircleNotch, Magnify
 
 export default function Dashboard() {
   const { user, token, loading, logout, startups, activeStartupId } = useAuth();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -46,7 +48,7 @@ export default function Dashboard() {
 
       if (res.ok) {
         setShowOnboarding(false);
-        window.location.reload();
+        router.refresh();
       } else if (res.status === 401) {
         alert("Your session has expired. Please log in again.");
         logout();
@@ -66,7 +68,7 @@ export default function Dashboard() {
   }
 
   if (!user && !loading) {
-    window.location.href = "/";
+    router.push("/");
     return null;
   }
 
@@ -132,7 +134,7 @@ export default function Dashboard() {
           <div className="w-full">
             <DescriptionBlock
               startup={currentStartup}
-              onUpdate={() => window.location.reload()}
+              onUpdate={() => router.refresh()}
             />
           </div>
 
@@ -149,7 +151,7 @@ export default function Dashboard() {
                 location={currentStartup.location}
                 currentStructure={currentStartup.legal_structure}
                 details={currentStartup.legal_structure_details}
-                onUpdate={() => window.location.reload()}
+                onUpdate={() => router.refresh()}
               />
               <DocumentsSection documents={currentStartup.documents} />
             </div>
@@ -160,7 +162,7 @@ export default function Dashboard() {
                 startupId={currentStartup._id}
                 sector={currentStartup.sector}
                 selectedModels={currentStartup.business_models}
-                onUpdate={() => window.location.reload()}
+                onUpdate={() => router.refresh()}
               />
               <NotesList startupId={currentStartup._id} />
             </div>
@@ -171,7 +173,7 @@ export default function Dashboard() {
                   score={currentStartup.readiness_score || 0}
                   startupId={currentStartup._id}
                   feedback={currentStartup.readiness_feedback}
-                  onUpdate={() => window.location.reload()}
+                  onUpdate={() => router.refresh()}
               />
               <TasksList startupId={currentStartup._id} />
             </div>

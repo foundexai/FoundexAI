@@ -10,7 +10,8 @@ export const signToken = (payload:{id:string,email:string}) => jwt.sign(payload,
 
 const ADMIN_EMAILS = [
   "almussanplanner12@gmail.com",
-  "sophzine@gmail.com"
+  "sophzine@gmail.com",
+  "Demo@foundex.ai",
 ];
 
 export const isAdmin = (email: string) => ADMIN_EMAILS.includes(email);

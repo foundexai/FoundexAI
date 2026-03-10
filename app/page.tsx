@@ -14,9 +14,9 @@ export default function Home() {
   // Redirect if authenticated
   useEffect(() => {
     if (!loading && user) {
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
     }
-  }, [user, loading]);
+  }, [user, loading, router]);
 
   if (loading || user) {
     return (
@@ -81,11 +81,18 @@ function AuthForm() {
       const data = await res.json();
 
       if (res.ok) {
-        login(data.token);
-        toast.success(
-          isLogin ? "Welcome back!" : "Account created successfully!"
-        );
-        window.location.href = callbackUrl;
+        if (isLogin) {
+          login(data.token);
+          toast.success("Welcome back!");
+          router.push(callbackUrl);
+        } else {
+          toast.success("Account created successfully! Please sign in.");
+          setIsLogin(true);
+          setForm({
+            ...form,
+            password: "", // Clear password for security
+          });
+        }
       } else {
         if (res.status === 500) {
           toast.error("Server error. Please try again later.");
@@ -108,7 +115,7 @@ function AuthForm() {
         <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4 dark:bg-yellow-900/20">
           <img src="/foundex.png" alt="" />
         </div>
-        <h1 className="text-3xl font-bold text-gray-`900 tracking-tight dark:text-white">
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight dark:text-white">
           {isLogin ? "Welcome Back" : "Create Account"}
         </h1>
         <p className="text-gray-500 mt-2 text-sm dark:text-gray-400">
