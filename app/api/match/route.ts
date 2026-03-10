@@ -32,13 +32,33 @@ export async function POST(req: Request) {
         id: inv.id,
         name: inv.name,
         type: inv.type,
-        focus: inv.focus,
-        description: inv.description,
+        focus: inv.focus || [],
+        description: (inv.description || "").substring(0, 300), // Truncate to save tokens
         investmentRange: inv.investmentRange || inv.investment_range,
       }),
     );
 
-    // 2. Construct Prompt
+    // 2. Pre-Rank and Limit (Prevents Context Limit Errors)
+    const searchText = (query || description || "").toLowerCase();
+    const keywords = searchText.split(/\W+/).filter((k: string) => k.length > 2);
+    
+    const preRanked = allInvestors.map(inv => {
+      let score = 0;
+      const invText = `${inv.name} ${inv.type} ${(inv.focus || []).join(" ")} ${inv.description}`.toLowerCase();
+      
+      if (query && invText.includes(query.toLowerCase())) score += 20;
+      keywords.forEach((word: string) => {
+        if (invText.includes(word)) score += 5;
+      });
+      if (sector && invText.includes(sector.toLowerCase())) score += 10;
+      if (stage && invText.includes(stage.toLowerCase())) score += 10;
+      
+      return { ...inv, rankScore: score };
+    })
+    .sort((a, b) => b.rankScore - a.rankScore)
+    .slice(0, 40); // Send only top 40 most relevant to AI
+
+    // 3. Construct Prompt
     let prompt = "";
     if (query) {
       prompt = `
@@ -52,7 +72,7 @@ export async function POST(req: Request) {
         Provide a DETAILED strategic rationale for each match explaining why they fit the user's specific query.
         
         Investors List:
-        ${JSON.stringify(allInvestors)}
+        ${JSON.stringify(preRanked)}
 
         Output JSON format ONLY:
         {
@@ -82,10 +102,9 @@ export async function POST(req: Request) {
         Reasoning Requirements:
         - Explain WHY this investor is a good fit based on their sector focus, stage, or investment thesis.
         - Mention potential synergies or shared interest areas.
-        - Write 2-3 insight sentences. Do NOT be generic.
         
         Investors List:
-        ${JSON.stringify(allInvestors)}
+        ${JSON.stringify(preRanked)}
 
         Output JSON format ONLY:
         {
@@ -100,58 +119,93 @@ export async function POST(req: Request) {
     }
 
     // 3. Call OpenAI/OpenRouter API
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://foundex.ai",
-          "X-Title": "FoundexAI",
-        },
-        body: JSON.stringify({
-          model: "openai/gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful AI investment analyst. Output valid JSON only. Always return exactly 3 matches.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          response_format: { type: "json_object" },
-          temperature: 0.7,
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenRouter Error:", errorText);
-      return NextResponse.json(
-        { error: "AI Service Unavailable" },
-        { status: 503 },
-      );
-    }
-
-    const data = await response.json();
-    const aiContent = data.choices[0]?.message?.content;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
     let aiResult;
     try {
-      aiResult = JSON.parse(aiContent);
-    } catch (e) {
-      console.error("Failed to parse AI response", aiContent);
-      return NextResponse.json(
-        { error: "Failed to process matches" },
-        { status: 500 },
+      const response = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY2}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://foundex.ai",
+            "X-Title": "FoundexAI",
+          },
+          body: JSON.stringify({
+            model: "openai/gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful AI investment analyst. Output valid JSON only. Always return exactly 3 matches.",
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.7,
+          }),
+          signal: controller.signal,
+        },
       );
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const aiContent = data.choices[0]?.message?.content;
+        aiResult = JSON.parse(aiContent);
+      } else {
+        const errorText = await response.text();
+        console.warn("OpenRouter API Failed, using local fallback:", errorText);
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      console.warn("AI Service Timeout or Error, using local fallback:", error);
     }
 
-    // 4. Map back to full investor objects to ensure frontend has all data
+    // 4. Fallback Logic if AI failed
+    if (!aiResult) {
+      console.log("Running local matching fallback...");
+      const searchText = (query || description || "").toLowerCase();
+      const keywords = searchText.split(/\W+/).filter((k: string) => k.length > 2);
+      
+      const scored = allInvestors.map(inv => {
+        let score = 0;
+        const invText = (inv.name + " " + inv.type + " " + inv.focus.join(" ") + " " + inv.description).toLowerCase();
+        
+        // Exact matches give high score
+        if (query && invText.includes(query.toLowerCase())) score += 10;
+        
+        // Keyword matches
+        keywords.forEach((word: string) => {
+          if (invText.includes(word)) score += 2;
+        });
+
+        // Stage matching (if profile provided)
+        if (stage && invText.includes(stage.toLowerCase())) score += 5;
+        if (sector && invText.includes(sector.toLowerCase())) score += 5;
+
+        return { ...inv, score };
+      });
+
+      const top3 = scored
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+
+      aiResult = {
+        matches: top3.map(inv => ({
+          id: inv.id,
+          reason: `Matched based on keyword overlap in your ${query ? "query" : "startup profile"}. ${inv.name} has a strong focus on ${inv.focus.slice(0, 3).join(", ")} which correlates with your interest in "${keywords.slice(0, 2).join(", ")}".`
+        }))
+      };
+    }
+
+    // 5. Map back to full investor objects to ensure frontend has all data
     const finalMatches = (aiResult.matches || []).map((m: any) => {
       const fullInvestor = allInvestors.find(inv => inv.id === m.id);
       return {

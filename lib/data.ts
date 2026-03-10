@@ -39,7 +39,7 @@ export const MOCK_INVESTORS: Investor[] = [
     description:
       "The largest Africa-focused private investment firm, bridging international capital and African talent. We focus on building market-leading companies in core sectors.",
     investmentRange: "$10M+",
-    website: "heliosinvestment.com",
+    website: "helioslp.com",
   },
   {
     id: "4",

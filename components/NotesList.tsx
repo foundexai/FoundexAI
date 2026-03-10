@@ -47,7 +47,7 @@ export default function NotesList({ startupId }: { startupId: string }) {
     });
     if (r.ok) {
       const data = await r.json();
-      setNotes(data.notes.slice(0, 2)); // Show only 2 notes
+      setNotes(data.notes.slice(0, 4)); // Show up to 4 notes
     }
     setIsLoading(false);
   }
@@ -143,7 +143,7 @@ export default function NotesList({ startupId }: { startupId: string }) {
                 href={`/dashboard/notes/${note._id}`}
                 className="group relative"
               >
-                <div className="bg-gray-50 hover:bg-white p-5 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 h-full flex flex-col group-hover:-translate-y-1 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:border-zinc-700/50 dark:hover:border-zinc-700">
+                <div className="bg-gray-50 hover:bg-white p-4 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 h-40 flex flex-col group-hover:-translate-y-1 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 dark:border-zinc-700/50 dark:hover:border-zinc-700">
                   <div className="flex flex-wrap gap-2 mb-3">
                     {note.tags.map((tag) => (
                       <span
@@ -162,7 +162,7 @@ export default function NotesList({ startupId }: { startupId: string }) {
                     {note.title}
                   </h3>
 
-                  <p className="text-sm text-gray-500 line-clamp-3 mb-4 leading-relaxed dark:text-gray-400 grow">
+                  <p className="text-xs text-gray-500 line-clamp-2 mb-2 leading-relaxed dark:text-gray-400 grow overflow-hidden">
                     {note.content}
                   </p>
 

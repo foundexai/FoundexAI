@@ -4,6 +4,7 @@ import { CaretDown, Plus, Check } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { BrandLogo } from "../BrandLogo";
 
 export default function StartupSwitcher() {
   const { startups, activeStartupId, setActiveStartupId } = useAuth();
@@ -30,8 +31,13 @@ export default function StartupSwitcher() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 p-2 pr-4 rounded-2xl bg-white/40 border border-white/50 backdrop-blur-md hover:bg-white/60 hover:shadow-lg transition-all duration-300 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 group"
       >
-        <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform">
-          {activeStartup.company_name.charAt(0)}
+        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform">
+          <BrandLogo 
+            name={activeStartup.company_name}
+            logo_url={activeStartup.logo_url}
+            website={activeStartup.website_url}
+            initial={activeStartup.logoInitial || activeStartup.company_name.charAt(0)}
+          />
         </div>
         <div className="text-left hidden md:block">
           <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider dark:text-yellow-500">
@@ -51,7 +57,7 @@ export default function StartupSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 glass-card border border-white/50 rounded-2xl shadow-2xl py-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200 dark:bg-zinc-900/95 dark:border-zinc-800">
+        <div className="absolute top-full left-0 mt-2 w-64 glass-card border border-white/50 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 dark:bg-zinc-900/95 dark:border-zinc-800">
           <div className="px-4 py-2 border-b border-gray-100 mb-2 dark:border-zinc-800">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               My Startups
@@ -74,10 +80,15 @@ export default function StartupSwitcher() {
                 )}
               >
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shadow-sm",
-                  activeStartupId === startup._id ? "bg-yellow-400 text-white" : "bg-gray-100 text-gray-500 dark:bg-zinc-800 dark:text-gray-400"
+                  "w-8 h-8 rounded-lg overflow-hidden shadow-sm",
                 )}>
-                  {startup.company_name.charAt(0)}
+                  <BrandLogo 
+                    name={startup.company_name}
+                    logo_url={startup.logo_url}
+                    website={startup.website_url}
+                    initial={startup.logoInitial || startup.company_name.charAt(0)}
+                    className="text-xs"
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={cn(

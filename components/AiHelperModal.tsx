@@ -44,7 +44,6 @@ export default function AiHelperModal({
         />
         <div className="flex justify-between items-center">
           <button className="flex items-center space-x-2 text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300">
-            <Sparkle className="h-5 w-5" weight="bold" />
             <span>Ask Sophia</span>
           </button>
           <button

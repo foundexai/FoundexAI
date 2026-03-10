@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, Circle, ArrowUpRight, CircleNotch } from "@phosphor-icons/react";
+import { ArrowRight, CheckCircle, Circle, ArrowUpRight, CircleNotch, Sparkle } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 
@@ -13,13 +13,14 @@ interface Task {
 }
 
 const categoryColors: { [key: string]: string } = {
+  "AI Insights": "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800",
   Finance: "bg-yellow-100 text-yellow-800",
   Market: "bg-blue-100 text-blue-800",
   Legal: "bg-purple-100 text-purple-800",
   Operations: "bg-pink-100 text-pink-800",
 };
 
-const categoryOrder = ["Finance", "Market", "Legal", "Operations"];
+const categoryOrder = ["AI Insights", "Finance", "Market", "Legal", "Operations"];
 
 export default function TasksList({ startupId }: { startupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -145,7 +146,7 @@ export default function TasksList({ startupId }: { startupId: string }) {
   return (
     <div
       id="tasks"
-      className="glass-card p-6 rounded-3xl border border-white/50 relative overflow-hidden flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800"
+      className="glass-card p-6 rounded-3xl border border-white/50 relative overflow-hidden flex flex-col dark:bg-zinc-900/60 dark:border-zinc-800"
     >
       <div className="flex justify-between items-center mb-6 relative z-10">
         <h2 className="text-xl font-bold text-gray-900 tracking-tight dark:text-white">
@@ -158,7 +159,7 @@ export default function TasksList({ startupId }: { startupId: string }) {
         </Link>
       </div>
 
-      <div className="space-y-8 relative z-10 grow overflow-y-auto pr-2 max-h-[300px]">
+      <div className="space-y-6 relative z-10 grow overflow-y-auto pr-2 max-h-[450px] thin-scrollbar">
         {sortedCategories.map((category) => (
           <div key={category}>
             <span
@@ -182,13 +183,21 @@ export default function TasksList({ startupId }: { startupId: string }) {
                     )}
                   </button>
                   <span
-                    className={`text-sm font-medium transition-all ${
+                    className={`text-sm font-medium transition-all flex items-center gap-2 ${
                       task.status === "completed"
                         ? "line-through text-gray-400 dark:text-gray-600"
+                        : task.title.startsWith("SOPHIA TIP:")
+                        ? "text-indigo-600 dark:text-indigo-400"
                         : "text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white"
                     }`}
                   >
-                    {task.title}
+                    {task.title.startsWith("SOPHIA TIP:") && (
+                      <Sparkle className="w-4 h-4 text-yellow-500 shrink-0" weight="fill" />
+                    )}
+                    {task.title.startsWith("SOPHIA TIP:") 
+                      ? task.title.replace("SOPHIA TIP:", "").trim() 
+                      : task.title
+                    }
                   </span>
                 </li>
               ))}

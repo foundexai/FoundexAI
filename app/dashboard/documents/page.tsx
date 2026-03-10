@@ -10,8 +10,9 @@ import {
   Funnel,
   CircleNotch,
   Calendar,
-  DownloadSimple,
   Eye,
+  DotsThree,
+  Clock,
 } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
@@ -36,6 +37,7 @@ export default function DocumentsPage() {
       try {
         const res = await fetch("/api/startups", {
           headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
         });
         const data = await res.json();
         if (data.startups && data.startups[0]) {
@@ -114,7 +116,6 @@ export default function DocumentsPage() {
           </div>
         </div>
 
-        {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <CircleNotch className="w-8 h-8 text-gray-400 animate-spin" weight="bold" />
@@ -122,14 +123,6 @@ export default function DocumentsPage() {
         ) : filteredDocs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredDocs.map((doc, i) => (
-              // We need an ID to route to viewer. Since we might not have subdoc IDs yet, let's use index or encode URL?
-              // Ideally documents have _id. Mongoose adds them by default to subdoc arrays.
-              // Fallback to index if needed, but lets assume _id exists.
-              // Actually, passing the URL encoded in route is messy.
-              // Let's create a Client Component card that handles the click or pass index.
-              // For now, I'll link to `/dashboard/documents/view?url=${encodeURIComponent(doc.url)}&type=${doc.type}&name=${doc.name}`
-              // OR better: `/dashboard/documents/${i}` if we assume order is stable? No.
-              // Let's use `doc._id` or `i` if `_id` is missing (but it shouldn't be).
               <Link
                 key={i}
                 href={`/dashboard/documents/view?url=${encodeURIComponent(doc.url)}&name=${encodeURIComponent(doc.name)}&type=${doc.type}`}
@@ -156,18 +149,17 @@ export default function DocumentsPage() {
                   {doc.name}
                 </h3>
 
-                <div className="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" weight="bold" />
-                    {doc.date
-                      ? format(new Date(doc.date), "MMM d, yyyy")
-                      : "Recently"}
+                <div className="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800 flex flex-col gap-1 items-start">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    <Calendar className="w-3.5 h-3.5" weight="bold" />
+                    {doc.date ? format(new Date(doc.date), "MMM d, yyyy") : "Recently"}
                   </div>
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="bg-gray-100 p-1.5 rounded-lg hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">
-                      <Eye className="w-3 h-3 text-gray-700 dark:text-gray-300" weight="bold" />
-                    </span>
-                  </div>
+                  {doc.date && (
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-gray-500 ml-5">
+                      <Clock className="w-3 h-3" weight="bold" />
+                      {format(new Date(doc.date), "h:mm a")}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

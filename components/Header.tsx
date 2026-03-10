@@ -91,8 +91,8 @@ export default function Header() {
 
   return (
     <header className="w-full sticky top-0 z-50 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10 transition-all duration-300">
-      <div className="mx-auto p-4 lg:px-6 py-3 flex justify-between items-center bg-transparent">
-        <div className="flex items-center space-x-3">
+      <div className="max-w-7xl mx-auto p-4 lg:px-6 py-3 flex justify-between items-center bg-transparent">
+        <div className="flex items-center space-x-2.5">
           <div className="relative w-8 h-8 md:w-10 md:h-10">
             <Image
               src="/foundex.png"
@@ -109,7 +109,7 @@ export default function Header() {
           </Link>
         </div>
 
-        <nav className="hidden lg:flex items-center space-x-8 ml-auto">
+        <nav className="hidden lg:flex items-center space-x-6 lg:space-x-8 ml-auto">
           <Link
             href="/dashboard/investors"
             className="text-sm font-bold text-gray-700 uppercase tracking-widest cursor-pointer opacity-60 hover:opacity-80 transition-opacity dark:text-gray-300"
@@ -155,7 +155,7 @@ export default function Header() {
                     </button>
                     
                     <div
-                        className={`absolute right-0 mt-2 w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
+                        className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
                             isNotificationsOpen
                                 ? "opacity-100 scale-100 translate-y-0"
                                 : "opacity-0 scale-95 -translate-y-2 pointer-events-none"

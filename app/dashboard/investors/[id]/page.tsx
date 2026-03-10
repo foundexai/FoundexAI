@@ -177,10 +177,13 @@ export default function InvestorDetailsPage() {
                   Website
                 </a>
               )}
-              <button className="inline-flex items-center px-6 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 dark:bg-white dark:text-black dark:hover:bg-gray-200 cursor-pointer">
+              <Link 
+                href="/dashboard/pricing"
+                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 dark:bg-white dark:text-black dark:hover:bg-gray-200 cursor-pointer"
+              >
                 <EnvelopeSimple className="w-4 h-4 mr-2 text-yellow-500" weight="bold" />
-                Connect
-              </button>
+                Get connected with investors
+              </Link>
             </div>
           </div>
         </div>
@@ -230,27 +233,6 @@ export default function InvestorDetailsPage() {
             <p className="text-sm text-gray-500 mt-2 font-medium dark:text-gray-400">
               Typical check size per deal
             </p>
-          </div>
-
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
-            <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Portfolio Highlights
-            </h4>
-            <div className="space-y-3">
-              {["Paystack", "Flutterwave", "Andela"].map((company) => (
-                <div
-                  key={company}
-                  className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer group dark:hover:bg-white/5"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-yellow-400 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all shrink-0">
-                    <Buildings size={20} className="text-white" weight="bold" />
-                  </div>
-                  <span className="font-bold text-gray-700 dark:text-gray-300">
-                    {company}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,8 @@
-import { MapPin, ArrowRight, Buildings, GlobeSimple, Heart, Star, CircleNotch, PencilSimple } from "@phosphor-icons/react";
+import { MapPin, ArrowRight, Heart, Star, CircleNotch, PencilSimple } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "./BrandLogo";
 
 export interface Investor {
   id: string;
@@ -57,20 +58,15 @@ export function InvestorCard({
       <div className="flex justify-between items-start mb-4 z-10">
         <div
           className={cn(
-            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden bg-yellow-400",
+            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden bg-yellow-400 border border-gray-100 dark:border-white/5",
           )}
         >
-          {investor.logo_url ? (
-            <img 
-              src={investor.logo_url} 
-              alt={investor.name} 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-xl font-black text-black">
-              {investor.logoInitial || investor.name.charAt(0)}
-            </span>
-          )}
+          <BrandLogo 
+            name={investor.name}
+            website={investor.website}
+            logo_url={investor.logo_url}
+            initial={investor.logoInitial}
+          />
         </div>
         <div className="flex flex-col items-end gap-2">
           <button

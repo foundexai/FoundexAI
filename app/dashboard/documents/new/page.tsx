@@ -110,8 +110,8 @@ export default function NewDocumentPage() {
       // 2. Save Metadata
       await saveDocumentMetadata(secureUrl);
 
-      toast.success("Document saved successfully!");
-      router.push("/dashboard");
+      toast.success("Document uploaded successfully!");
+      router.push("/dashboard/documents");
     } catch (e) {
       console.error(e);
       toast.error(
@@ -126,11 +126,11 @@ export default function NewDocumentPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-black">
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center sticky top-0 z-10 dark:bg-zinc-900 dark:border-zinc-800">
         <Link
-          href="/dashboard"
+          href="/dashboard/documents"
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold transition-colors dark:text-gray-400 dark:hover:text-white"
         >
           <CaretLeft className="w-5 h-5" weight="bold" />
-          Back to Dashboard
+          Back to Documents
         </Link>
       </div>
 

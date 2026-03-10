@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MagnifyingGlass, FadersHorizontal, Trash, ChatCircleDots, X, PaperPlaneTilt, CircleNotch, ArrowRight, RocketLaunch } from "@phosphor-icons/react";
+import { MagnifyingGlass, FadersHorizontal, Trash, ChatCircleDots, RocketLaunch, ArrowRight, CircleNotch, EnvelopeSimple } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -25,7 +25,6 @@ export default function SelectedInvestors() {
   const { user, token, refreshUser } = useAuth();
   const [investors, setInvestors] = useState<SavedInvestor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedChatInvestor, setSelectedChatInvestor] = useState<SavedInvestor | null>(null);
 
   useEffect(() => {
     async function fetchSaved() {
@@ -104,7 +103,7 @@ export default function SelectedInvestors() {
             <tr className="text-gray-400 text-xs font-bold uppercase tracking-wider border-b border-gray-100 dark:border-zinc-800">
               <th className="pb-4 pl-4 min-w-[200px]">Investor's Name</th>
               <th className="pb-4 min-w-[140px]">Activity</th>
-              <th className="pb-4 min-w-[180px]">Portfolio Insight</th>
+              {/* <th className="pb-4 min-w-[180px]">Portfolio Insight</th> */}
               <th className="pb-4 min-w-[100px]">Category</th>
               <th className="pb-4 min-w-[120px]">Location</th>
               <th className="pb-4 pr-4 text-right min-w-[100px]">Action</th>
@@ -161,7 +160,7 @@ export default function SelectedInvestors() {
                   </div>
                 </td>
 
-                <td className="py-4 whitespace-nowrap">
+                {/* <td className="py-4 whitespace-nowrap">
                   <div
                     className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800/50"
                     title="Based on sector and stage match"
@@ -173,7 +172,7 @@ export default function SelectedInvestors() {
                   <div className="text-[10px] text-gray-400 mt-1 max-w-[160px] truncate">
                     Fintech focus • Africa 1st
                   </div>
-                </td>
+                </td> */}
 
                 <td className="py-4 whitespace-nowrap">
                   <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-400">
@@ -192,13 +191,13 @@ export default function SelectedInvestors() {
                     >
                       <Trash weight="bold" className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => setSelectedChatInvestor(inv)}
-                      className="text-blue-600 hover:text-blue-700 font-bold text-sm flex items-center gap-1 p-2 hover:bg-blue-50 rounded-lg transition-colors dark:text-blue-400 dark:hover:bg-blue-900/20 cursor-pointer"
-                      title="Chat with Investor"
+                    <Link
+                      href="/dashboard/pricing"
+                      className="text-gray-400 hover:text-gray-950 font-bold text-sm flex items-center gap-1 p-2 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 cursor-pointer"
+                      title="Get connected with investors"
                     >
-                      <ChatCircleDots weight="bold" className="w-4 h-4" />
-                    </button>
+                      <EnvelopeSimple weight="bold" className="w-5 h-5 text-yellow-500" />
+                    </Link>
                   </div>
                 </td>
               </tr>
@@ -239,91 +238,6 @@ export default function SelectedInvestors() {
         )}
       </div>
 
-      {/* Premium Chat Overlay */}
-        {selectedChatInvestor && (
-            <div className="fixed inset-0 z-50 flex items-center justify-end">
-                {/* Backdrop */}
-                <div 
-                    className="absolute inset-0 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300" 
-                    onClick={() => setSelectedChatInvestor(null)}
-                />
-                
-                {/* Chat Panel */}
-                <div className="relative w-full max-w-lg h-full bg-white dark:bg-zinc-900 shadow-2xl animate-in slide-in-from-right duration-500 border-l border-white/20 dark:border-zinc-800 flex flex-col">
-                    {/* Header */}
-                    <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between bg-gray-50/50 dark:bg-black/20">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-yellow-400 flex items-center justify-center text-white font-black shadow-lg shadow-yellow-500/20">
-                                {selectedChatInvestor.name.charAt(0)}
-                            </div>
-                            <div>
-                                <h3 className="font-black text-gray-900 dark:text-white tracking-tight">
-                                    {selectedChatInvestor.name}
-                                </h3>
-                                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
-                                    Investor Communication
-                                </p>
-                            </div>
-                        </div>
-                        <button 
-                            onClick={() => setSelectedChatInvestor(null)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors text-gray-400"
-                        >
-                            <X className="w-6 h-6" weight="bold" />
-                        </button>
-                    </div>
-
-                    {/* Chat Body - Coming Soon */}
-                    <div className="grow flex flex-col items-center justify-center p-12 text-center space-y-8">
-                        {/* Premium Infographic */}
-                        <div className="relative group">
-                            <div className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full animate-pulse group-hover:bg-yellow-400/30 transition-all duration-700" />
-                            <div className="relative w-32 h-32 bg-white dark:bg-zinc-800 rounded-[2.5rem] shadow-2xl flex items-center justify-center border border-gray-100 dark:border-white/5 transform group-hover:scale-110 transition-transform duration-500">
-                                <div className="absolute -top-2 -right-2 w-8 h-8 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black animate-bounce shadow-xl">
-                                    <PaperPlaneTilt weight="bold" className="w-4 h-4" />
-                                </div>
-                                <ChatCircleDots className="w-16 h-16 text-yellow-500" weight="fill" />
-                            </div>
-                            
-                            {/* Decorative elements */}
-                            <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-blue-500/10 rounded-2xl blur-xl" />
-                            <div className="absolute top-1/2 -right-8 w-16 h-16 bg-purple-500/10 rounded-full blur-2xl" />
-                        </div>
-
-                        <div className="space-y-4 relative">
-                            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
-                                One-Click <br />
-                                <span className="text-yellow-600 dark:text-yellow-500">Investor Outreach</span>
-                            </h2>
-                            <p className="text-gray-500 dark:text-gray-400 text-lg font-medium leading-relaxed max-w-xs mx-auto">
-                                We are building a high-fidelity communication bridge between startups and investors.
-                            </p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-sm font-bold uppercase tracking-widest shadow-sm">
-                            <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-                            Coming Soon
-                        </div>
-                    </div>
-
-                    {/* Footer - Disabled Input */}
-                    <div className="p-6 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/30 dark:bg-black/10">
-                        <div className="relative opacity-50">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 flex gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-zinc-800 animate-pulse" />
-                                <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-zinc-800 animate-pulse [animation-delay:-0.2s]" />
-                            </div>
-                            <input 
-                                disabled
-                                type="text" 
-                                placeholder="Messaging disabled for early access..."
-                                className="w-full pl-28 pr-4 py-4 bg-white dark:bg-zinc-800 border-2 border-dashed border-gray-200 dark:border-zinc-700 rounded-2xl text-sm font-medium outline-none"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )}
     </div>
   );
 }

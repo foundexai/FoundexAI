@@ -288,9 +288,9 @@ function StartupProfileContent() {
                           {startupName || "Click to add"}
                         </p>
                       </div>
-                      <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                      {/* <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
                         <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
-                      </div>
+                      </div> */}
                     </div>
                     <div
                       className="glass-card hover:bg-white/80 p-6 rounded-3xl shadow-sm border border-white/50 flex items-center justify-between cursor-pointer transition-all hover:shadow-md group"
@@ -304,9 +304,9 @@ function StartupProfileContent() {
                           {sector || "Click to add"}
                         </p>
                       </div>
-                      <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                      {/* <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
                         <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
-                      </div>
+                      </div> */}
                     </div>
                     <div
                       className="glass-card hover:bg-white/80 p-6 rounded-3xl shadow-sm border border-white/50 flex items-center justify-between cursor-pointer transition-all hover:shadow-md group"
@@ -319,9 +319,6 @@ function StartupProfileContent() {
                         <p className="font-bold text-3xl text-gray-900">
                           {readinessScore}%
                         </p>
-                      </div>
-                      <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                        <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
                       </div>
                     </div>
                   </div>
@@ -336,9 +333,9 @@ function StartupProfileContent() {
                       <h3 className="font-bold text-gray-900 text-lg">
                         Mission
                       </h3>
-                      <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                      {/* <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
                         <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
-                      </div>
+                      </div> */}
                     </div>
                     <p className="text-gray-600 leading-relaxed">
                       {mission || "Click to add mission"}
@@ -352,9 +349,9 @@ function StartupProfileContent() {
                       <h3 className="font-bold text-gray-900 text-lg">
                         Vision
                       </h3>
-                      <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                      {/* <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
                         <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
-                      </div>
+                      </div> */}
                     </div>
                     <p className="text-gray-600 leading-relaxed">
                       {vision || "Click to add vision"}
@@ -370,9 +367,9 @@ function StartupProfileContent() {
                     <h3 className="font-bold text-gray-900 text-lg">
                       Business Description
                     </h3>
-                    <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                    {/* <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
                       <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
-                    </div>
+                    </div> */}
                   </div>
                   <p className="text-gray-600 leading-relaxed">
                     {businessDescription || "Click to add business description"}
@@ -387,9 +384,9 @@ function StartupProfileContent() {
                     <h3 className="font-bold text-gray-900 text-lg">
                       Legal Structure
                     </h3>
-                    <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                    {/* <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
                       <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
-                    </div>
+                    </div> */}
                   </div>
                   <p className="text-gray-600 leading-relaxed">
                     {legalStructure || "Click to add legal structure"}
@@ -404,9 +401,6 @@ function StartupProfileContent() {
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-gray-900 text-lg">Tasks</h3>
-                    <div className="p-2 rounded-full bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
-                      <Sparkle className="w-5 h-5 text-yellow-600" weight="bold" />
-                    </div>
                   </div>
                   <div className="space-y-4">
                     <p className="text-gray-500 italic">

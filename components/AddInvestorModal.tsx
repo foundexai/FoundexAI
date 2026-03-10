@@ -7,6 +7,7 @@ import {
   GlobeSimple,
   MapPin,
   Briefcase,
+  CaretDown,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -146,23 +147,28 @@ export default function AddInvestorModal({
                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                   Type <span className="text-red-500">*</span>
                 </label>
-                <select
-                  required
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 pr-10 py-3 font-medium focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white"
-                  value={formData.type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, type: e.target.value })
-                  }
-                >
-                  <option value="VC">Venture Capital</option>
-                  <option value="Angel">Angel Investor</option>
-                  <option value="Grant">Grant / Non-dilutive</option>
-                  <option value="Accelerator">Accelerator</option>
-                  <option value="PE">Private Equity</option>
-                  <option value="Family Office">Family Office</option>
-                  <option value="Corporate">Corporate VC</option>
-                  <option value="Other">Other</option>
-                </select>
+                <div className="relative group">
+                  <select
+                    required
+                    className="w-full appearance-none bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 pr-12 py-3 font-semibold focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white cursor-pointer relative z-10"
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
+                  >
+                    <option value="VC">Venture Capital</option>
+                    <option value="Angel">Angel Investor</option>
+                    <option value="Grant">Grant / Non-dilutive</option>
+                    <option value="Accelerator">Accelerator</option>
+                    <option value="PE">Private Equity</option>
+                    <option value="Family Office">Family Office</option>
+                    <option value="Corporate">Corporate VC</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none z-20">
+                    <CaretDown className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors" weight="bold" />
+                  </div>
+                </div>
               </div>
             </div>
 

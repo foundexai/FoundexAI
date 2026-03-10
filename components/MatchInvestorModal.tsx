@@ -135,7 +135,7 @@ export function MatchInvestorModal({
         </div>
 
         {/* Body */}
-        <div className="p-8 grow overflow-y-auto custom-scrollbar">
+        <div className="p-4 sm:p-8 grow overflow-y-auto custom-scrollbar">
           {step === "input" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               
@@ -329,12 +329,9 @@ export function MatchInvestorModal({
           )}
 
           {step === "matching" && (
-            <div className="flex flex-col items-center justify-center h-full py-20 text-center space-y-6">
+            <div className="flex flex-col items-center justify-center h-full py-12 md:py-20 text-center space-y-6">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkle className="w-8 h-8 text-blue-600 animate-pulse" weight="bold" />
-                </div>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -354,10 +351,10 @@ export function MatchInvestorModal({
                   <CheckCircle className="w-4 h-4" weight="bold" />
                   Found {matches.length} Matches
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   Best Matches for <span className="text-yellow-500">{formData.name}</span>
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400">
+                <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">
                   Based on your sector and stage.
                 </p>
               </div>
@@ -374,7 +371,6 @@ export function MatchInvestorModal({
                       {matchReasons[inv.id] && (
                         <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-2 leading-relaxed shadow-sm">
                           <div className="flex gap-2 mb-1">
-                            <Sparkle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" weight="bold" />
                             <span className="font-bold">AI Analysis:</span>
                           </div>
                           {matchReasons[inv.id]}

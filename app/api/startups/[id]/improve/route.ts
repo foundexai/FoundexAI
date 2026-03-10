@@ -38,7 +38,7 @@ export async function POST(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY2}`,
         "HTTP-Referer": "https://foundex.ai",
         "X-Title": "Foundex MVP",
       },
@@ -55,18 +55,17 @@ export async function POST(
     }
 
     const data = await aiRes.json();
-    const improved = data.choices[0].message.content.trim();
+    const improved = data.choices[0]?.message?.content?.trim() || description;
 
     return NextResponse.json({ improved });
   } catch (error) {
     console.error("Improvement Error:", error);
-    // Fallback if AI fails
+    // Fallback if AI fails: Return the original description
     return NextResponse.json(
       {
-        improved:
-          "Could not generate improvement at this time. Please try again later.", // Or return original?
+        improved: "Unable to improve description automatically right now. Keeping original text.",
       },
-      { status: 500 },
+      { status: 200 }, // Change to 200 so UI doesn't break
     );
   }
 }

@@ -78,8 +78,8 @@ export default function Dashboard() {
 
       {!currentStartup && !loading ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-          <div className="glass-card p-10 rounded-3xl border border-white/50 max-w-md w-full relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight dark:text-white">
+          <div className="glass-card p-6 md:p-10 rounded-3xl border border-white/50 max-w-md w-full relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 tracking-tight dark:text-white">
               Start Your Journey
             </h2>
             <p className="text-gray-500 mb-8 leading-relaxed dark:text-gray-400">
@@ -102,74 +102,80 @@ export default function Dashboard() {
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-100/30 rounded-full mix-blend-multiply filter blur-3xl opacity-40 translate-y-1/2 -translate-x-1/2 dark:bg-yellow-900/10"></div>
             </div>
 
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <StartupSwitcher />
-                </div>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-tight dark:text-white">
-                    {currentStartup.company_name}
-                  </h1>
-                  <Link
-                    href="/dashboard/investors"
-                    className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg dark:bg-white dark:text-black"
-                  >
-                    Get Connected
-                  </Link>
-                </div>
-                <div>
-                  <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
-                    {currentStartup.sector || "Technology"}
-                  </div>
-                </div>
-                <p className="text-lg text-gray-500 font-medium dark:text-gray-400 max-w-lg">
-                  Welcome back, {user?.full_name?.split(" ")[0]}! Let's build something great.
-                </p>
+            <div className="relative z-10 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <StartupSwitcher />
               </div>
-              <div className="flex flex-col items-center md:items-end gap-6">
-                <ReadinessScore
-                  score={currentStartup.readiness_score || 0}
-                  startupId={currentStartup._id}
-                  feedback={currentStartup.readiness_feedback}
-                  onUpdate={() => window.location.reload()}
-                />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-tight dark:text-white wrap-break-word">
+                  {currentStartup.company_name}
+                </h1>
+                <Link
+                  href="/dashboard/pricing"
+                  className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg dark:bg-white dark:text-black"
+                >
+                  Get connected with investors
+                </Link>
               </div>
+              <div>
+                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
+                  {currentStartup.sector || "Technology"}
+                </div>
+              </div>
+              <p className="text-lg text-gray-500 font-medium dark:text-gray-400 max-w-lg">
+                Welcome back, {user?.full_name?.split(" ")[0]}! Let's build something great.
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          {/* Description Block - Full Width */}
+          <div className="w-full">
             <DescriptionBlock
               startup={currentStartup}
               onUpdate={() => window.location.reload()}
             />
-
-            <LegalStructureCard
-              startupId={currentStartup._id}
-              location={currentStartup.location}
-              currentStructure={currentStartup.legal_structure}
-              details={currentStartup.legal_structure_details}
-              onUpdate={() => window.location.reload()}
-            />
-
-            <BusinessModelCard
-              startupId={currentStartup._id}
-              sector={currentStartup.sector}
-              selectedModels={currentStartup.business_models}
-              onUpdate={() => window.location.reload()}
-            />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-            <DocumentsSection documents={currentStartup.documents} />
+          {/* Selected Investors Section - Right below Description */}
+          <SelectedInvestors />
 
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+          {/* Main Dashboard Grid - Balanced 3 Column Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+            
+            {/* Column 1: Foundation */}
+            <div className="space-y-6">
+              <LegalStructureCard
+                startupId={currentStartup._id}
+                location={currentStartup.location}
+                currentStructure={currentStartup.legal_structure}
+                details={currentStartup.legal_structure_details}
+                onUpdate={() => window.location.reload()}
+              />
+              <DocumentsSection documents={currentStartup.documents} />
+            </div>
+
+            {/* Column 2: Strategy */}
+            <div className="space-y-6">
+              <BusinessModelCard
+                startupId={currentStartup._id}
+                sector={currentStartup.sector}
+                selectedModels={currentStartup.business_models}
+                onUpdate={() => window.location.reload()}
+              />
               <NotesList startupId={currentStartup._id} />
+            </div>
+
+            {/* Column 3: Intelligence & Execution */}
+            <div className="space-y-6">
+              <ReadinessScore
+                  score={currentStartup.readiness_score || 0}
+                  startupId={currentStartup._id}
+                  feedback={currentStartup.readiness_feedback}
+                  onUpdate={() => window.location.reload()}
+              />
               <TasksList startupId={currentStartup._id} />
             </div>
           </div>
-
-          <SelectedInvestors />
         </div>
       ) : null}
 
@@ -211,7 +217,7 @@ function DescriptionBlock({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          description: description, // Send current edited description as base
+          description: description,
           company_name: startup.company_name,
         }),
       });
@@ -248,7 +254,7 @@ function DescriptionBlock({
       });
       if (res.ok) {
         setIsEditing(false);
-        setAiSuggestion(null); // Clear suggestion on save
+        setAiSuggestion(null);
         onUpdate();
         toast.success("Description updated");
       }
@@ -260,105 +266,128 @@ function DescriptionBlock({
   }
 
   return (
-    <div className="glass-card p-6 rounded-3xl border border-white/50 flex flex-col h-full dark:bg-zinc-900/60 dark:border-zinc-800">
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-          Business Description
-        </h3>
-      </div>
+    <div className="glass-card p-6 md:p-10 rounded-[2.5rem] border border-white/50 relative overflow-hidden dark:bg-zinc-900/40 dark:border-zinc-800 shadow-sm transition-all hover:shadow-xl">
+      {/* Decorative gradient blur */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-br from-yellow-100/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none dark:from-yellow-900/10"></div>
+      
+      <div className="relative z-10">
+        <div className="flex justify-between items-center mb-6">
+          <div className="space-y-1">
+            <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+              Business Description
+            </h3>
+            <p className="text-xs text-gray-400 font-medium">
+              Your core value proposition and mission defined.
+            </p>
+          </div>
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-5 py-2.5 bg-gray-950 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-md flex items-center gap-2 dark:bg-white dark:text-black cursor-pointer"
+            >
+              <NotePencil className="w-4 h-4" />
+              Edit
+            </button>
+          )}
+        </div>
 
-      <div className="grow space-y-4">
-        {isEditing ? (
-          <>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 min-h-[150px] font-medium leading-relaxed dark:bg-black/50 dark:border-zinc-700 dark:text-gray-200 focus:ring-2 focus:ring-black/5 dark:focus:ring-white/10 outline-none transition-all"
-              placeholder="Describe your business model, target audience, and value proposition..."
-            />
-            
-            {/* Ask Sophia Section */}
-            <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 dark:bg-black/80 dark:border-zinc-800 relative overflow-hidden group">
-               {aiSuggestion && (
-                   <div className="flex justify-end items-center mb-3">
-                        <div className="flex gap-2">
-                            <button 
-                                onClick={handleCopySuggestion}
-                                className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-                            >
-                                <NotePencil className="w-3.5 h-3.5" weight="bold" />
-                                Copy
-                            </button>
-                            <button 
-                                onClick={handleAskSophia}
-                                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-                            >
-                                <div className={`w-3.5 h-3.5 ${improving ? 'animate-spin' : ''}`}>
-                                    <MagicWand weight="bold" />
-                                </div>
-                                Regenerate
-                            </button>
-                        </div>
-                   </div>
-               )}
+        <div className="space-y-6">
+          {isEditing ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <div className="space-y-4">
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full p-6 border border-gray-200 rounded-2xl text-gray-700 min-h-[250px] font-medium leading-relaxed dark:bg-black/40 dark:border-zinc-800 dark:text-gray-200 focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500/50 outline-none transition-all text-lg"
+                  placeholder="Describe your business model, target audience, and value proposition..."
+                />
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setDescription(startup.business_description);
+                      setAiSuggestion(null);
+                    }}
+                    className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl text-sm font-black hover:bg-gray-200 transition-all dark:bg-zinc-800 dark:text-gray-400 dark:hover:bg-zinc-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex-1 py-4 bg-yellow-500 text-white rounded-2xl text-sm font-black hover:bg-yellow-600 shadow-lg shadow-yellow-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </div>
 
-               {aiSuggestion ? (
-                   <div className="text-sm text-gray-300 leading-relaxed bg-white/5 p-3 rounded-xl border border-white/5">
-                       {aiSuggestion}
-                   </div>
-               ) : (
-                   <div className="text-center py-4">
-                       <p className="text-gray-500 text-xs mb-3">
-                           Need help refining your description? Sophia can generate a professional version for you.
-                       </p>
-                       <button
+              <div className="h-full">
+                <div className="bg-zinc-950 rounded-4xl p-8 border border-zinc-800 dark:bg-black/60 relative overflow-hidden h-full flex flex-col justify-center min-h-[300px]">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-yellow-500 via-orange-500 to-yellow-500"></div>
+                  
+                  {aiSuggestion ? (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <div className="flex items-center gap-2 text-yellow-500">
+                        <Sparkle weight="fill" className="w-5 h-5" />
+                        <span className="text-xs font-black uppercase tracking-widest">Sophia's Suggestion</span>
+                      </div>
+                      <p className="text-lg text-gray-300 leading-relaxed font-medium italic">
+                        "{aiSuggestion}"
+                      </p>
+                      <div className="flex gap-3 pt-4">
+                        <button 
+                          onClick={handleCopySuggestion}
+                          className="flex-1 bg-yellow-500 text-white text-xs font-black px-4 py-3 rounded-xl transition-all hover:bg-yellow-600 flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20"
+                        >
+                          <NotePencil className="w-4 h-4" />
+                          Apply Suggestion
+                        </button>
+                        <button 
+                          onClick={handleAskSophia}
+                          disabled={improving}
+                          className="flex-1 bg-white/5 hover:bg-white/10 text-white text-xs font-black px-4 py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-white/10"
+                        >
+                          <MagicWand className={`w-4 h-4 ${improving ? 'animate-spin' : ''}`} />
+                          Regenerate
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center space-y-6">
+                      <div className="w-16 h-16 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
+                        <Sparkle className="w-8 h-8 text-yellow-500" />
+                      </div>
+                      <h4 className="text-white font-black text-xl tracking-tight">Need a professional polish?</h4>
+                      <p className="text-gray-500 text-sm max-w-xs mx-auto leading-relaxed">
+                        Sophia can analyze your draft and generate a compelling, investor-ready business description for you.
+                      </p>
+                      <button
                         onClick={handleAskSophia}
                         disabled={improving}
-                        className="bg-yellow-500 text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-yellow-600 hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed shadow-yellow-500/20"
-                       >
-                           {improving && <CircleNotch className="w-4 h-4 animate-spin" />}
-                           {improving ? "Generating..." : "Generate Suggestion"}
-                       </button>
-                   </div>
-               )}
+                        className="bg-yellow-500 text-white font-black text-sm px-8 py-4 rounded-2xl hover:bg-yellow-600 hover:shadow-xl hover:scale-105 transition-all flex items-center gap-3 mx-auto disabled:opacity-50 shadow-lg shadow-yellow-500/30"
+                      >
+                        {improving ? (
+                          <CircleNotch className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <MagicWand className="w-5 h-5" />
+                        )}
+                        {improving ? "Sophia is thinking..." : "Generate Suggestion"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </>
-        ) : (
-          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap dark:text-gray-300 line-clamp-6">
-            {description}
-          </p>
-        )}
-      </div>
-
-      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
-        {!isEditing ? (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="w-full py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 dark:bg-white/5 dark:border-zinc-700 dark:text-gray-300"
-          >
-            Edit Description
-          </button>
-        ) : (
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                setIsEditing(false);
-                setDescription(startup.business_description);
-                setAiSuggestion(null);
-              }}
-              className="flex-1 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-bold dark:bg-transparent dark:border-zinc-700 dark:text-gray-400"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex-1 py-2 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-500/30"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        )}
+          ) : (
+            <div className="max-w-4xl">
+              <p className="text-xl text-gray-600 leading-[1.8] font-medium dark:text-gray-300 whitespace-pre-wrap">
+                {description || "No description provided yet. Click edit to define your business for investors."}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

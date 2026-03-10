@@ -17,7 +17,9 @@ export default function AdminPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"pending" | "all" | "startups">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "all" | "startups" | "bulk">("pending");
+  const [bulkData, setBulkData] = useState("");
+  const [isProcessingBulk, setIsProcessingBulk] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
   // Edit State
@@ -25,6 +27,36 @@ export default function AdminPage() {
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
   const [isEditStartupOpen, setIsEditStartupOpen] = useState(false);
+
+  const handleBulkImport = async () => {
+    if (!bulkData.trim()) return;
+    setIsProcessingBulk(true);
+    try {
+      const parsed = JSON.parse(bulkData);
+      const res = await fetch("/api/admin/bulk-investors", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ investors: parsed })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`Import complete! ${data.results.updated} updated, ${data.results.created} created.`);
+        setBulkData("");
+        queryClient.invalidateQueries({ queryKey: ["admin", "investors"] });
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Import failed");
+      }
+    } catch (e) {
+      toast.error("Invalid JSON format");
+    } finally {
+      setIsProcessingBulk(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -254,6 +286,17 @@ export default function AdminPage() {
                 >
                 All Investors
                 </button>
+                <button
+                onClick={() => setActiveTab("bulk")}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
+                    activeTab === "bulk"
+                    ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
+                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+                >
+                <FileText className="w-4 h-4" weight="bold" />
+                Bulk Import
+                </button>
             </div>
           </div>
         </div>
@@ -342,6 +385,42 @@ export default function AdminPage() {
                     ))}
                   </div>
              )
+        ) : activeTab === "bulk" ? (
+             <div className="glass-card p-10 rounded-3xl border border-white/60 dark:border-white/10 bg-white/40 space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Bulk Investor Import</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Paste a JSON array of investors to update existing records or create new ones. Records are matched by name or website.
+                  </p>
+                </div>
+                
+                <textarea
+                  value={bulkData}
+                  onChange={(e) => setBulkData(e.target.value)}
+                  placeholder='[{"name": "Sequoia Capital", "website": "https://sequoiacap.com", "description": "...", "focus": ["SaaS", "AI"]}]'
+                  className="w-full h-80 p-6 bg-white border border-gray-200 rounded-2xl font-mono text-sm focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all dark:bg-black/40 dark:border-white/10 dark:text-zinc-300"
+                />
+                
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleBulkImport}
+                    disabled={isProcessingBulk || !bulkData.trim()}
+                    className="px-8 py-4 bg-yellow-500 text-white rounded-2xl font-black hover:bg-yellow-600 shadow-lg shadow-yellow-500/20 transition-all transform hover:scale-[1.02] flex items-center gap-3 disabled:opacity-50"
+                  >
+                    {isProcessingBulk ? <CircleNotch className="w-5 h-5 animate-spin" /> : <RocketLaunch className="w-5 h-5" />}
+                    {isProcessingBulk ? "Processing..." : "Run Import / Sync"}
+                  </button>
+                </div>
+
+                <div className="mt-8 p-6 bg-blue-50/50 rounded-2xl border border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/20">
+                  <h3 className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-2">Import Format Memo</h3>
+                  <ul className="text-xs text-blue-700 space-y-1 dark:text-blue-400/80 list-disc pl-4">
+                    <li>Requires array of objects: <code>[]</code></li>
+                    <li>Fields: <code>name*</code>, <code>website</code>, <code>description</code>, <code>focus (array)</code>, <code>location</code>, <code>type</code></li>
+                    <li>Existing records will be updated; new ones will be created.</li>
+                  </ul>
+                </div>
+             </div>
         ) : (
             // INVESTORS VIEW
             filteredInvestors.length === 0 ? (

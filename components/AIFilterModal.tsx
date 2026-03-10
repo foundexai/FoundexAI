@@ -98,7 +98,7 @@ export function AIFilterModal({
         </div>
 
         {/* Body */}
-        <div className="p-8 grow overflow-y-auto custom-scrollbar">
+        <div className="p-4 sm:p-8 grow overflow-y-auto custom-scrollbar">
           {step === "input" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-4">
@@ -140,12 +140,9 @@ export function AIFilterModal({
           )}
 
           {step === "searching" && (
-            <div className="flex flex-col items-center justify-center h-full py-20 text-center space-y-6">
+            <div className="flex flex-col items-center justify-center h-full py-12 md:py-20 text-center space-y-6">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full border-4 border-zinc-100 border-t-zinc-900 animate-spin dark:border-zinc-800 dark:border-t-white"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkle className="w-8 h-8 text-zinc-900 dark:text-white animate-pulse" weight="bold" />
-                </div>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -160,9 +157,9 @@ export function AIFilterModal({
 
           {step === "results" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white">
+                    <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white">
                         Search Results
                     </h3>
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
@@ -171,7 +168,7 @@ export function AIFilterModal({
                 </div>
                 <button
                     onClick={reset}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 text-sm"
+                    className="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 text-sm"
                 >
                     New Search
                 </button>
@@ -189,7 +186,6 @@ export function AIFilterModal({
                       {matchReasons[inv.id] && (
                         <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl text-sm text-zinc-800 dark:text-zinc-200 border border-zinc-100 dark:border-zinc-700 animate-in fade-in slide-in-from-top-2 leading-relaxed shadow-sm">
                           <div className="flex items-center gap-2 mb-2">
-                            <Sparkle className="w-4 h-4 text-zinc-900 dark:text-white shrink-0" weight="fill" />
                             <span className="font-black uppercase tracking-wider text-[10px]">AI Match Rationale</span>
                           </div>
                           {matchReasons[inv.id]}

@@ -222,7 +222,7 @@ export default function DashboardLayout({
         </aside>
 
         <main className={cn(
-          "w-full flex-1 min-h-screen bg-gray-50/50 dark:bg-black transition-all duration-300",
+          "min-w-0 flex-1 min-h-screen bg-gray-50/50 dark:bg-black transition-all duration-300",
           isCollapsed ? "lg:ml-20" : "lg:ml-72"
         )}>
           <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">

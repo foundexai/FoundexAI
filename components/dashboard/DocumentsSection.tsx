@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FileText, Plus, DotsThree } from "@phosphor-icons/react";
+import { FileText, Plus, DotsThree, Clock } from "@phosphor-icons/react";
+import { format } from "date-fns";
 
 interface UploadedDoc {
   name: string;
@@ -19,10 +20,10 @@ export default function DocumentsSection({
   documents = [],
 }: DocumentsSectionProps) {
   // Mock data if empty
-  const displayDocs =
-    documents.length > 0
-      ? documents
-      : [{ name: "Pitch Deck v2.3", type: "deck", date: new Date(), url: "#" }];
+  // Show only the 1 most recent document on the dashboard
+  const displayDocs = (documents.length > 0 ? documents : [
+    { name: "Pitch Deck v2.3", type: "deck", date: new Date(), url: "#" }
+  ]).slice(0, 1);
 
   return (
     <div className="glass-card p-6 rounded-3xl border border-white/50 h-full dark:bg-zinc-900/60 dark:border-zinc-800">
@@ -40,8 +41,10 @@ export default function DocumentsSection({
 
       <div className="space-y-4">
         {displayDocs.map((doc, i) => (
-          <div
+          <Link
             key={i}
+            href={doc.url}
+            target="_blank"
             className="group relative bg-black rounded-xl overflow-hidden aspect-2/1 flex items-center justify-center cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02]"
           >
             {/* Placeholder Gradient Background mimicking a deck slide */}
@@ -53,9 +56,15 @@ export default function DocumentsSection({
               <h4 className="text-white font-bold text-lg tracking-tight">
                 {doc.name}
               </h4>
-              <p className="text-white/50 text-xs">
-                {new Date(doc.date).toLocaleDateString()}
-              </p>
+              <div className="flex flex-col items-center gap-0.5 mt-1">
+                <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">
+                  {format(new Date(doc.date), "MMM d, yyyy")}
+                </p>
+                <div className="flex items-center gap-1 text-white/40 text-[9px] font-medium">
+                  <Clock className="w-2.5 h-2.5" weight="bold" />
+                  {format(new Date(doc.date), "h:mm a")}
+                </div>
+              </div>
             </div>
 
             <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -63,11 +72,11 @@ export default function DocumentsSection({
                 <DotsThree className="w-4 h-4" weight="bold" />
               </button>
             </div>
-          </div>
+          </Link>
         ))}
 
         <Link href="/dashboard/documents/new">
-          <button className="w-full py-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 font-bold hover:bg-gray-50 hover:border-gray-300 transition-all flex flex-col items-center justify-center gap-1 dark:border-zinc-700 dark:hover:bg-white/5 dark:text-gray-500">
+          <button className="w-full py-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 font-bold hover:bg-gray-50 hover:border-gray-300 transition-all flex flex-col items-center justify-center gap-1 dark:border-zinc-700 dark:hover:bg-white/5 dark:text-gray-500 cursor-pointer">
             <Plus className="w-6 h-6" weight="bold" />
             <span>Add New Document</span>
           </button>

@@ -65,7 +65,7 @@ export async function POST(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY2}`,
           "HTTP-Referer": "https://foundex.ai", // Required by OpenRouter
           "X-Title": "Foundex MVP",
         },
@@ -105,10 +105,10 @@ export async function POST(
           if (!existingTitles.has(tip)) {
             await Task.create({
               startup_id: startup._id,
-              title: tip,
-              category: "Operations",
+              title: `SOPHIA TIP: ${tip}`,
+              category: "AI Insights",
               status: "pending",
-              priority: "medium"
+              priority: "high"
             });
           }
         }
@@ -154,10 +154,10 @@ export async function POST(
         if (!existingTitles.has(tip)) {
           await Task.create({
             startup_id: startup._id,
-            title: tip,
-            category: "Operations",
+            title: `SOPHIA TIP: ${tip}`,
+            category: "AI Insights",
             status: "pending",
-            priority: "medium"
+            priority: "high"
           });
         }
       }

@@ -17,6 +17,7 @@ interface User {
   full_name: string;
   saved_investors: string[]; // Store IDs of saved investors
   user_type?: "founder" | "investor";
+  plan_type?: "starter" | "founder" | "pro" | "license";
   isAdmin?: boolean;
   profile_image_url?: string;
   linkedin_url?: string;
@@ -34,6 +35,9 @@ export interface Startup {
   legal_structure_details?: string;
   business_models?: string[];
   documents?: any[];
+  logo_url?: string;
+  website_url?: string;
+  logoInitial?: string;
 }
 
 interface AuthContextType {
