@@ -29,7 +29,8 @@ export default function RootLayout({
       <body className={`${manrope.className} w-full `}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
+          forcedTheme="dark"
           enableSystem={false}
           disableTransitionOnChange
         >
