@@ -41,6 +41,9 @@ interface Startup {
   cac?: number;
   ltv?: number;
   readiness_score?: number;
+  logoInitial?: string;
+  logoColor?: string;
+  location?: string;
 }
 
 export default function ProfilePage() {
@@ -511,15 +514,27 @@ export default function ProfilePage() {
                 !editingStartup &&
                 !showAddForm && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {/* Add Startup Card */}
+                    <button
+                      onClick={() => setShowAddForm(true)}
+                      className="glass-card border-2 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-600 transition-all cursor-pointer min-h-[280px] dark:border-white/10 dark:hover:border-yellow-500/50"
+                    >
+                      <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 dark:bg-white/5">
+                        <Plus className="h-8 w-8" weight="bold" />
+                      </div>
+                      <p className="font-bold">Add New Startup</p>
+                    </button>
+
                     {startups.map((startup) => (
                       <div
                         key={startup._id}
                         className="glass-card border border-white/60 rounded-3xl p-8 flex flex-col hover:border-yellow-500/50 transition-all duration-300 group bg-white/40 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 dark:hover:border-yellow-500/50"
                       >
                         <div className="flex justify-between items-start mb-4">
-                          <div className="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center shadow-md shrink-0">
+                          <div className={`w-12 h-12 ${startup.logoColor || "bg-yellow-400"} rounded-xl flex items-center justify-center shadow-md shrink-0 text-white font-black text-xl`}>
+                            {startup.logoInitial || startup.company_name.charAt(0).toUpperCase()}
                           </div>
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-2 lg:opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => setEditingStartup(startup)}
                               className="text-gray-400 hover:text-yellow-600 p-2 rounded-lg hover:bg-yellow-50 transition-colors dark:hover:bg-yellow-500/10 dark:hover:text-yellow-500"
@@ -536,20 +551,20 @@ export default function ProfilePage() {
                             </button>
                           </div>
                         </div>
-                        <h3 className="font-bold text-2xl mb-2 text-gray-900 leading-tight dark:text-white">
+                        <h3 className="font-bold text-2xl mb-2 text-gray-900 leading-tight dark:text-white truncate">
                           {startup.company_name}
                         </h3>
-                        <p className="text-gray-500 mb-6 grow line-clamp-3 leading-relaxed dark:text-gray-400">
+                        <p className="text-sm text-gray-500 mb-6 grow line-clamp-3 leading-relaxed dark:text-gray-400">
                           {startup.business_description}
                         </p>
 
                         <div className="pt-4 border-t border-gray-100/50 flex justify-between items-center dark:border-white/10">
-                          <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
                             {startup.sector || "Uncategorized"}
                           </span>
                           {startup.readiness_score !== undefined && (
-                            <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md dark:bg-green-500/20 dark:text-green-400">
-                              Score: {startup.readiness_score}%
+                            <span className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-1 rounded-lg dark:bg-green-500/20 dark:text-green-400">
+                              SCORE: {startup.readiness_score}%
                             </span>
                           )}
                         </div>

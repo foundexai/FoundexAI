@@ -1,4 +1,4 @@
-import { MapPin, TrendUp } from "@phosphor-icons/react";
+import { MapPin, TrendUp, Check, PencilSimple } from "@phosphor-icons/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -20,22 +20,60 @@ interface StartupCardProps {
   startup: Startup;
   isSaved?: boolean;
   onToggleSave?: (id: string) => void;
+  onSelect?: (id: string) => void;
+  isSelected?: boolean;
+  onEdit?: (startup: Startup) => void;
 }
 
 export function StartupCard({
   startup,
   isSaved,
   onToggleSave,
+  onSelect,
+  isSelected = false,
+  onEdit,
 }: StartupCardProps) {
-  return (
-    <Link
-      href={`/dashboard/startups/${startup.id}`}
-      className="group block h-full"
-    >
-      <div className="glass-card h-full p-6 rounded-3xl border border-white/50 hover:border-yellow-400/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800 dark:hover:border-yellow-500/30">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-gray-100 to-gray-200 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500 dark:from-zinc-800 dark:to-zinc-900 dark:opacity-20 pointer-events-none"></div>
+  const cardContent = (
+    <div className={cn(
+      "glass-card h-full p-6 rounded-3xl border border-white/50 hover:border-yellow-400/50 transition-all duration-300 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800 dark:hover:border-yellow-500/30",
+      isSelected && "ring-2 ring-yellow-500 border-transparent",
+      !onEdit && "hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+    )}>
+      {/* Checkbox for Select */}
+      {onSelect && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSelect(startup.id);
+          }}
+          className={cn(
+            "absolute top-4 left-4 z-20 w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center",
+            isSelected 
+              ? "bg-yellow-500 border-yellow-500 text-black" 
+              : "bg-white/50 border-white/50 hover:border-yellow-500/50 dark:bg-white/10 dark:border-white/20"
+          )}
+        >
+          {isSelected && <Check weight="bold" className="w-4 h-4" />}
+        </button>
+      )}
 
-        <div className="relative z-10">
+      {onEdit && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onEdit(startup);
+          }}
+          className="absolute top-4 right-4 z-20 p-2 rounded-xl bg-white/50 border border-white/50 hover:bg-white transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer text-gray-400 hover:text-gray-900"
+        >
+          <PencilSimple weight="bold" className="w-4 h-4" />
+        </button>
+      )}
+
+      <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-gray-100 to-gray-200 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500 dark:from-zinc-800 dark:to-zinc-900 dark:opacity-20 pointer-events-none"></div>
+
+      <div className="relative z-10 pt-4">
           <div className="flex justify-between items-start mb-6">
             <div
               className={cn(
@@ -92,6 +130,17 @@ export function StartupCard({
           </div>
         </div>
       </div>
+  );
+  if (onEdit) {
+    return cardContent;
+  }
+
+  return (
+    <Link
+      href={`/dashboard/startups/${startup.id}`}
+      className="group block h-full"
+    >
+      {cardContent}
     </Link>
   );
 }

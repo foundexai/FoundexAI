@@ -61,3 +61,37 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const token = req.headers.get("Authorization")?.split(" ")[1];
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const decoded = await verifyToken(token);
+    if (!decoded || !isAdmin(decoded.user.email)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+
+    await connectDB();
+
+    const deletedStartup = await Startup.findByIdAndDelete(id);
+
+    if (!deletedStartup) {
+      return NextResponse.json({ error: "Startup not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Startup deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting startup:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

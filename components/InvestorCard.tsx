@@ -1,4 +1,4 @@
-import { MapPin, ArrowRight, Heart, Star, CircleNotch, PencilSimple } from "@phosphor-icons/react";
+import { MapPin, ArrowRight, Heart, Star, CircleNotch, PencilSimple, Check } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,8 @@ interface InvestorCardProps {
   onToggleSave?: (id: string) => void;
   isSaving?: boolean;
   onEdit?: (investor: Investor) => void;
+  onSelect?: (id: string) => void;
+  isSelected?: boolean;
 }
 
 export function InvestorCard({
@@ -33,6 +35,8 @@ export function InvestorCard({
   onToggleSave,
   isSaving = false,
   onEdit,
+  onSelect,
+  isSelected = false,
 }: InvestorCardProps) {
   const router = useRouter();
 
@@ -47,10 +51,30 @@ export function InvestorCard({
   const cardContent = (
     <div 
       className={cn(
-        "glass-card group flex flex-col p-6 rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden h-full dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10",
+        "glass-card group flex flex-col p-6 rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden h-full dark:bg-zinc-900/60 dark:border-white/10 dark:hover:bg-white/10",
+        isSelected && "ring-2 ring-yellow-500 border-transparent",
         !onEdit && "hover:-translate-y-1 hover:shadow-xl cursor-pointer"
       )}
     >
+      {/* Checkbox for Select */}
+      {onSelect && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSelect(investor.id);
+          }}
+          className={cn(
+            "absolute top-4 left-4 z-20 w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center",
+            isSelected 
+              ? "bg-yellow-500 border-yellow-500 text-black" 
+              : "bg-white/50 border-white/50 hover:border-yellow-500/50 dark:bg-white/10 dark:border-white/20"
+          )}
+        >
+          {isSelected && <Check weight="bold" className="w-4 h-4" />}
+        </button>
+      )}
+
       {/* Decorative gradient blur */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500 dark:from-white/5"></div>
 

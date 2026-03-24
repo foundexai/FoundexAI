@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       "🎉 Startup Approved",
       `An admin approved the startup "${startup.company_name}".`,
       "approval",
-      "/admin"
+      "/dashboard/admin"
     );
 
     return NextResponse.json(

@@ -126,7 +126,7 @@ export async function POST(req: Request) {
       "💎 New Investor Submission",
       `${body.name} (${body.type}) has been submitted for approval.`,
       "submission",
-      "/admin"
+      "/dashboard/admin"
     );
 
     return NextResponse.json(

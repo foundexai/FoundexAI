@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         "✅ Investor Approved",
         `An admin approved the investor profile for ${investor.name}.`,
         "approval",
-        "/admin"
+        "/dashboard/admin"
       );
     }
 

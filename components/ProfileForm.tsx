@@ -26,35 +26,6 @@ export default function ProfileForm({
     readiness_score: startup?.readiness_score || 0,
   });
 
-  useEffect(() => {
-    async function load() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      const r = await fetch("/api/startups", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (r.ok) {
-        const data = await r.json();
-        if (data.startups && data.startups.length > 0) {
-          const startup = data.startups[0]; // Assuming first startup
-          setStartupId(startup._id);
-          setForm({
-            company_name: startup.company_name || "",
-            sector: startup.sector || "",
-            location: startup.location || "",
-            business_description: startup.business_description || "",
-            website_url: startup.website_url || "",
-            funding_stage: startup.funding_stage || "Pre-seed",
-            readiness_score: startup.readiness_score || 0,
-          });
-        }
-      }
-    }
-    load();
-  }, []);
-
   async function save(e: any) {
     e.preventDefault();
     const token = localStorage.getItem("token");

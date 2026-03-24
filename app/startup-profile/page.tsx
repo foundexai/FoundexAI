@@ -193,7 +193,7 @@ function StartupProfileContent() {
               {user?.isAdmin && (
                 <li>
                   <a
-                    href="/admin"
+                    href="/dashboard/admin"
                     className="flex items-center p-3 text-gray-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
                   >
                     <ShieldCheck className="mr-3 w-5 h-5" weight="bold" />Admin

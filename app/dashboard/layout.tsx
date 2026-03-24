@@ -83,7 +83,7 @@ export default function DashboardLayout({
       groups.push({
         title: "Management",
         items: [
-          { name: "Admin", href: "/admin", icon: ShieldCheck },
+          { name: "Admin", href: "/dashboard/admin", icon: ShieldCheck },
         ],
       });
     }

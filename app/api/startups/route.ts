@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
     }
     const { user } = decoded;
 
-    const { company_name, business_description } = await req.json();
+    const body = await req.json();
+    const { company_name, business_description, sector, location, website_url, funding_stage } = body;
 
     if (!company_name || !business_description) {
       return NextResponse.json(
@@ -35,9 +36,13 @@ export async function POST(req: NextRequest) {
     }
 
     const newStartup = await Startup.create({
-      user_id: user._id, // Use user._id which is standard for MongoDB documents
+      user_id: user._id, 
       company_name,
       business_description,
+      sector,
+      location,
+      website_url,
+      funding_stage: funding_stage || "Pre-seed",
     });
 
     // Notify Admins
@@ -46,7 +51,7 @@ export async function POST(req: NextRequest) {
       "🚀 New Startup Submission",
       `${company_name} has been submitted for review. \n"${business_description.substring(0, 100)}..."`,
       "submission",
-      "/admin"
+      "/dashboard/admin"
     );
 
     return NextResponse.json({ startup: newStartup }, { status: 201 });
