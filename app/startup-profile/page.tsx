@@ -5,6 +5,8 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Sparkle, House, Users, FileText, Gear, SignOut, List, X as XIcon, MagnifyingGlass, ShieldCheck } from "@phosphor-icons/react";
 import AiHelperModal from "@/components/AiHelperModal";
+import { toast } from "sonner";
+
 
 function StartupProfileContent() {
   const searchParams = useSearchParams();
@@ -24,7 +26,9 @@ function StartupProfileContent() {
   const [notes, setNotes] = useState<any[]>([]);
   const [businessModel, setBusinessModel] = useState<string[]>([]);
   const [legalStructure, setLegalStructure] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
+
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,6 +56,7 @@ function StartupProfileContent() {
               setVision(startup.vision || "");
               setBusinessDescription(startup.business_description || "");
               setLegalStructure(startup.legal_structure || "");
+              setLogoUrl(startup.logo_url || "");
             } else {
               window.location.href = "/dashboard";
             }
@@ -104,6 +109,46 @@ function StartupProfileContent() {
       setModalField(null);
     } else {
       alert("Failed to save. Please try again.");
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !startupId) return;
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // 1. Upload to Cloudinary
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${document.cookie.match(/token=([^;]+)/)?.[1]}`
+        },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
+
+      // 2. Update Database
+      const updateRes = await fetch(`/api/startups/${startupId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo_url: url }),
+      });
+
+      if (updateRes.ok) {
+        setLogoUrl(url);
+        toast.success("Logo updated successfully");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to upload logo");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -273,8 +318,21 @@ function StartupProfileContent() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="md:col-span-1 glass-card border border-white/50 rounded-3xl overflow-hidden shadow-sm aspect-square bg-yellow-400 flex items-center justify-center">
+                  <div className="md:col-span-1 glass-card border border-white/50 rounded-3xl overflow-hidden shadow-sm aspect-square bg-gray-100 flex items-center justify-center relative group">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt={startupName} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-4xl font-black text-gray-300">
+                        {startupName?.charAt(0)?.toUpperCase()}
+                      </div>
+                    )}
+                    <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                      <input type="file" className="hidden" onChange={handleLogoUpload} accept="image/*" />
+                      <p className="text-white text-xs font-bold uppercase tracking-widest">Change Logo</p>
+                    </label>
+
                   </div>
+
                   <div className="md:col-span-2 grid grid-cols-1 gap-4">
                     <div
                       className="glass-card hover:bg-white/80 p-6 rounded-3xl shadow-sm border border-white/50 flex items-center justify-between cursor-pointer transition-all hover:shadow-md group"

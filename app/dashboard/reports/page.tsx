@@ -189,11 +189,18 @@ export default function ReportsPage() {
             
             <div className="grid grid-cols-2 gap-4">
               {E_REPORTS.slice(1, 3).map(rep => (
-                <div key={rep.id} className="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl space-y-3 hover:border-yellow-500/50 transition-colors cursor-pointer group">
-                  <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-800">
-                     <img src={rep.image} alt={rep.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                <div key={rep.id} className="group relative bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden hover:border-yellow-500/50 transition-all duration-500 flex flex-col h-full shadow-sm hover:shadow-xl hover:-translate-y-1">
+                  <div className="aspect-3/4 relative overflow-hidden">
+                    <img 
+                      src={rep.image} 
+                      alt={rep.title} 
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-110"
+                    />
                   </div>
-                  <p className="text-[10px] font-bold text-zinc-100 line-clamp-2 leading-tight uppercase tracking-tighter">{rep.title}</p>
+                  <div className="p-4 flex-1 flex flex-col justify-between">
+                    <p className="text-[10px] font-bold text-zinc-100 line-clamp-2 leading-tight uppercase tracking-tighter">{rep.title}</p>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mt-2">{rep.sector}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -233,7 +240,7 @@ export default function ReportsPage() {
                  )}
                </div>
 
-               <div className="aspect-[3/4] rounded-2xl bg-zinc-900 overflow-hidden relative border border-white/5">
+               <div className="aspect-3/4 rounded-2xl bg-zinc-900 overflow-hidden relative border border-white/5">
                  <img 
                     src={report.image} 
                     alt={report.title} 

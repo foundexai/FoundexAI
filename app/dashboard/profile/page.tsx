@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { InvestorCardSkeleton } from "@/components/ui/skeletons/InvestorCardSkeleton";
 import { StartupSmallCardSkeleton } from "@/components/ui/skeletons/StartupSmallCardSkeleton";
 import { MOCK_INVESTORS, Investor } from "@/lib/data";
+import { cn } from "@/lib/utils";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
 interface Startup {
@@ -44,6 +45,7 @@ interface Startup {
   logoInitial?: string;
   logoColor?: string;
   location?: string;
+  logo_url?: string;
 }
 
 export default function ProfilePage() {
@@ -531,8 +533,17 @@ export default function ProfilePage() {
                         className="glass-card border border-white/60 rounded-3xl p-8 flex flex-col hover:border-yellow-500/50 transition-all duration-300 group bg-white/40 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 dark:hover:border-yellow-500/50"
                       >
                         <div className="flex justify-between items-start mb-4">
-                          <div className={`w-12 h-12 ${startup.logoColor || "bg-yellow-400"} rounded-xl flex items-center justify-center shadow-md shrink-0 text-white font-black text-xl`}>
-                            {startup.logoInitial || startup.company_name.charAt(0).toUpperCase()}
+                          <div className={cn(
+                            "w-12 h-12 rounded-xl flex items-center justify-center shadow-md shrink-0 overflow-hidden",
+                            !startup.logo_url && (startup.logoColor || "bg-yellow-400")
+                          )}>
+                            {startup.logo_url ? (
+                              <img src={startup.logo_url} alt={startup.company_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-white font-black text-xl">
+                                {startup.logoInitial || startup.company_name.charAt(0).toUpperCase()}
+                              </span>
+                            )}
                           </div>
                           <div className="flex gap-2 lg:opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
