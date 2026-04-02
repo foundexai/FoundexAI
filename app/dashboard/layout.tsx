@@ -84,6 +84,7 @@ export default function DashboardLayout({
         title: "Management",
         items: [
           { name: "Admin", href: "/dashboard/admin", icon: ShieldCheck },
+          { name: "Subscriptions", href: "/dashboard/admin/subscriptions", icon: Lightning },
         ],
       });
     }

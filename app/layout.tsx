@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
+import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { MobileMenuProvider } from "@/context/MobileMenuContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";

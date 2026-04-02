@@ -5,6 +5,11 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password_hash: { type: String, required: true },
   user_type: { type: String, enum: ["founder", "investor"], required: true },
+  plan_type: { 
+    type: String, 
+    enum: ["starter", "founder", "pro", "license"], 
+    default: "starter" 
+  },
   saved_investors: [{ type: String }],
   investor_statuses: { type: Map, of: String, default: {} }, // investorId -> status
   linkedin_url: { type: String },
