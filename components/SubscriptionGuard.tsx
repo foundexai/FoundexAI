@@ -95,7 +95,7 @@ export default function SubscriptionGuard({
     <div className="flex items-center justify-center min-h-[70vh] px-4">
       <div className="w-full max-w-lg">
         {/* Main Card */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border border-zinc-800/50 shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-zinc-900 via-zinc-950 to-black border border-zinc-800/50 shadow-2xl">
           {/* Glow Effects */}
           <div className="absolute -top-20 -right-20 w-60 h-60 bg-yellow-400/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-yellow-400/3 rounded-full blur-3xl pointer-events-none" />
@@ -104,7 +104,7 @@ export default function SubscriptionGuard({
             {/* Lock Icon */}
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-yellow-400/10 to-yellow-400/5 flex items-center justify-center border border-yellow-400/20">
+                <div className="w-20 h-20 rounded-3xl bg-linear-to-br from-yellow-400/10 to-yellow-400/5 flex items-center justify-center border border-yellow-400/20">
                   <Lock
                     className="w-9 h-9 text-yellow-400"
                     weight="bold"

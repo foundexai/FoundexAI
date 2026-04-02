@@ -37,10 +37,12 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              <MobileMenuProvider>
-                <Header />
-                {children}
-              </MobileMenuProvider>
+              <SubscriptionProvider>
+                <MobileMenuProvider>
+                  <Header />
+                  {children}
+                </MobileMenuProvider>
+              </SubscriptionProvider>
             </AuthProvider>
           </QueryProvider>
           <Toaster />
