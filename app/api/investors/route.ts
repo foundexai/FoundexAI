@@ -19,8 +19,8 @@ export async function GET(req: Request) {
       const { getSubscriptionStatus } = await import("@/lib/subscription");
       const decoded = await verifyToken(token);
       if (decoded) {
-        const { is_subscribed } = await getSubscriptionStatus(decoded.user.id || decoded.user._id, decoded.user.email);
-        isSubscribed = is_subscribed;
+        const { is_subscribed, is_admin } = await getSubscriptionStatus(decoded.user.id || decoded.user._id, decoded.user.email);
+        isSubscribed = is_subscribed || is_admin;
       }
     }
 

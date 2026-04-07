@@ -26,7 +26,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function InvestorsPage() {
   const { token, user, refreshUser } = useAuth();
-  const { is_subscribed, is_admin, hasReachedLimit } = useSubscription();
+  const { is_subscribed, is_admin, hasReachedLimit, loading: subLoading } = useSubscription();
   const queryClient = useQueryClient();
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,12 +60,17 @@ export default function InvestorsPage() {
         type: selectedType || "",
       });
 
-      const res = await fetch(`/api/investors?${queryParams.toString()}`);
+      const res = await fetch(`/api/investors?${queryParams.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!res.ok) throw new Error("Failed to fetch investors");
       return res.json();
     },
     staleTime: 60 * 1000, 
     retry: 2,
+    enabled: !!token, 
   });
 
   const investors = (data?.investors || []) as Investor[];
@@ -210,10 +215,15 @@ export default function InvestorsPage() {
             }}
             className={cn(
               "flex items-center gap-2 px-6 py-2 rounded-xl font-black text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0",
-              is_subscribed || is_admin ? "bg-black text-yellow-400 hover:bg-zinc-900" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              (subLoading || isLoading) 
+                ? "bg-gray-100 text-gray-400" 
+                : (is_subscribed || is_admin) 
+                  ? "bg-black text-yellow-400 hover:bg-zinc-900" 
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
             )}
+            disabled={subLoading || isLoading}
           >
-            Match Me {!is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
+            Match Me {!subLoading && !isLoading && !is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
           </button>
           
           <button 
@@ -224,11 +234,12 @@ export default function InvestorsPage() {
               }
               setIsFilterModalOpen(true);
             }}
-            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0 cursor-pointer"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0 cursor-pointer disabled:opacity-50"
+            disabled={subLoading || isLoading}
           >
             <FadersHorizontal className="w-4 h-4" weight="bold" />
             <span className="hidden lg:inline">AI Search</span>
-            {!is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
+            {!subLoading && !isLoading && !is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
           </button>
 
           <button

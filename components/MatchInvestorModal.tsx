@@ -115,282 +115,250 @@ export function MatchInvestorModal({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full sm:max-w-4xl bg-white dark:bg-zinc-900 shadow-2xl rounded-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-white/20 dark:border-white/10">
+      <div className="relative w-full sm:max-w-4xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 border border-white/40 dark:border-white/5">
+        
+        {/* Decorative background elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-400/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
         {/* Header */}
-        <div className="bg-yellow-400 p-6 relative shrink-0">
+        <div className="px-8 pt-10 pb-6 relative shrink-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+            className="absolute top-8 right-8 text-gray-400 hover:text-gray-900 transition-colors p-2 hover:bg-gray-100 rounded-full dark:hover:bg-white/5 dark:hover:text-white"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" weight="bold" />
           </button>
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-2xl font-black text-white tracking-tight">
+          
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-yellow-500">
+                {/* <Sparkle weight="fill" className="w-5 h-5" /> */}
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Foundex Intelligence</span>
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">
               AI Matchmaker
             </h2>
+            <p className="text-gray-500 font-medium text-sm dark:text-gray-400">
+              Find your perfect investor match based on our global ecosystem.
+            </p>
           </div>
-          <p className="text-blue-100 font-medium">
-            Find your perfect investor match instantly.
-          </p>
         </div>
 
         {/* Body */}
         <div className="p-4 sm:p-8 grow overflow-y-auto custom-scrollbar">
           {step === "input" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-4">
               
-              {/* Startup Selection Dropdown */}
-              {startups.length > 0 && (
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Select Startup Profile
-                  </label>
-                  <div className="relative">
-                    <select
-                      className="w-full appearance-none bg-yellow-50/50 border border-yellow-200 rounded-xl px-4 py-3 font-bold text-gray-900 focus:ring-2 focus:ring-yellow-500 focus:outline-none dark:bg-yellow-900/10 dark:border-yellow-500/20 dark:text-yellow-500"
-                      value={selectedStartupId}
-                      onChange={(e) => handleStartupSelect(e.target.value)}
-                    >
-                      <option value="manual">Enter Manually</option>
-                      {startups.map((s) => (
-                        <option key={s._id} value={s._id}>
-                          {s.company_name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                      <CaretDown className="w-4 h-4" weight="bold" />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* Left Side: Select Profile */}
+                <div className="lg:col-span-12">
+                   {startups.length > 0 && (
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                        Select Existing Profile
+                      </label>
+                      <div className="relative group">
+                        <select
+                          className="w-full appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500/50 focus:outline-none dark:bg-black/40 dark:border-zinc-800 dark:text-white transition-all cursor-pointer"
+                          value={selectedStartupId}
+                          onChange={(e) => handleStartupSelect(e.target.value)}
+                        >
+                          <option value="manual">Enter Manually</option>
+                          {startups.map((s) => (
+                            <option key={s._id} value={s._id}>
+                              {s.company_name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-yellow-500 transition-colors">
+                          <CaretDown className="w-4 h-4" weight="bold" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Main Form Fields */}
+                <div className="lg:col-span-7 space-y-6">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                      Startup Name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500/50 focus:outline-none dark:bg-black/50 dark:border-zinc-800 dark:text-white transition-all text-sm"
+                      placeholder="e.g. Acme FinTech"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                        Sector
+                      </label>
+                      <div className="relative group">
+                        <select
+                          className="w-full appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500/50 focus:outline-none dark:bg-black/50 dark:border-zinc-800 dark:text-white transition-all text-sm cursor-pointer"
+                          value={formData.sector}
+                          onChange={(e) =>
+                            setFormData({ ...formData, sector: e.target.value })
+                          }
+                        >
+                          {[
+                            "Adtech", "Agriculture", "AI/ML", "Biotech", "Blockchain", "Cleantech", "Cybersecurity", "E-commerce", "Edtech", "Energy", "Entertainment", "Fintech", "Foodtech", "Gaming", "Healthtech", "IoT", "Logistics", "Marketplace", "Proptech", "SaaS", "Social Impact", "Sustainability", "Travel"
+                          ].map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-yellow-500 transition-colors">
+                          <CaretDown className="w-3.5 h-3.5" weight="bold" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                        Funding Stage
+                      </label>
+                      <div className="relative group">
+                        <select
+                          className="w-full appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500/50 focus:outline-none dark:bg-black/50 dark:border-zinc-800 dark:text-white transition-all text-sm cursor-pointer"
+                          value={formData.stage}
+                          onChange={(e) =>
+                            setFormData({ ...formData, stage: e.target.value })
+                          }
+                        >
+                          {["Pre-seed", "Seed", "Series A", "Series B+", "Growth"].map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-yellow-500 transition-colors">
+                          <CaretDown className="w-3.5 h-3.5" weight="bold" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Startup Name
+                {/* Right Side: Description */}
+                <div className="lg:col-span-5 space-y-3">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                    Value Proposition
                   </label>
-                  <input
-                    type="text"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
-                    placeholder="Type your startup name..."
-                    value={formData.name}
+                  <textarea
+                    className="w-full bg-gray-50 border border-gray-100 rounded-3xl px-6 py-5 font-medium focus:ring-4 focus:ring-yellow-500/10 focus:border-yellow-500/50 focus:outline-none min-h-[170px] lg:h-[135px] dark:bg-black/50 dark:border-zinc-800 dark:text-white transition-all text-sm leading-relaxed resize-none"
+                    placeholder="Describe your solution and the problem you are solving..."
+                    value={formData.description}
                     onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
+                      setFormData({ ...formData, description: e.target.value })
                     }
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Sector
-                  </label>
-                  <div className="relative">
-                    <select
-                      className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
-                      value={formData.sector}
-                      onChange={(e) =>
-                        setFormData({ ...formData, sector: e.target.value })
-                      }
-                    >
-                      {[
-                        "Adtech",
-                        "Agriculture",
-                        "Agritech",
-                        "AI/ML",
-                        "Automotive",
-                        "Aviation",
-                        "Biotech",
-                        "Blockchain",
-                        "Circular Economy",
-                        "Cleantech",
-                        "Construction",
-                        "Consumer Electronics",
-                        "Cybersecurity",
-                        "Data & Analytics",
-                        "Deeptech",
-                        "Defense",
-                        "Design",
-                        "Direct-to-Consumer (DTC)",
-                        "E-commerce",
-                        "Edtech",
-                        "Energy",
-                        "Enterprise",
-                        "Entertainment",
-                        "Environment",
-                        "Events",
-                        "Fashion",
-                        "Fintech",
-                        "Foodtech",
-                        "Gaming",
-                        "Govtech",
-                        "Hardware",
-                        "Healthtech",
-                        "HRtech",
-                        "IoT",
-                        "Insurtech",
-                        "Legaltech",
-                        "Logistics",
-                        "Manufacturing",
-                        "Marine",
-                        "Marketplace",
-                        "Marketing",
-                        "Media",
-                        "Mining",
-                        "Mobility",
-                        "Nanotechnology",
-                        "Network Security",
-                        "Non-profit",
-                        "Other",
-                        "Proptech",
-                        "Real Estate",
-                        "Retail",
-                        "Robotics",
-                        "SaaS",
-                        "Security",
-                        "Smart City",
-                        "Smart Home",
-                        "Social Media",
-                        "Social Impact",
-                        "Software",
-                        "Space",
-                        "Sports",
-                        "Supply Chain",
-                        "Sustainability",
-                        "Technology",
-                        "Telecommunications",
-                        "Transportation",
-                        "Travel",
-                        "Virtual Reality (VR)",
-                        "Wearables",
-                        "Wellness",
-                      ].map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                      <CaretDown className="w-4 h-4" weight="bold" />
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Stage
-                  </label>
-                  <div className="relative">
-                    <select
-                      className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
-                      value={formData.stage}
-                      onChange={(e) =>
-                        setFormData({ ...formData, stage: e.target.value })
-                      }
-                    >
-                      {[
-                        "Pre-seed",
-                        "Seed",
-                        "Series A",
-                        "Series B+",
-                        "Growth",
-                      ].map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                      <CaretDown className="w-4 h-4" weight="bold" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                  Short Description
-                </label>
-                <textarea
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none min-h-[100px] dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
-                  placeholder="Describe what you do in a few sentences..."
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                />
               </div>
 
-              <button
-                onClick={handleMatch}
-                className="w-full py-4 bg-yellow-400 text-white font-bold rounded-xl hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-400/30 flex items-center justify-center gap-2 text-lg hover:-translate-y-1"
-                disabled={!formData.name || !formData.description}
-              >
-                Find My Match
-              </button>
+              <div className="pt-6 border-t border-gray-100 dark:border-white/5 flex justify-end">
+                <button
+                    onClick={handleMatch}
+                    className="group px-10 py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center justify-center gap-3 text-base dark:bg-white dark:text-black dark:hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1 active:translate-y-0"
+                    disabled={!formData.name || !formData.description}
+                >
+                    <span>Analyze & Match</span>
+                    <Sparkle className="w-5 h-5 group-hover:rotate-12 transition-transform text-yellow-500" weight="fill" />
+                </button>
+              </div>
             </div>
           )}
 
           {step === "matching" && (
-            <div className="flex flex-col items-center justify-center h-full py-12 md:py-20 text-center space-y-6">
+            <div className="flex flex-col items-center justify-center h-full py-20 text-center space-y-8 animate-in fade-in duration-500">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
+                <div className="w-24 h-24 rounded-4xl bg-yellow-400/10 flex items-center justify-center relative border border-yellow-400/20">
+                    <Sparkle className="w-10 h-10 text-yellow-500 animate-pulse" weight="fill" />
+                    <div className="absolute inset-0 rounded-4xl border-t-2 border-yellow-400 animate-spin"></div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  Analyzing your startup...
+              <div className="max-w-xs">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+                  Consulting Sophia...
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Scanning our database for the best fit.
+                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                  Our intelligence engine is analyzing your profile against 5,000+ global investment thesis patterns.
                 </p>
               </div>
             </div>
           )}
 
           {step === "results" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold text-sm mb-4 dark:bg-green-500/20 dark:text-green-400">
-                  <CheckCircle className="w-4 h-4" weight="bold" />
-                  Found {matches.length} Matches
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-4">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-600 rounded-full font-black text-[10px] uppercase tracking-wider mb-3 dark:bg-green-500/20 dark:text-green-400 border border-green-500/20">
+                    <CheckCircle className="w-3 h-3" weight="bold" />
+                    Analysis Complete
+                  </div>
+                  <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">
+                    Optimal <span className="text-yellow-500">Matches</span>
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+                    Found {matches.length} investors whose thesis aligns with your roadmap.
+                  </p>
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Best Matches for <span className="text-yellow-500">{formData.name}</span>
-                </h3>
-                <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">
-                  Based on your sector and stage.
-                </p>
+                
+                <button
+                  onClick={reset}
+                  className="px-6 py-3 bg-gray-100 text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition-all font-bold rounded-2xl text-xs uppercase tracking-widest dark:bg-zinc-900 dark:text-zinc-500 dark:hover:text-white dark:hover:bg-zinc-800 border border-transparent hover:border-gray-300 dark:hover:border-zinc-700"
+                >
+                  New Search
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-1 custom-scrollbar">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[450px] overflow-y-auto px-1 py-1 custom-scrollbar">
                 {matches.length > 0 ? (
                   matches.map((inv) => (
-                    <div key={inv.id} className="relative group">
-                      <InvestorCard
-                        investor={inv}
-                        isSaved={false}
-                        onToggleSave={() => {}}
-                      />
-                      {matchReasons[inv.id] && (
-                        <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-blue-800 dark:text-blue-200 border border-blue-100 dark:border-blue-800 animate-in fade-in slide-in-from-top-2 leading-relaxed shadow-sm">
-                          <div className="flex gap-2 mb-1">
-                            <span className="font-bold">AI Analysis:</span>
-                          </div>
-                          {matchReasons[inv.id]}
+                    <div key={inv.id} className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-500">
+                      <div className="bg-gray-50/50 dark:bg-black/40 rounded-[2.5rem] p-3 border border-gray-100 dark:border-white/5 transition-all hover:border-yellow-500/30 hover:shadow-xl hover:shadow-yellow-500/5 group h-full flex flex-col">
+                        <div className="shrink-0">
+                          <InvestorCard
+                            investor={inv}
+                            isSaved={false}
+                            onToggleSave={() => {}}
+                            variant="mini"
+                          />
                         </div>
-                      )}
+                        
+                        {matchReasons[inv.id] && (
+                          <div className="px-3 pb-3 pt-1 mt-auto">
+                             <div className="relative p-4 bg-white dark:bg-zinc-900/50 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden group-hover:border-yellow-500/20 transition-all">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500/20 group-hover:bg-yellow-500 transition-colors"></div>
+                                <div className="flex items-center gap-2 mb-2 text-yellow-500">
+                                  <Sparkle className="w-3 h-3" weight="fill" />
+                                  <span className="text-[9px] font-black uppercase tracking-widest">Match Analysis</span>
+                                </div>
+                                <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed font-medium line-clamp-3 group-hover:line-clamp-none transition-all duration-500">
+                                  {matchReasons[inv.id]}
+                                </p>
+                             </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-2 text-center py-10 text-gray-500 border-2 border-dashed border-gray-200 rounded-2xl dark:border-zinc-800">
-                    No exact matches found. Try broadening your description.
+                  <div className="col-span-2 text-center py-20 bg-gray-50/50 dark:bg-black/20 rounded-[2.5rem] border-2 border-dashed border-gray-100 dark:border-zinc-800">
+                    <div className="w-16 h-16 bg-white dark:bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100 dark:border-zinc-800">
+                       <Sparkle className="w-8 h-8 text-gray-300 dark:text-zinc-700" />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No exact matches</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-500 max-w-xs mx-auto">
+                      Sophia couldn't find a direct match. Try expanding your value proposition description.
+                    </p>
                   </div>
                 )}
               </div>
-
-              <button
-                onClick={reset}
-                className="w-full py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
-              >
-                Search Again
-              </button>
             </div>
           )}
         </div>

@@ -27,6 +27,7 @@ interface InvestorCardProps {
   onEdit?: (investor: Investor) => void;
   onSelect?: (id: string) => void;
   isSelected?: boolean;
+  variant?: "default" | "mini";
 }
 
 export function InvestorCard({
@@ -37,6 +38,7 @@ export function InvestorCard({
   onEdit,
   onSelect,
   isSelected = false,
+  variant = "default",
 }: InvestorCardProps) {
   const router = useRouter();
 
@@ -51,7 +53,8 @@ export function InvestorCard({
   const cardContent = (
     <div 
       className={cn(
-        "glass-card group flex flex-col p-6 rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden h-full dark:bg-zinc-900/60 dark:border-white/10 dark:hover:bg-white/10",
+        "glass-card group flex flex-col rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden h-full dark:bg-zinc-900/60 dark:border-white/10 dark:hover:bg-white/10",
+        variant === "mini" ? "p-4" : "p-6",
         isSelected && "ring-2 ring-yellow-500 border-transparent",
         !onEdit && "hover:-translate-y-1 hover:shadow-xl cursor-pointer"
       )}
@@ -79,10 +82,11 @@ export function InvestorCard({
       <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500 dark:from-white/5"></div>
 
       {/* Header: Logo & Type */}
-      <div className="flex justify-between items-start mb-4 z-10">
+      <div className={cn("flex justify-between items-start z-10", variant === "mini" ? "mb-3" : "mb-4")}>
         <div
           className={cn(
-            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden bg-yellow-400 border border-gray-100 dark:border-white/5",
+            "rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden bg-yellow-400 border border-gray-100 dark:border-white/5",
+            variant === "mini" ? "w-10 h-10" : "w-14 h-14"
           )}
         >
           <BrandLogo 
@@ -125,40 +129,46 @@ export function InvestorCard({
       </div>
 
       {/* Content: Name & Desc */}
-      <div className="mb-4 z-10 grow">
-        <h3 className="text-xl font-bold text-gray-900 leading-tight mb-1 group-hover:text-black transition-colors dark:text-white dark:group-hover:text-white">
+      <div className={cn("z-10 grow", variant === "mini" ? "mb-3" : "mb-4")}>
+        <h3 className={cn(
+          "font-bold text-gray-900 leading-tight mb-1 group-hover:text-black transition-colors dark:text-white dark:group-hover:text-white",
+          variant === "mini" ? "text-base" : "text-xl"
+        )}>
           {investor.name}
         </h3>
         <div className="flex items-center text-xs text-gray-500 mb-3 font-medium dark:text-gray-400">
           <MapPin className="w-3.5 h-3.5 mr-1" weight="bold" />
           {investor.location}
         </div>
-        <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed dark:text-gray-300">
+        <p className={cn(
+          "text-sm text-gray-600 leading-relaxed dark:text-gray-300",
+          variant === "mini" ? "line-clamp-2" : "line-clamp-3"
+        )}>
           {investor.description}
         </p>
       </div>
 
       {/* Tags */}
-      <div className="flex flex-wrap gap-2 mb-6 z-10">
-        {investor.focus.slice(0, 3).map((tag) => (
+      <div className={cn("flex flex-wrap gap-2 z-10", variant === "mini" ? "mb-4" : "mb-6")}>
+        {investor.focus.slice(0, variant === "mini" ? 2 : 3).map((tag) => (
           <span
             key={tag}
-            className="px-2.5 py-1 rounded-lg bg-gray-100/50 text-xs font-semibold text-gray-600 border border-gray-100/50 group-hover:bg-white/80 transition-colors dark:bg-white/5 dark:text-gray-300 dark:border-white/10 dark:group-hover:bg-white/10"
+            className="px-2.5 py-1 rounded-lg bg-gray-100/50 text-[10px] sm:text-xs font-semibold text-gray-600 border border-gray-100/50 group-hover:bg-white/80 transition-colors dark:bg-white/5 dark:text-gray-300 dark:border-white/10 dark:group-hover:bg-white/10"
           >
             {tag}
           </span>
         ))}
-        {investor.focus.length > 3 && (
+        {investor.focus.length > (variant === "mini" ? 2 : 3) && (
           <span className="px-2 py-1 text-xs font-medium text-gray-400 dark:text-gray-500">
-            +{investor.focus.length - 3} more
+            +{investor.focus.length - (variant === "mini" ? 2 : 3)} more
           </span>
         )}
       </div>
 
       {/* Footer: Action */}
-      <div className="mt-auto pt-4 border-t border-gray-100/50 flex justify-between items-center z-10 dark:border-white/10">
+      <div className={cn("mt-auto flex justify-between items-center z-10", variant !== "mini" && "pt-4 border-t border-gray-100/50 dark:border-white/10")}>
         <div className="text-xs font-medium text-gray-500">
-          {investor.investmentRange && (
+          {investor.investmentRange && variant !== "mini" && (
             <span className="block text-gray-400 text-[10px] uppercase tracking-wide dark:text-gray-500">
               Range: {investor.investmentRange}
             </span>
@@ -174,10 +184,13 @@ export function InvestorCard({
                   onEdit(investor);
                 }}
                 type="button"
-                className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-900 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white dark:hover:text-black cursor-pointer"
+                className={cn(
+                  "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-900 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white dark:hover:text-black cursor-pointer",
+                  variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+                )}
                 title="Edit Profile"
               >
-                <PencilSimple className="w-4 h-4" weight="bold" />
+                <PencilSimple className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
               </button>
 
               <button 
@@ -186,15 +199,21 @@ export function InvestorCard({
                   router.push(`/dashboard/investors/${investor.id}`);
                 }}
                 type="button"
-                className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-yellow-500 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-yellow-500 dark:hover:text-black cursor-pointer"
+                className={cn(
+                  "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-yellow-500 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-yellow-500 dark:hover:text-black cursor-pointer",
+                  variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+                )}
                 title="View Profile"
               >
-                <ArrowRight className="w-4 h-4" weight="bold" />
+                <ArrowRight className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
               </button>
             </>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white group-hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:group-hover:bg-white dark:group-hover:text-black">
-              <ArrowRight className="w-4 h-4" weight="bold" />
+            <div className={cn(
+              "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white group-hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:group-hover:bg-white dark:group-hover:text-black",
+              variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+            )}>
+              <ArrowRight className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
             </div>
           )}
         </div>
