@@ -10,8 +10,32 @@ export async function GET(req: Request) {
     const limit = parseInt(searchParams.get("limit") || "12");
     const search = searchParams.get("search") || "";
     const type = searchParams.get("type") || "";
+    
+    // Auth check for subscription status
+    const token = req.headers.get("Authorization")?.split(" ")[1];
+    let isSubscribed = false;
+    if (token) {
+      const { verifyToken } = await import("@/lib/auth");
+      const { getSubscriptionStatus } = await import("@/lib/subscription");
+      const decoded = await verifyToken(token);
+      if (decoded) {
+        const { is_subscribed } = await getSubscriptionStatus(decoded.user.id || decoded.user._id, decoded.user.email);
+        isSubscribed = is_subscribed;
+      }
+    }
 
     await connectDB();
+
+    // Limit non-subscribers to 1.5 pages (18 items total)
+    const MAX_FREE_ITEMS = 18;
+    const effectiveLimit = !isSubscribed ? Math.min(limit, Math.max(0, MAX_FREE_ITEMS - (page - 1) * limit)) : limit;
+
+    if (!isSubscribed && (page - 1) * limit >= MAX_FREE_ITEMS) {
+      return NextResponse.json({
+        investors: [],
+        pagination: { total: MAX_FREE_ITEMS, page, limit, pages: 2, restricted: true }
+      });
+    }
 
     // Build Query
     const query: any = { isApproved: true };
@@ -35,13 +59,15 @@ export async function GET(req: Request) {
 
     const skip = (page - 1) * limit;
 
-    const [investors, total] = await Promise.all([
+    const [investors, totalCount] = await Promise.all([
       Investor.find(query)
         .sort({ isFeatured: -1, created_at: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(effectiveLimit),
       Investor.countDocuments(query),
     ]);
+
+    const total = isSubscribed ? totalCount : Math.min(totalCount, MAX_FREE_ITEMS);
 
     // Transform _id to id to match frontend interface
     const formattedInvestors = investors.map((inv) => ({
@@ -73,6 +99,7 @@ export async function GET(req: Request) {
         page,
         limit,
         pages: Math.ceil(total / limit),
+        restricted: !isSubscribed && totalCount > MAX_FREE_ITEMS,
       },
     });
   } catch (error) {

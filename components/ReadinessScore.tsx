@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowsClockwise, Lightning, CircleNotch } from "@phosphor-icons/react";
+import { ArrowsClockwise, Lightning, CircleNotch, Lock } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 interface ReadinessScoreProps {
   score: number;
@@ -18,6 +19,7 @@ export default function ReadinessScore({
   onUpdate,
 }: ReadinessScoreProps) {
   const [analyzing, setAnalyzing] = useState(false);
+  const { is_subscribed, is_admin } = useSubscription();
 
   // Calculate circle properties
   const radius = 60;
@@ -34,6 +36,10 @@ export default function ReadinessScore({
   const colorClass = getColor(score);
 
   const handleAnalyze = async () => {
+    if (!is_subscribed && !is_admin) {
+      toast.info("AI Readiness Analysis is a premium feature. Please upgrade to Pro.");
+      return;
+    }
     setAnalyzing(true);
     const token = localStorage.getItem("token");
     try {
@@ -72,10 +78,14 @@ export default function ReadinessScore({
         <button
           onClick={handleAnalyze}
           disabled={analyzing}
-          className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 dark:hover:bg-white/10 dark:text-gray-500"
-          title="Recalculate Score with AI"
+          className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 dark:hover:bg-white/10 dark:text-gray-500 flex items-center justify-center relative group"
+          title={(!is_subscribed && !is_admin) ? "Upgrade to Pro for AI Analysis" : "Recalculate Score with AI"}
         >
-          <ArrowsClockwise className={`w-3.5 h-3.5 ${analyzing ? "animate-spin" : ""}`} weight="bold" />
+          {(!is_subscribed && !is_admin) ? (
+            <Lock className="w-3.5 h-3.5 text-gray-400 group-hover:text-yellow-600" weight="bold" />
+          ) : (
+            <ArrowsClockwise className={`w-3.5 h-3.5 ${analyzing ? "animate-spin" : ""}`} weight="bold" />
+          )}
         </button>
       </div>
 

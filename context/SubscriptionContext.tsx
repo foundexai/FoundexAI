@@ -27,6 +27,7 @@ export interface SubscriptionState {
 interface SubscriptionContextType extends SubscriptionState {
   refreshSubscription: () => Promise<void>;
   hasAccess: (minimumPlan?: string) => boolean;
+  hasReachedLimit: (page: number, currentItemCount: number) => boolean;
   canUseFeature: (feature: string) => boolean;
 }
 
@@ -115,6 +116,15 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({
     [state.is_admin, state.plan_level]
   );
 
+  const hasReachedLimit = useCallback(
+    (page: number, currentItemCount: number) => {
+      if (state.is_subscribed || state.is_admin) return false;
+      // 1.5 pages limit (18 items)
+      return (page - 1) * 12 + currentItemCount >= 18;
+    },
+    [state.is_subscribed, state.is_admin]
+  );
+
   const canUseFeature = useCallback(
     (feature: string) => {
       if (state.is_admin) return true;
@@ -142,6 +152,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({
         ...state,
         refreshSubscription: fetchSubscription,
         hasAccess,
+        hasReachedLimit,
         canUseFeature,
       }}
     >

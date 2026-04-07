@@ -20,6 +20,10 @@ export async function POST(
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
+    const { requireSubscription } = await import("@/lib/subscription");
+    const guard = await requireSubscription(decoded.user.id || decoded.user._id, decoded.user.email);
+    if (guard.blocked) return guard.response as NextResponse;
+
     const { id } = await params;
     const startup = await Startup.findOne({
       _id: id,

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MagicWand, CircleNotch, Plus, X, FloppyDiskBack, NotePencil } from "@phosphor-icons/react";
+import { MagicWand, CircleNotch, Plus, X, FloppyDiskBack, NotePencil, Lock } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 interface BusinessModelCardProps {
   startupId: string;
@@ -33,6 +34,7 @@ export default function BusinessModelCard({
 }: BusinessModelCardProps) {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const { is_subscribed, is_admin } = useSubscription();
   const [currentModels, setCurrentModels] = useState<string[]>(selectedModels);
   const [customModel, setCustomModel] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState<string[] | null>(null);
@@ -60,6 +62,10 @@ export default function BusinessModelCard({
   };
 
   const handleSuggest = async () => {
+    if (!is_subscribed && !is_admin) {
+      toast.info("Sophia's Business Intelligence is a premium feature. Please upgrade to Pro.");
+      return;
+    }
     setIsSuggesting(true);
     setAiSuggestions(null);
     // Simulate AI suggestion
@@ -160,16 +166,24 @@ export default function BusinessModelCard({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-4">
+                <div className="text-center py-4 relative group/ai">
                   <p className="text-gray-500 text-xs mb-3">
                     Not sure which models fit? Sophia can suggest types based on your industry.
                   </p>
+                  
+                  {(!is_subscribed && !is_admin) && (
+                    <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center rounded-xl border border-yellow-400/10 scale-105 opacity-0 group-hover/ai:opacity-100 transition-all duration-300 pointer-events-none">
+                      <Lock className="w-5 h-5 text-yellow-400 mb-1" weight="bold" />
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Premium Feature</span>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleSuggest}
                     disabled={isSuggesting}
                     className="bg-yellow-500 text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-yellow-600 hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed shadow-yellow-500/20"
                   >
-                    {isSuggesting && <CircleNotch className="w-4 h-4 animate-spin" />}
+                    {(!is_subscribed && !is_admin) ? <Lock className="w-4 h-4" weight="bold" /> : (isSuggesting && <CircleNotch className="w-4 h-4 animate-spin" />)}
                     {isSuggesting ? "Analyzing..." : "Generate Suggestion"}
                   </button>
                 </div>

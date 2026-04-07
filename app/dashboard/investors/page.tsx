@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   MagnifyingGlass,
   Funnel,
@@ -8,11 +9,14 @@ import {
   CircleNotch,
   Plus,
   Sparkle,
+  Lock,
 } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 import { MatchInvestorModal } from "@/components/MatchInvestorModal";
 import { AIFilterModal } from "@/components/AIFilterModal";
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { toast } from "sonner";
 import AddInvestorModal from "@/components/AddInvestorModal";
 import EditInvestorDialog from "@/components/admin/EditInvestorDialog";
@@ -22,6 +26,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function InvestorsPage() {
   const { token, user, refreshUser } = useAuth();
+  const { is_subscribed, is_admin, hasReachedLimit } = useSubscription();
   const queryClient = useQueryClient();
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -196,18 +201,34 @@ export default function InvestorsPage() {
             className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white outline-none"
           />
           <button
-            onClick={() => setIsMatchModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-2 bg-black hover:bg-zinc-900 text-yellow-400 rounded-xl font-black text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+            onClick={() => {
+              if (!is_subscribed && !is_admin) {
+                toast.info("Upgrade to Pro to use AI Matchmaker");
+                return;
+              }
+              setIsMatchModalOpen(true);
+            }}
+            className={cn(
+              "flex items-center gap-2 px-6 py-2 rounded-xl font-black text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0",
+              is_subscribed || is_admin ? "bg-black text-yellow-400 hover:bg-zinc-900" : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            )}
           >
-            Match Me
+            Match Me {!is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
           </button>
           
           <button 
-            onClick={() => setIsFilterModalOpen(true)}
+            onClick={() => {
+              if (!is_subscribed && !is_admin) {
+                toast.info("AI Search is a premium feature");
+                return;
+              }
+              setIsFilterModalOpen(true);
+            }}
             className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0 cursor-pointer"
           >
             <FadersHorizontal className="w-4 h-4" weight="bold" />
             <span className="hidden lg:inline">AI Search</span>
+            {!is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
           </button>
 
           <button
@@ -229,7 +250,7 @@ export default function InvestorsPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
             {investors.map((investor) => (
               <InvestorCard
                 key={investor.id}
@@ -239,6 +260,27 @@ export default function InvestorsPage() {
                 isSaving={saveMutation.isPending && saveMutation.variables === investor.id}
               />
             ))}
+            
+            {/* Limit Banner Overlay */}
+            {data?.pagination?.restricted && currentPage === 2 && (
+               <div className="col-span-full mt-8 p-8 rounded-3xl bg-linear-to-br from-zinc-900 to-black border border-yellow-400/20 text-center space-y-4 shadow-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-yellow-400/30"></div>
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-yellow-400/10 flex items-center justify-center mb-4 border border-yellow-400/20">
+                      <Lock className="w-6 h-6 text-yellow-400" weight="bold" />
+                    </div>
+                    <h3 className="text-xl font-black text-white tracking-tight">Unlock 1,500+ More Investors</h3>
+                    <p className="text-zinc-400 text-sm max-w-md mx-auto">
+                      You've reached the limit for the free tier. Upgrade to Pro to access our full global database and AI matching tools.
+                    </p>
+                    <Link href="/dashboard/pricing" className="mt-6 inline-block">
+                      <button className="px-8 py-3 bg-yellow-400 text-black rounded-xl font-black text-sm hover:bg-yellow-500 transition-all hover:-translate-y-0.5 shadow-lg shadow-yellow-400/20">
+                        View Pricing
+                      </button>
+                    </Link>
+                  </div>
+               </div>
+            )}
           </div>
 
           <Pagination 

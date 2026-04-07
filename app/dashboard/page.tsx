@@ -15,7 +15,8 @@ import DocumentsSection from "@/components/dashboard/DocumentsSection";
 import SelectedInvestors from "@/components/dashboard/SelectedInvestors";
 import ReadinessScore from "@/components/ReadinessScore";
 import StartupSwitcher from "@/components/dashboard/StartupSwitcher";
-import { NotePencil, FloppyDiskBack, X, MagicWand, Sparkle, CircleNotch, MagnifyingGlass } from "@phosphor-icons/react";
+import { NotePencil, FloppyDiskBack, X, MagicWand, Sparkle, CircleNotch, MagnifyingGlass, Lock } from "@phosphor-icons/react";
+import { useSubscription } from "@/context/SubscriptionContext";
 
 
 export default function Dashboard() {
@@ -203,12 +204,17 @@ function DescriptionBlock({
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [improving, setImproving] = useState(false);
+  const { is_subscribed, is_admin } = useSubscription();
 
   useEffect(() => {
     setDescription(startup.business_description);
   }, [startup.business_description]);
 
   async function handleAskSophia() {
+    if (!is_subscribed && !is_admin) {
+      toast.info("Sophia's Business Description AI is a premium feature. Please upgrade to Pro.");
+      return;
+    }
     setImproving(true);
     const token = localStorage.getItem("token");
     try {
@@ -357,7 +363,14 @@ function DescriptionBlock({
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center space-y-6">
+                    <div className="text-center space-y-6 relative group/ai">
+                      {(!is_subscribed && !is_admin) && (
+                        <div className="absolute inset-x-0 -top-10 -bottom-10 bg-black/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center rounded-4xl border border-yellow-400/10 scale-105 opacity-0 group-hover/ai:opacity-100 transition-all duration-300 pointer-events-none">
+                          <Lock className="w-10 h-10 text-yellow-400 mb-2" weight="bold" />
+                          <span className="text-xs font-black text-white uppercase tracking-widest">Premium Intelligence</span>
+                        </div>
+                      )}
+
                       <div className="w-16 h-16 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
                         <Sparkle className="w-8 h-8 text-yellow-500" />
                       </div>
@@ -370,10 +383,14 @@ function DescriptionBlock({
                         disabled={improving}
                         className="bg-yellow-500 text-white font-black text-sm px-8 py-4 rounded-2xl hover:bg-yellow-600 hover:shadow-xl hover:scale-105 transition-all flex items-center gap-3 mx-auto disabled:opacity-50 shadow-lg shadow-yellow-500/30"
                       >
-                        {improving ? (
-                          <CircleNotch className="w-5 h-5 animate-spin" />
+                        {(!is_subscribed && !is_admin) ? (
+                          <Lock className="w-5 h-5" weight="bold" />
                         ) : (
-                          <MagicWand className="w-5 h-5" />
+                          improving ? (
+                            <CircleNotch className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <MagicWand className="w-5 h-5" />
+                          )
                         )}
                         {improving ? "Sophia is thinking..." : "Generate Suggestion"}
                       </button>
