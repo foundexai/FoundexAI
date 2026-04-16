@@ -118,6 +118,12 @@ function StartupProfileContent() {
 
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Not authenticated");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
 
@@ -125,7 +131,7 @@ function StartupProfileContent() {
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${document.cookie.match(/token=([^;]+)/)?.[1]}`
+          "Authorization": `Bearer ${token}`
         },
         body: formData,
       });
@@ -136,7 +142,10 @@ function StartupProfileContent() {
       // 2. Update Database
       const updateRes = await fetch(`/api/startups/${startupId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ logo_url: url }),
       });
 

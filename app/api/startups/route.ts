@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const { user } = decoded;
 
     const body = await req.json();
-    const { company_name, business_description, sector, location, website_url, funding_stage } = body;
+    const { company_name, business_description, sector, location, website_url, funding_stage, logo_url } = body;
 
     if (!company_name || !business_description) {
       return NextResponse.json(
@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       location,
       website_url,
       funding_stage: funding_stage || "Pre-seed",
+      logo_url,
     });
 
     // Notify Admins
