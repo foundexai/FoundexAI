@@ -169,6 +169,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Logout failed:", e);
     }
     localStorage.removeItem("token");
+    localStorage.removeItem("activeStartupId");
     setToken(null);
     setUser(null);
   };

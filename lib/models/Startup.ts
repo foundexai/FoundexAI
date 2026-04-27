@@ -79,9 +79,29 @@ const StartupSchema = new mongoose.Schema({
 // Helper to ensure stage consistency
 // Helper to ensure stage consistency
 StartupSchema.pre("save", async function () {
-  if (this.funding_stage && !this.stage) {
-    this.stage =
-      this.funding_stage === "Pre-seed" ? "Pre-Seed" : this.funding_stage;
+  // Mapping between funding_stage (Dashboard) and stage (Directory/Cards)
+  const syncMap: { [key: string]: string } = {
+    "Pre-seed": "Pre-Seed",
+    "Seed": "Seed",
+    "Series A": "Series A",
+    "Series B+": "Series B+",
+  };
+
+  const reverseSyncMap: { [key: string]: string } = {
+    "Pre-Seed": "Pre-seed",
+    "Seed": "Seed",
+    "Series A": "Series A",
+    "Series B+": "Series B+",
+  };
+
+  // Sync funding_stage -> stage
+  if (this.funding_stage && syncMap[this.funding_stage]) {
+    this.stage = syncMap[this.funding_stage] as any;
+  }
+  
+  // Sync stage -> funding_stage (if funding_stage not already set or if stage was the one changed)
+  if (this.stage && !this.funding_stage && reverseSyncMap[this.stage]) {
+    this.funding_stage = reverseSyncMap[this.stage] as any;
   }
 });
 

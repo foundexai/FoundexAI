@@ -84,7 +84,8 @@ function AuthForm() {
         if (isLogin) {
           login(data.token);
           toast.success("Welcome back!");
-          router.push(callbackUrl);
+          // Use hard refresh to ensure Sophia and other states are perfectly initialized
+          window.location.href = callbackUrl;
         } else {
           toast.success("Account created successfully! Please sign in.");
           setIsLogin(true);
