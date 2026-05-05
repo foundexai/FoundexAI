@@ -67,9 +67,9 @@ export async function POST(req: Request) {
         Search Query: "${query}"
 
         Task: 
-        Analyze the list of Investors below and identify the TOP 3 best matches for this specific search query.
-        You MUST ALWAYS return exactly 3 matches, even if the fit is not perfect. Pick the closest possible candidates.
-        Provide a DETAILED strategic rationale for each match explaining why they fit the user's specific query.
+        Analyze the list of Investors below and identify the BEST matches for this specific search query.
+        Return 0 to 3 matches. Only return an investor if there is a CLEAR strategic alignment with the query. 
+        Provide a DETAILED strategic rationale for each match explaining why they fit.
         
         Investors List:
         ${JSON.stringify(preRanked)}
@@ -95,8 +95,8 @@ export async function POST(req: Request) {
         - Description: ${description}
 
         Task: 
-        Analyze the list of Investors below and identify the TOP 3 best matches for this startup.
-        You MUST ALWAYS return exactly 3 matches, even if the fit is not perfect. Pick the closest possible candidates.
+        Analyze the list of Investors below and identify the BEST matches for this startup.
+        Return 0 to 3 matches. Only return an investor if there is a CLEAR strategic alignment between their investment thesis and this startup's profile.
         Provide a DETAILED strategic rationale for each match.
         
         Reasoning Requirements:
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
             messages: [
               {
                 role: "system",
-                content: "You are a helpful AI investment analyst. Output valid JSON only. Always return exactly 3 matches.",
+                content: "You are a helpful AI investment analyst. Output valid JSON only. Return 0-3 matches based on quality of fit. Do not force matches that do not exist.",
               },
               {
                 role: "user",
@@ -168,41 +168,12 @@ export async function POST(req: Request) {
       console.warn("AI Service Timeout or Error, using local fallback:", error);
     }
 
-    // 4. Fallback Logic if AI failed
+    // 4. Handle AI failure
     if (!aiResult) {
-      console.log("Running local matching fallback...");
-      const searchText = (query || description || "").toLowerCase();
-      const keywords = searchText.split(/\W+/).filter((k: string) => k.length > 2);
-      
-      const scored = allInvestors.map(inv => {
-        let score = 0;
-        const invText = (inv.name + " " + inv.type + " " + inv.focus.join(" ") + " " + inv.description).toLowerCase();
-        
-        // Exact matches give high score
-        if (query && invText.includes(query.toLowerCase())) score += 10;
-        
-        // Keyword matches
-        keywords.forEach((word: string) => {
-          if (invText.includes(word)) score += 2;
-        });
-
-        // Stage matching (if profile provided)
-        if (stage && invText.includes(stage.toLowerCase())) score += 5;
-        if (sector && invText.includes(sector.toLowerCase())) score += 5;
-
-        return { ...inv, score };
-      });
-
-      const top3 = scored
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
-
-      aiResult = {
-        matches: top3.map(inv => ({
-          id: inv.id,
-          reason: `Matched based on keyword overlap in your ${query ? "query" : "startup profile"}. ${inv.name} has a strong focus on ${inv.focus.slice(0, 3).join(", ")} which correlates with your interest in "${keywords.slice(0, 2).join(", ")}".`
-        }))
-      };
+      return NextResponse.json(
+        { error: "Our intelligence engine (Sophia) is temporarily unavailable. Please try again in a moment." },
+        { status: 503 }
+      );
     }
 
     // 5. Map back to full investor objects to ensure frontend has all data

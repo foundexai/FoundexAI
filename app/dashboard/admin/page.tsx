@@ -277,9 +277,6 @@ export default function AdminPage() {
       <div className="space-y-8">
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center dark:bg-red-900/20">
-              <ShieldWarning className="w-6 h-6 text-red-600 dark:text-red-400" weight="bold" />
-            </div>
             <div>
               <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                 Admin Dashboard

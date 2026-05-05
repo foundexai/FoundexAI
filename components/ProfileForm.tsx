@@ -65,8 +65,8 @@ export default function ProfileForm({
     }
 
     if (form.website_url && !form.website_url.startsWith("http")) {
-      toast.error("Website URL must start with http:// or https://");
-      return;
+      // Auto-prefix with https if missing
+      form.website_url = `https://${form.website_url}`;
     }
 
     setSubmitting(true);

@@ -17,7 +17,8 @@ import {
   DownloadSimple,
   Lock,
   ChartPieSlice,
-  NavigationArrow
+  NavigationArrow,
+  Sparkle
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -25,6 +26,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface ReportStats {
   startupsCount: number;
@@ -47,6 +49,7 @@ export default function ReportsPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { data: stats, isLoading } = useQuery<ReportStats>({
     queryKey: ["reports", "stats"],
@@ -57,6 +60,14 @@ export default function ReportsPage() {
     },
     staleTime: 60000,
   });
+
+  const FINTECH_DATA = [
+    { year: '2020', funding: 0.439 },
+    { year: '2021', funding: 1.37 },
+    { year: '2022', funding: 1.20 },
+    { year: '2023', funding: 0.96 },
+    { year: '2024', funding: 2.00 },
+  ];
 
   const handleDownloadReport = (reportTitle: string) => {
     if (user?.plan_type !== "license") {
@@ -81,7 +92,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white space-y-12 animate-in fade-in duration-700 pb-20">
+    <div className="min-h-screen bg-black text-white space-y-12 animate-in fade-in duration-700 pb-20 px-4 md:px-8">
       
       {/* Search & Identity Bar */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 pt-4">
@@ -96,17 +107,32 @@ export default function ReportsPage() {
           />
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-1.5 pr-4 rounded-2xl">
+        <div className="flex items-center gap-4 relative">
+          <button 
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-1.5 pr-4 rounded-2xl hover:bg-zinc-800 transition-colors"
+          >
             <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center font-black text-black">
               {user?.full_name?.[0].toUpperCase() || "U"}
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden sm:block text-left">
               <p className="text-sm font-black tracking-tight leading-none text-zinc-100">{user?.full_name || "User"}</p>
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{user?.user_type || "Admin"}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{user?.plan_type || "Starter"}</p>
             </div>
-            <CaretDown className="h-4 w-4 text-zinc-500 ml-2" weight="bold" />
-          </div>
+            <CaretDown className={cn("h-4 w-4 text-zinc-500 ml-2 transition-transform", isDropdownOpen && "rotate-180")} weight="bold" />
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
+               <div className="p-4 border-b border-zinc-800">
+                  <p className="text-xs font-bold text-zinc-100">{user?.full_name}</p>
+                  <p className="text-[10px] text-zinc-500">{user?.email}</p>
+               </div>
+               <Link href="/dashboard/profile" className="flex items-center gap-3 px-4 py-3 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all">
+                  <Users size={14} /> Profile Settings
+               </Link>
+            </div>
+          )}
         </div>
       </div>
 
@@ -125,52 +151,85 @@ export default function ReportsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="text-2xl font-black mb-2">Fintech Report 2025</h3>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Global Executive Summary</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Nigeria Executive Summary</span>
                 </div>
                 <ChartBar className="w-10 h-10 text-yellow-500" weight="duotone" />
               </div>
               <p className="text-zinc-400 text-sm leading-relaxed max-w-4xl">
-                Fintech in Africa has entered a new maturity phase in 2025. The exuberant funding cycle of 2022 to 2023 has tapered into a more disciplined, fundamentals-driven environment. However, the region continues to outperform global averages in digital payments penetration and mobile money activity. This report provides a forward-looking assessment of the African fintech landscape, drawing on macro indicators, investor behavior, and ecosystem development.
+                Fintech in Africa has entered a new maturity phase in 2025. Nigeria Fintech Funding has seen significant shifts, with 2024 showing a massive resurgence to $2.0B. Venture debt now makes up ~41% of total funding in 2025, a dramatic increase from just 17% in 2019. This evolution marks a transition to more sustainable, long-term capital structures within the ecosystem.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="bg-zinc-900/50 p-6 rounded-3xl border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sys Activity</p>
-                    <ChartLineUp className="w-5 h-5 text-yellow-500" />
+                    <div>
+                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">Nigeria Fintech Funding</p>
+                       <p className="text-[9px] text-zinc-600">Last 5 Years (USD Billions)</p>
+                    </div>
+                    <ChartLineUp className="w-5 h-5 text-[#B45F47]" />
                   </div>
-                  <div className="h-32 w-full mt-2">
-                     <svg className="w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
-                        <path 
-                          d={stats?.transactions.reduce((acc, curr, i) => {
-                            const x = (i / (stats.transactions.length - 1)) * 95;
-                            const y = 50 - (curr.value / Math.max(...stats.transactions.map(t => t.value), 1)) * 40;
-                            return i === 0 ? `M${x},${y}` : `${acc} L${x},${y}`;
-                          }, "") || "M0,30 L95,10"}
-                          fill="none" 
-                          stroke="#EAB308" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                        />
-                     </svg>
+                  <div className="h-64 w-full mt-2">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={FINTECH_DATA} margin={{ top: 20, right: 20, left: -20, bottom: 20 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#27272a" />
+                          <XAxis 
+                            dataKey="year" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }}
+                            dy={10}
+                            label={{ value: 'Year', position: 'insideBottom', offset: -10, fill: '#71717a', fontSize: 10, fontWeight: 'bold' }}
+                          />
+                          <YAxis 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }}
+                            domain={[0, 2.0]}
+                            ticks={[0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]}
+                          />
+                          <Tooltip 
+                            contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px' }}
+                            itemStyle={{ color: '#B45F47', fontWeight: 'bold' }}
+                            formatter={(value: any) => [`$${value}B`, "Funding"]}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="funding" 
+                            stroke="#B45F47" 
+                            strokeWidth={3}
+                            dot={{ r: 4, fill: '#B45F47', strokeWidth: 2, stroke: '#18181b' }}
+                            activeDot={{ r: 6, strokeWidth: 0 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="bg-zinc-900/50 p-6 rounded-3xl border border-white/5 space-y-4">
+                <div className="bg-zinc-900/50 p-6 rounded-3xl border border-white/5 space-y-4 flex flex-col justify-between">
                   <div className="flex justify-between items-center">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sectors</p>
-                    <ChartPieSlice className="w-5 h-5 text-zinc-400" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Key Ecosystem Shifts</p>
+                    <TrendUp className="w-5 h-5 text-zinc-400" />
                   </div>
-                  <div className="space-y-3">
-                    {stats?.topSectors.slice(0, 3).map((s, i) => (
-                      <div key={s.name} className="flex justify-between items-center">
-                        <span className="text-xs text-zinc-400">{s.name}</span>
-                        <div className="h-1 flex-1 mx-3 bg-zinc-800 rounded-full overflow-hidden">
-                           <div className="h-full bg-yellow-400" style={{ width: s.value }}></div>
-                        </div>
-                        <span className="text-[10px] font-black text-yellow-500">{s.value}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    <div>
+                       <div className="flex justify-between text-[10px] font-bold mb-2">
+                          <span className="text-zinc-500 uppercase tracking-widest">Venture Debt Share</span>
+                          <span className="text-yellow-500">41%</span>
+                       </div>
+                       <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-yellow-500 transition-all duration-1000" style={{ width: '41%' }}></div>
+                       </div>
+                       <p className="text-[9px] text-zinc-600 mt-2">Up from 17% in 2019</p>
+                    </div>
+                    <div>
+                       <div className="flex justify-between text-[10px] font-bold mb-2">
+                          <span className="text-zinc-500 uppercase tracking-widest">African Investor Base</span>
+                          <span className="text-zinc-300">31%</span>
+                       </div>
+                       <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-zinc-400 transition-all duration-1000" style={{ width: '31%' }}></div>
+                       </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -179,12 +238,17 @@ export default function ReportsPage() {
 
           {/* Featured Visual & Secondary Reports */}
           <div className="lg:col-span-4 flex flex-col gap-8">
-            <div className="bg-zinc-900/20 border border-zinc-800 rounded-[2.5rem] overflow-hidden group aspect-square lg:aspect-auto flex-1">
+            <div className="bg-zinc-900/20 border border-zinc-800 rounded-[2.5rem] overflow-hidden group aspect-square lg:aspect-auto flex-1 relative">
               <img 
                 src="https://images.unsplash.com/photo-1559526323-cb2f2fe2591b?q=80&w=1200" 
                 alt="Fintech Featured" 
                 className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000 grayscale group-hover:grayscale-0"
               />
+              <div className="absolute inset-0 bg-linear-to-t from-black to-transparent"></div>
+              <div className="absolute bottom-8 left-8 right-8">
+                 <p className="text-2xl font-black leading-tight mb-2">The Venture Debt Revolution</p>
+                 <p className="text-xs text-zinc-400">How alternative financing is scaling Africa's tech hubs.</p>
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -210,7 +274,7 @@ export default function ReportsPage() {
 
       {/* 2. INTELLIGENCE REPORTS HUB (Downloadable E-Reports) */}
       <section className="space-y-8 pt-10">
-        <div className="flex justify-between items-end">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-1 h-8 bg-zinc-700 rounded-full"></div>
@@ -282,9 +346,9 @@ export default function ReportsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10">
            {[
              { label: "Institutional Capital", value: "$4.1B", icon: Handshake },
-             { label: "Active Startups", value: stats?.startupsCount || "0", icon: NavigationArrow },
-             { label: "Vetted Investors", value: stats?.investorsCount || "0", icon: Sparkle },
-             { label: "Sectors Covered", value: "12", icon: GlobeSimple },
+             { label: "Active Investors", value: "614", icon: Sparkle },
+             { label: "Venture Deals (2024)", value: "487", icon: NavigationArrow },
+             { label: "Sectors Covered", value: "4", icon: GlobeSimple },
            ].map((stat, i) => (
              <div key={i} className="bg-zinc-900/40 p-6 rounded-3xl border border-zinc-800 flex flex-col items-center text-center gap-2">
                 <stat.icon className="w-5 h-5 text-zinc-600" />
@@ -299,15 +363,4 @@ export default function ReportsPage() {
   );
 }
 
-function Sparkle(props: any) {
-  return (
-    <svg 
-      {...props} 
-      viewBox="0 0 256 256" 
-      xmlns="http://www.w3.org/2000/svg" 
-      fill="currentColor"
-    >
-      <path d="M211,108.6l-31.5-12.7L166.8,64.4a12,12,0,0,0-21.6,0L132.5,95.9,101,108.6a12,12,0,0,0,0,21.6l31.5,12.7,12.7,31.5a12,12,0,0,0,21.6,0l12.7-31.5L211,130.2A12,12,0,0,0,211,108.6Z M80,64a8,8,0,0,1-8,8H56V88a8,8,0,0,1-16,0V72H24a8,8,0,0,1,0-16H40V40a8,8,0,0,1,16,0V56h16A8,8,0,0,1,80,64ZM80,192a8,8,0,0,1-8,8H56v16a8,8,0,0,1-16,0V200H24a8,8,0,0,1,0-16H40V168a8,8,0,0,1,16,0v16h16A8,8,0,0,1,80,192Z" />
-    </svg>
-  );
-}
+
