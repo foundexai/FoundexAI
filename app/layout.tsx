@@ -7,6 +7,7 @@ import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { MobileMenuProvider } from "@/context/MobileMenuContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
+import { TrialBanner } from "@/components/TrialBanner";
 import QueryProvider from "@/components/providers/QueryProvider";
 
 const manrope = Manrope({ subsets: ["latin"] });
@@ -39,6 +40,7 @@ export default function RootLayout({
             <AuthProvider>
               <SubscriptionProvider>
                 <MobileMenuProvider>
+                  <TrialBanner />
                   <Header />
                   {children}
                 </MobileMenuProvider>

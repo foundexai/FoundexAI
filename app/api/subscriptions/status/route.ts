@@ -22,9 +22,11 @@ export async function GET(req: Request) {
     }
 
     const userId = (decoded.user as any)._id || (decoded.user as any).id;
-    const userEmail = (decoded.user as any).email;
+    const userEmail = (decoded.user as any).email || (decoded as any).email;
 
+    console.log(`[API /subscriptions/status] Request from userId: ${userId}, email: ${userEmail}`);
     const status = await getSubscriptionStatus(userId, userEmail);
+    console.log(`[API /subscriptions/status] Returning status for ${userId}`);
 
     return NextResponse.json({ subscription: status });
   } catch (error) {

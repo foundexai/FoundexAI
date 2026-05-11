@@ -20,6 +20,8 @@ export interface SubscriptionState {
   cancel_at_period_end: boolean;
   connect_requests_used: number;
   connect_requests_limit: number;
+  is_trial_active: boolean;
+  trial_days_remaining: number;
   loading: boolean;
   error: string | null;
 }
@@ -48,6 +50,8 @@ const defaultState: SubscriptionState = {
   cancel_at_period_end: false,
   connect_requests_used: 0,
   connect_requests_limit: 0,
+  is_trial_active: false,
+  trial_days_remaining: 0,
   loading: true,
   error: null,
 };
@@ -118,11 +122,11 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({
 
   const hasReachedLimit = useCallback(
     (page: number, currentItemCount: number) => {
-      if (state.is_subscribed || state.is_admin) return false;
+      if (state.is_subscribed || state.is_admin || state.is_trial_active) return false;
       // 1.5 pages limit (18 items)
       return (page - 1) * 12 + currentItemCount >= 18;
     },
-    [state.is_subscribed, state.is_admin]
+    [state.is_subscribed, state.is_admin, state.is_trial_active]
   );
 
   const canUseFeature = useCallback(

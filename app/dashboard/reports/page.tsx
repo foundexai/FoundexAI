@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -47,6 +48,7 @@ const E_REPORTS = [
 
 export default function ReportsPage() {
   const { user } = useAuth();
+  const { is_trial_active, trial_days_remaining } = useSubscription();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -108,6 +110,14 @@ export default function ReportsPage() {
         </div>
         
         <div className="flex items-center gap-4 relative">
+          {is_trial_active && (
+            <div className="hidden lg:flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 px-4 py-2 rounded-2xl animate-pulse">
+              <Sparkle className="w-4 h-4 text-yellow-500" weight="fill" />
+              <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500">
+                Trial Active: {trial_days_remaining} Days Left
+              </p>
+            </div>
+          )}
           <button 
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-1.5 pr-4 rounded-2xl hover:bg-zinc-800 transition-colors"

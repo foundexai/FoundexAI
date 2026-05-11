@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import Subscription from "@/lib/models/Subscription";
+import User from "@/lib/models/User";
 import { isAdmin } from "@/lib/auth";
 
 /**
@@ -52,6 +53,9 @@ export interface SubscriptionStatus {
   cancel_at_period_end: boolean;
   connect_requests_used: number;
   connect_requests_limit: number;
+  // Trial info
+  is_trial_active: boolean;
+  trial_days_remaining: number;
 }
 
 /**
@@ -64,10 +68,48 @@ export async function getSubscriptionStatus(
   userId: string,
   userEmail?: string
 ): Promise<SubscriptionStatus> {
+  console.log(`[getSubscriptionStatus] Checking status for userId: ${userId}`);
+  
+  await connectDB();
+  const user = await User.findById(userId).lean();
+  console.log(`[getSubscriptionStatus] User found: ${!!user}`);
+
+  // Calculate Trial Status
+  let trialStart = user?.trial_start_date;
+  
+  // If no trial start date yet, activate it now (on first login/check)
+  // This satisfies the requirement: "starting from the very day he signs in / starting from today"
+  if (!trialStart && user) {
+    console.log(`[getSubscriptionStatus] Activating trial for user: ${userId}`);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { trial_start_date: new Date() },
+      { new: true }
+    ).lean();
+    trialStart = updatedUser?.trial_start_date;
+  }
+
+  let isTrialActive = false;
+  let trialDaysRemaining = 0;
+  
+  if (trialStart) {
+    const start = new Date(trialStart);
+    const trialEnd = new Date(start);
+    trialEnd.setDate(trialEnd.getDate() + 30);
+    const now = new Date();
+    
+    if (now < trialEnd) {
+      isTrialActive = true;
+      trialDaysRemaining = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
+  }
+  console.log(`[getSubscriptionStatus] Trial: active=${isTrialActive}, days=${trialDaysRemaining}`);
+
   const adminUser = userEmail ? isAdmin(userEmail) : false;
 
   // Admins always have full access
   if (adminUser) {
+    console.log(`[getSubscriptionStatus] User is admin`);
     return {
       is_subscribed: true,
       plan: "license",
@@ -78,10 +120,10 @@ export async function getSubscriptionStatus(
       cancel_at_period_end: false,
       connect_requests_used: 0,
       connect_requests_limit: -1,
+      is_trial_active: isTrialActive, // Now includes trial info for admins
+      trial_days_remaining: trialDaysRemaining,
     };
   }
-
-  await connectDB();
 
   // Find the most recent active subscription for this user
   const subscription = await Subscription.findOne({
@@ -91,18 +133,25 @@ export async function getSubscriptionStatus(
     .sort({ created_at: -1 })
     .lean();
 
+  console.log(`[getSubscriptionStatus] Subscription found: ${!!subscription}`);
+
   if (!subscription) {
-    return {
-      is_subscribed: false,
-      plan: "starter",
-      status: "none",
-      plan_level: PLAN_HIERARCHY.starter,
+    const plan = isTrialActive ? "founder" : "starter";
+    const result = {
+      is_subscribed: isTrialActive,
+      plan: plan,
+      status: isTrialActive ? "trialing" : "none",
+      plan_level: PLAN_HIERARCHY[plan],
       is_admin: false,
       current_period_end: null,
       cancel_at_period_end: false,
       connect_requests_used: 0,
-      connect_requests_limit: PLAN_LIMITS.starter.connect_requests,
+      connect_requests_limit: PLAN_LIMITS[plan].connect_requests,
+      is_trial_active: isTrialActive,
+      trial_days_remaining: trialDaysRemaining,
     };
+    console.log(`[getSubscriptionStatus] Returning trial/starter status:`, result);
+    return result;
   }
 
   // Check if period has expired
@@ -111,6 +160,23 @@ export async function getSubscriptionStatus(
     new Date() > new Date(subscription.current_period_end);
 
   if (isExpired) {
+    // Even if subscription expired, check if user is still within their 30-day initial trial
+    if (isTrialActive) {
+      return {
+        is_subscribed: true,
+        plan: "founder",
+        status: "trialing",
+        plan_level: PLAN_HIERARCHY.founder,
+        is_admin: false,
+        current_period_end: null,
+        cancel_at_period_end: false,
+        connect_requests_used: 0,
+        connect_requests_limit: PLAN_LIMITS.founder.connect_requests,
+        is_trial_active: true,
+        trial_days_remaining: trialDaysRemaining,
+      };
+    }
+
     return {
       is_subscribed: false,
       plan: subscription.plan || "starter",
@@ -122,6 +188,8 @@ export async function getSubscriptionStatus(
       connect_requests_used: subscription.connect_requests_used || 0,
       connect_requests_limit:
         PLAN_LIMITS[subscription.plan]?.connect_requests || 0,
+      is_trial_active: false,
+      trial_days_remaining: 0,
     };
   }
 
@@ -129,7 +197,7 @@ export async function getSubscriptionStatus(
   const isPaid = PLAN_HIERARCHY[plan] >= PLAN_HIERARCHY.founder;
 
   return {
-    is_subscribed: isPaid,
+    is_subscribed: isPaid || isTrialActive,
     plan,
     status: subscription.status,
     plan_level: PLAN_HIERARCHY[plan] || 0,
@@ -141,6 +209,8 @@ export async function getSubscriptionStatus(
       subscription.connect_requests_limit ||
       PLAN_LIMITS[plan]?.connect_requests ||
       0,
+    is_trial_active: isTrialActive,
+    trial_days_remaining: trialDaysRemaining,
   };
 }
 

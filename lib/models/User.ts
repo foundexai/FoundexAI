@@ -16,7 +16,8 @@ const UserSchema = new mongoose.Schema({
   profile_image_url: { type: String },
   reset_code: { type: String },
   reset_code_expires: { type: Date },
-  created_at: { type: Date, default: Date.now },
+   trial_start_date: { type: Date, default: Date.now },
+   created_at: { type: Date, default: Date.now },
 });
 
 // In development, the model might be cached with an old schema.
