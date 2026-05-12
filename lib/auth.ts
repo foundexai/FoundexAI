@@ -12,6 +12,8 @@ const ADMIN_EMAILS = [
   "almussanplanner12@gmail.com",
   "sophzine@gmail.com",
   "Demo@foundex.ai",
+  "Interndemo1@foundex.ai",
+  "Interndemo2@foundex.ai",
 ];
 
 export const isAdmin = (email: string) => ADMIN_EMAILS.includes(email);

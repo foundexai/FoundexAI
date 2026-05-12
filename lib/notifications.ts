@@ -3,7 +3,10 @@ import User from "@/lib/models/User";
 
 const ADMIN_EMAILS = [
   "almussanplanner12@gmail.com",
-  "sophzine@gmail.com"
+  "sophzine@gmail.com",
+  "Demo@foundex.ai",
+  "Interndemo1@foundex.ai",
+  "Interndemo2@foundex.ai",
 ];
 
 export async function notifyAdmins(title: string, message: string, type: string = "system", link?: string) {
