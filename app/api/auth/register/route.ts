@@ -11,9 +11,14 @@ export async function POST(req: Request) {
 
   const password_hash = await hashPassword(password);
   const user = await User.create({ full_name, email, password_hash, user_type });
-  const token = signToken({ id: user._id.toString(), email });
+  const token = signToken({ 
+    id: user._id.toString(), 
+    email, 
+    full_name: user.full_name, 
+    is_admin: user.is_admin 
+  });
   const res = NextResponse.json({ 
-    user: { id: user._id, full_name, email, user_type },
+    user: { id: user._id, full_name, email, user_type, isAdmin: user.is_admin },
     token
   });
   // set httpOnly cookie

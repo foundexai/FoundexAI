@@ -10,7 +10,7 @@ export async function GET(req: Request) {
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const decoded = await verifyToken(token);
+    const decoded = await verifyToken(token, true);
     if (!decoded || !isAdmin(decoded.user.email)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

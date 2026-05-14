@@ -474,7 +474,7 @@ export default function AdminPage() {
             ))}
           </div>
         ) : activeTab === "pending" ? (
-             <div className="space-y-12">
+             <div className="max-h-[700px] overflow-y-auto thin-scrollbar pr-4 space-y-12">
                 {/* Pending Startups Section */}
                 <div className="space-y-6">
                     <div className="flex items-center">
@@ -622,7 +622,7 @@ export default function AdminPage() {
                 </div>
              </div>
         ) : activeTab === "startups" ? (
-             <>
+             <div className="max-h-[700px] overflow-y-auto thin-scrollbar pr-4">
              {allStartupsQuery.isError ? (
                 <div className="glass-card p-20 text-center rounded-3xl border border-red-100 dark:border-red-900/20 bg-red-50/10">
                     <ShieldWarning className="w-12 h-12 text-red-500 mx-auto mb-4" weight="bold" />
@@ -697,7 +697,7 @@ export default function AdminPage() {
                     ))}
                   </div>
              )}
-             </>
+             </div>
          ) : activeTab === "users" ? (
              // USERS MANAGEMENT VIEW
              <div className="space-y-6">
@@ -735,107 +735,111 @@ export default function AdminPage() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        <div className="overflow-hidden glass-card rounded-3xl border border-white/60 dark:border-white/10 bg-white/40 shadow-xl">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-gray-100 dark:border-white/5">
-                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">User</th>
-                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Type / Plan</th>
-                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
-                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Joined</th>
-                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-                                        {filteredUsers.map((u: any) => (
-                                            <tr key={u._id} className="group hover:bg-white/50 dark:hover:bg-white/5 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-900 dark:text-white font-black shadow-inner">
-                                                            {u.full_name.charAt(0)}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                                                {u.full_name}
-                                                                {u.is_admin && <ShieldCheck weight="fill" className="w-3.5 h-3.5 text-yellow-500" />}
-                                                            </div>
-                                                            <div className="text-xs text-gray-500 dark:text-gray-400">{u.email}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className={cn(
-                                                            "text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md w-fit",
-                                                            u.user_type === "founder" ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" : "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400"
-                                                        )}>
-                                                            {u.user_type}
-                                                        </span>
-                                                        <span className="text-xs font-bold text-gray-400 uppercase">{u.plan_type}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-                                                        <span className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Active</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <button className="p-2 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black rounded-xl transition-all opacity-0 group-hover:opacity-100">
-                                                        <UserGear weight="bold" className="w-5 h-5" />
-                                                    </button>
-                                                </td>
+                        <div className="flex flex-col h-[700px] glass-card rounded-[2.5rem] border border-white/60 dark:border-white/10 bg-white/40 shadow-xl overflow-hidden">
+                            <div className="flex-1 overflow-y-auto thin-scrollbar p-1">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="sticky top-0 z-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+                                            <tr className="border-b border-gray-100 dark:border-white/5">
+                                                <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">User</th>
+                                                <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Type / Plan</th>
+                                                <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
+                                                <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Joined</th>
+                                                <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        {/* Pagination Controls */}
-                        {usersPagination && usersPagination.totalPages > 1 && (
-                            <div className="flex justify-between items-center px-2">
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                    Showing <span className="text-gray-900 dark:text-white">{filteredUsers.length}</span> of <span className="text-gray-900 dark:text-white">{usersPagination.total}</span> users
-                                </p>
-                                <div className="flex gap-2">
-                                    <button 
-                                        disabled={usersPage === 1}
-                                        onClick={() => setUsersPage(prev => Math.max(1, prev - 1))}
-                                        className="p-2.5 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
-                                    >
-                                        <CaretLeft weight="bold" className="w-5 h-5" />
-                                    </button>
-                                    <div className="flex items-center gap-1">
-                                        {[...Array(usersPagination.totalPages)].map((_, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => setUsersPage(i + 1)}
-                                                className={cn(
-                                                    "w-10 h-10 rounded-xl text-sm font-bold transition-all cursor-pointer",
-                                                    usersPage === i + 1 
-                                                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black shadow-lg" 
-                                                    : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500"
-                                                )}
-                                            >
-                                                {i + 1}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <button 
-                                        disabled={usersPage === usersPagination.totalPages}
-                                        onClick={() => setUsersPage(prev => Math.min(usersPagination.totalPages, prev + 1))}
-                                        className="p-2.5 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
-                                    >
-                                        <CaretRight weight="bold" className="w-5 h-5" />
-                                    </button>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+                                            {filteredUsers.map((u: any) => (
+                                                <tr key={u._id} className="group hover:bg-white/50 dark:hover:bg-white/5 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-900 dark:text-white font-black shadow-inner">
+                                                                {u.full_name.charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                                                    {u.full_name}
+                                                                    {u.is_admin && <ShieldCheck weight="fill" className="w-3.5 h-3.5 text-yellow-500" />}
+                                                                </div>
+                                                                <div className="text-xs text-gray-500 dark:text-gray-400">{u.email}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className={cn(
+                                                                "text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md w-fit",
+                                                                u.user_type === "founder" ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" : "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400"
+                                                            )}>
+                                                                {u.user_type}
+                                                            </span>
+                                                            <span className="text-xs font-bold text-gray-400 uppercase">{u.plan_type}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                                                            <span className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Active</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <button className="p-2 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black rounded-xl transition-all opacity-0 group-hover:opacity-100">
+                                                            <UserGear weight="bold" className="w-5 h-5" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        )}
+                            
+                            {/* Fixed Pagination at the bottom of the container */}
+                            <div className="p-6 border-t border-gray-100 dark:border-white/5 bg-white/50 dark:bg-black/20 backdrop-blur-md">
+                                {usersPagination && usersPagination.totalPages > 1 && (
+                                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                            Showing <span className="text-gray-900 dark:text-white">{filteredUsers.length}</span> of <span className="text-gray-900 dark:text-white">{usersPagination.total}</span> users
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                disabled={usersPage === 1}
+                                                onClick={() => setUsersPage(prev => Math.max(1, prev - 1))}
+                                                className="p-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
+                                            >
+                                                <CaretLeft weight="bold" className="w-4 h-4" />
+                                            </button>
+                                            <div className="flex items-center gap-1 overflow-x-auto max-w-[200px] sm:max-w-none no-scrollbar">
+                                                {[...Array(usersPagination.totalPages)].map((_, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setUsersPage(i + 1)}
+                                                        className={cn(
+                                                            "w-8 h-8 flex items-center justify-center rounded-lg text-[10px] font-black transition-all cursor-pointer shrink-0",
+                                                            usersPage === i + 1 
+                                                            ? "bg-zinc-900 text-white dark:bg-white dark:text-black shadow-lg" 
+                                                            : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400"
+                                                        )}
+                                                    >
+                                                        {i + 1}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <button 
+                                                disabled={usersPage === usersPagination.totalPages}
+                                                onClick={() => setUsersPage(prev => Math.min(usersPagination.totalPages, prev + 1))}
+                                                className="p-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
+                                            >
+                                                <CaretRight weight="bold" className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
              </div>
@@ -875,8 +879,8 @@ export default function AdminPage() {
                   </ul>
                 </div>
              </div>
-        ) : (
-            <>
+         ) : (
+            <div className="max-h-[700px] overflow-y-auto thin-scrollbar pr-4">
             {allInvestorsQuery.isError ? (
                 <div className="glass-card p-20 text-center rounded-3xl border border-red-100 dark:border-red-900/20 bg-red-50/10">
                     <ShieldWarning className="w-12 h-12 text-red-500 mx-auto mb-4" weight="bold" />
@@ -889,7 +893,7 @@ export default function AdminPage() {
                 <p className="text-xl font-bold text-gray-500 dark:text-gray-400">No investors found.</p>
             </div>
             ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-4">
                 {filteredInvestors.map((inv) => (
                 <div key={inv.id} className="relative group">
                     <InvestorCard
@@ -936,7 +940,7 @@ export default function AdminPage() {
                 ))}
             </div>
             )}
-            </>
+            </div>
         ) }
       </div>
       <ConfirmationModal

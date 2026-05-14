@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = await verifyToken(token);
+    const decoded = await verifyToken(token, true);
     if (!decoded || !isAdmin(decoded.user.email)) {
         // Only hardcoded admins can create other admins for now, or maybe check is_admin too
         if (!decoded || !(decoded.user as any).is_admin) {

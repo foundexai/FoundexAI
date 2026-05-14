@@ -12,7 +12,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Authentication token not provided.' }, { status: 401 });
     }
 
-    const decoded = await verifyToken(token);
+    const decoded = await verifyToken(token, true);
     if (!decoded) {
       return NextResponse.json({ error: 'Invalid token.' }, { status: 401 });
     }

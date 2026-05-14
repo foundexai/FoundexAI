@@ -229,10 +229,16 @@ function DescriptionBlock({
           company_name: startup.company_name,
         }),
       });
+      if (res.status === 429) {
+        toast.error("Sophia is currently handling many requests. Please take a short break and try again in a few moments.");
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setAiSuggestion(data.improved);
         toast.success("Sophia has a suggestion for you!");
+      } else {
+        toast.error("Sophia is temporarily unavailable. Please try again later.");
       }
     } catch (e) {
       toast.error("Error connecting to AI");

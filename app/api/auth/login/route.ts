@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
-import { comparePassword, signToken } from "@/lib/auth";
+import { comparePassword, signToken, isAdmin } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -16,9 +16,14 @@ export async function POST(req: Request) {
     const ok = await comparePassword(password, user.password_hash);
     if (!ok)
       return NextResponse.json({ error: "Incorrect password." }, { status: 401 });
-    const token = signToken({ id: user._id.toString(), email });
+    const token = signToken({ 
+      id: user._id.toString(), 
+      email, 
+      full_name: user.full_name, 
+      is_admin: isAdmin(email) || user.is_admin 
+    });
     const res = NextResponse.json({
-      user: { id: user._id, full_name: user.full_name, email },
+      user: { id: user._id, full_name: user.full_name, email, isAdmin: isAdmin(email) || user.is_admin },
       token,
     });
     res.cookies.set("token", token, {

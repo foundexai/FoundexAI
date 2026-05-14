@@ -49,6 +49,10 @@ export default function ReadinessScore({
           Authorization: `Bearer ${token}`,
         },
       });
+      if (res.status === 429) {
+        toast.error("Sophia is currently handling many requests. Please take a short break and try again in a few moments.");
+        return;
+      }
 
       if (res.ok) {
         const data = await res.json();

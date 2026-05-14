@@ -38,6 +38,12 @@ export function AIFilterModal({
         body: JSON.stringify({ query }),
       });
 
+      if (res.status === 429) {
+        toast.error("Sophia is currently handling many requests. Please take a short break and try again in a few moments.");
+        setStep("input");
+        return;
+      }
+
       if (!res.ok) throw new Error("Search failed");
 
       const data = await res.json();
