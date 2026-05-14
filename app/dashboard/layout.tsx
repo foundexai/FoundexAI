@@ -18,6 +18,8 @@ import {
   CaretLeft,
   CaretRight,
 } from "@phosphor-icons/react";
+import Image from "next/image";
+import Header from "@/components/Header";
 
 interface NavItem {
   name: string;
@@ -90,10 +92,25 @@ export default function DashboardLayout({
     }
 
     return (
-      <div className="flex flex-col h-full py-6">
-        <div className="flex-1 px-4 space-y-8 overflow-y-auto thin-scrollbar pt-20 md:pt-4">
-          {groups.map((group) => (
-          <div key={group.title} className={cn("space-y-3 lg:mt-16", isCollapsed && "items-center flex flex-col")}>
+      <div className="flex flex-col h-full">
+        <div className="px-6 py-6 flex items-center gap-3 mt-2">
+            <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
+              <Image
+                src="/foundex.png"
+                alt="FoundexAI Logo"
+                fill
+                className="object-contain drop-shadow-lg"
+              />
+            </div>
+            {!isCollapsed && (
+                <Link href="/dashboard" className="text-xl md:text-2xl font-black text-gray-900 tracking-tighter hover:opacity-80 transition-opacity dark:text-white truncate">
+                    FoundexAI
+                </Link>
+            )}
+        </div>
+        <div className="flex-1 px-4 space-y-8 overflow-y-auto thin-scrollbar pt-4">
+          {groups.map((group, index) => (
+          <div key={group.title} className={cn("space-y-3", index === 0 ? "lg:mt-4" : "lg:mt-12", isCollapsed && "items-center flex flex-col")}>
             {!isCollapsed && (
               <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500">
                 {group.title}
@@ -149,7 +166,7 @@ export default function DashboardLayout({
             <img 
               src={user.profile_image_url} 
               alt={user.full_name} 
-              className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-white/10 shrink-0" 
+              className="w-10.5 h-11 rounded-full object-cover border border-gray-200 dark:border-white/10 shrink-0" 
             />
           ) : (
             <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center border border-gray-200 dark:border-white/10 shrink-0">
@@ -223,9 +240,10 @@ export default function DashboardLayout({
         </aside>
 
         <main className={cn(
-          "min-w-0 flex-1 min-h-screen bg-gray-50/50 dark:bg-black transition-all duration-300",
+          "min-w-0 flex-1 min-h-screen bg-gray-50/50 dark:bg-black transition-all duration-300 relative",
           isCollapsed ? "lg:ml-20" : "lg:ml-72"
         )}>
+          <Header variant="dashboard" />
           <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {children}
           </div>

@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     
     const userObj = {
       ...((decoded.user as any).toObject ? (decoded.user as any).toObject() : decoded.user),
-      isAdmin: isAdmin(decoded.user.email)
+      isAdmin: isAdmin(decoded.user.email) || (decoded.user as any).is_admin
     };
         
     return NextResponse.json({ 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth, Startup as StartupModel } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Check, X, CircleNotch, ShieldWarning, FileText, MagnifyingGlass, Funnel, RocketLaunch, PencilSimple, Star, Trash, Checks } from "@phosphor-icons/react";
+import { Check, X, CircleNotch, ShieldWarning, FileText, MagnifyingGlass, Funnel, RocketLaunch, PencilSimple, Star, Trash, Checks, UserPlus, Users, UserGear, ShieldCheck, Envelope, Lock, IdentificationCard, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { toast } from "sonner";
 import EditInvestorDialog from "@/components/admin/EditInvestorDialog";
@@ -18,7 +18,16 @@ export default function AdminPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"pending" | "all" | "startups" | "bulk">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "all" | "startups" | "users" | "bulk">("pending");
+  const [usersPage, setUsersPage] = useState(1);
+  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({
+    full_name: "",
+    email: "",
+    password: "",
+    user_type: "founder" as "founder" | "investor",
+    is_admin: false
+  });
   const [bulkData, setBulkData] = useState("");
   const [isProcessingBulk, setIsProcessingBulk] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -145,7 +154,53 @@ export default function AdminPage() {
     staleTime: 60000,
   });
 
+  const allUsersQuery = useQuery({
+    queryKey: ["admin", "users", "all", usersPage, searchQuery],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/users/all?page=${usersPage}&limit=10&search=${searchQuery}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to load users");
+      const data = await res.json();
+      return data;
+    },
+    enabled: !!token && user?.isAdmin,
+    staleTime: 30000,
+  });
+
   // Mutations
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: typeof newUserForm) => {
+      const res = await fetch("/api/admin/users/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userData),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to create user");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("User created successfully!");
+      setIsCreateUserOpen(false);
+      setNewUserForm({
+        full_name: "",
+        email: "",
+        password: "",
+        user_type: "founder",
+        is_admin: false
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
   const approveMutation = useMutation({
     mutationFn: async ({ id, type }: { id: string; type: "investor" | "startup" }) => {
       const endpoint = type === "investor" ? "/api/admin/investors/approve" : "/api/admin/startups/approve";
@@ -229,12 +284,15 @@ export default function AdminPage() {
   const isLoading = 
     (activeTab === "pending" && (pendingInvestorsQuery.isLoading || pendingStartupsQuery.isLoading)) ||
     (activeTab === "all" && allInvestorsQuery.isLoading) ||
+    (activeTab === "users" && allUsersQuery.isLoading) ||
     (activeTab === "startups" && allStartupsQuery.isLoading);
     
   const pendingInvestors = pendingInvestorsQuery.data || [];
   const allInvestors = allInvestorsQuery.data || [];
   const allStartups = allStartupsQuery.data || [];
   const pendingStartups = pendingStartupsQuery.data || [];
+  const allUsers = allUsersQuery.data?.users || [];
+  const usersPagination = allUsersQuery.data?.pagination;
 
   const filteredInvestors = (activeTab === "pending" ? pendingInvestors : allInvestors).filter(inv => 
     inv.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -245,6 +303,9 @@ export default function AdminPage() {
       s.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.business_description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Users are filtered on the backend now, but we keep this for reactive consistency if needed
+  const filteredUsers = allUsers;
 
   const processingId = approveMutation.isPending ? approveMutation.variables?.id : 
                      (rejectMutation.isPending ? rejectMutation.variables?.id : 
@@ -274,82 +335,91 @@ export default function AdminPage() {
         startup={selectedStartup}
       />
 
-      <div className="space-y-8">
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+      <div className="space-y-10">
+        <div className="space-y-2">
+            <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
                 Admin Dashboard
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400">
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">
                 Manage global investor data and submissions.
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
-             {/* Search */}
-            <div className="relative grow md:grow-0 md:w-80">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                    <MagnifyingGlass className="w-5 h-5" weight="bold" />
-                </span>
-                <input 
-                    type="text" 
-                    placeholder="Search database..." 
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
+            </p>
+        </div>
 
-            <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1 rounded-2xl shadow-sm flex dark:bg-white/5 dark:border-white/10 overflow-x-auto">
-                <button
-                  onClick={() => setActiveTab("pending")}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
-                    activeTab === "pending"
-                    ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  )}
-                >
-                  Pending ({pendingInvestors.length + pendingStartups.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("all")}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
-                    activeTab === "all"
-                    ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  )}
-                >
-                  Investors ({allInvestors.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("startups")}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
-                    activeTab === "startups"
-                    ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  )}
-                >
-                  Startups ({allStartups.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("bulk")}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer",
-                    activeTab === "bulk"
-                    ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  )}
-                >
-                  <FileText className="w-4 h-4" weight="bold" />
-                  Bulk Import
-                </button>
+        <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto max-w-full">
+                {/* Search */}
+                <div className="relative w-full md:w-96">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                        <MagnifyingGlass className="w-5 h-5" weight="bold" />
+                    </span>
+                    <input 
+                        type="text" 
+                        placeholder="Search database..." 
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white shadow-sm"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1.5 rounded-[1.5rem] shadow-sm flex dark:bg-white/5 dark:border-white/10 overflow-x-auto no-scrollbar w-full max-w-full">
+                    <button
+                      onClick={() => setActiveTab("pending")}
+                      className={cn(
+                        "px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
+                        activeTab === "pending"
+                        ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      )}
+                    >
+                      Pending ({pendingInvestors.length + pendingStartups.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("all")}
+                      className={cn(
+                        "px-4 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
+                        activeTab === "all"
+                        ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      )}
+                    >
+                      Investors ({allInvestors.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("startups")}
+                      className={cn(
+                        "px-4 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
+                        activeTab === "startups"
+                        ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      )}
+                    >
+                      Startups ({allStartups.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("users")}
+                      className={cn(
+                        "px-4 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
+                        activeTab === "users"
+                        ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      )}
+                    >
+                      Users ({allUsers.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("bulk")}
+                      className={cn(
+                        "px-4 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer",
+                        activeTab === "bulk"
+                        ? "bg-white shadow-md text-gray-900 dark:bg-white/10 dark:text-white"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      )}
+                    >
+                      <FileText className="w-4 h-4" weight="bold" />
+                      Bulk Import
+                    </button>
+                </div>
             </div>
-          </div>
         </div>
 
         {/* Bulk Actions Bar */}
@@ -388,7 +458,7 @@ export default function AdminPage() {
                     isDestructive: true
                   });
                 }}
-                className="flex-[2] sm:px-8 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                className="flex-2 sm:px-8 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
               >
                 <Trash weight="bold" className="w-4 h-4" />
                 <span className="whitespace-nowrap">Delete Selected</span>
@@ -407,11 +477,16 @@ export default function AdminPage() {
              <div className="space-y-12">
                 {/* Pending Startups Section */}
                 <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                        <RocketLaunch className="w-6 h-6 text-yellow-500" weight="bold" />
-                        <h2 className="text-xl font-bold dark:text-white">Pending Startup Submissions ({pendingStartups.length})</h2>
+                    <div className="flex items-center">
+                        <h2 className="text-xl font-bold dark:text-white tracking-tight">Pending Startup Submissions <span className="text-zinc-400 ml-2 font-medium">({pendingStartups.length})</span></h2>
                     </div>
-                    {pendingStartups.length === 0 ? (
+                    {pendingStartupsQuery.isError ? (
+                        <div className="glass-card p-12 text-center rounded-3xl border border-red-100 dark:border-red-900/20 bg-red-50/10">
+                            <ShieldWarning className="w-10 h-10 text-red-500 mx-auto mb-3" weight="bold" />
+                            <p className="text-red-800 dark:text-red-400 font-bold">Failed to load pending startups</p>
+                            <button onClick={() => pendingStartupsQuery.refetch()} className="text-sm text-red-600 underline mt-2">Retry</button>
+                        </div>
+                    ) : pendingStartups.length === 0 ? (
                         <div className="glass-card p-12 text-center rounded-3xl border border-white/60 dark:border-white/10 bg-white/40">
                              <p className="text-gray-500 font-medium">No new startup submissions.</p>
                         </div>
@@ -489,11 +564,16 @@ export default function AdminPage() {
 
                 {/* Pending Investors Section */}
                 <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                        <Star className="w-6 h-6 text-yellow-500" weight="bold" />
-                        <h2 className="text-xl font-bold dark:text-white">Pending Investor Submissions ({pendingInvestors.length})</h2>
+                    <div className="flex items-center">
+                        <h2 className="text-xl font-bold dark:text-white tracking-tight">Pending Investor Submissions <span className="text-zinc-400 ml-2 font-medium">({pendingInvestors.length})</span></h2>
                     </div>
-                    {pendingInvestors.length === 0 ? (
+                    {pendingInvestorsQuery.isError ? (
+                        <div className="glass-card p-12 text-center rounded-3xl border border-red-100 dark:border-red-900/20 bg-red-50/10">
+                            <ShieldWarning className="w-10 h-10 text-red-500 mx-auto mb-3" weight="bold" />
+                            <p className="text-red-800 dark:text-red-400 font-bold">Failed to load pending investors</p>
+                            <button onClick={() => pendingInvestorsQuery.refetch()} className="text-sm text-red-600 underline mt-2">Retry</button>
+                        </div>
+                    ) : pendingInvestors.length === 0 ? (
                         <div className="glass-card p-12 text-center rounded-3xl border border-white/60 dark:border-white/10 bg-white/40">
                              <p className="text-gray-500 font-medium">No new investor submissions.</p>
                         </div>
@@ -542,8 +622,15 @@ export default function AdminPage() {
                 </div>
              </div>
         ) : activeTab === "startups" ? (
-             // ALL STARTUPS VIEW
-             filteredStartups.length === 0 ? (
+             <>
+             {allStartupsQuery.isError ? (
+                <div className="glass-card p-20 text-center rounded-3xl border border-red-100 dark:border-red-900/20 bg-red-50/10">
+                    <ShieldWarning className="w-12 h-12 text-red-500 mx-auto mb-4" weight="bold" />
+                    <h3 className="text-lg font-bold text-red-800 dark:text-red-400">Database Error</h3>
+                    <p className="text-sm text-red-600/70 dark:text-red-400/60 mb-6">Failed to load startup database.</p>
+                    <button onClick={() => allStartupsQuery.refetch()} className="px-6 py-2 bg-zinc-900 text-white rounded-xl font-bold">Retry Load</button>
+                </div>
+             ) : filteredStartups.length === 0 ? (
                 <div className="glass-card p-20 text-center rounded-3xl border border-white/60 dark:border-white/10 bg-white/40">
                     <p className="text-xl font-bold text-gray-500 dark:text-gray-400">No startups found.</p>
                 </div>
@@ -609,8 +696,150 @@ export default function AdminPage() {
                         </div>
                     ))}
                   </div>
-             )
-        ) : activeTab === "bulk" ? (
+             )}
+             </>
+         ) : activeTab === "users" ? (
+             // USERS MANAGEMENT VIEW
+             <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-3">
+                        <Users className="w-6 h-6 text-yellow-500" weight="bold" />
+                        <h2 className="text-xl font-bold dark:text-white">User Management</h2>
+                    </div>
+                    <button 
+                        onClick={() => setIsCreateUserOpen(true)}
+                        className="px-6 py-2.5 bg-zinc-900 dark:bg-white dark:text-black text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg active:scale-95"
+                    >
+                        <UserPlus weight="bold" />
+                        Create New User
+                    </button>
+                </div>
+
+                {allUsersQuery.isError ? (
+                    <div className="glass-card p-12 text-center rounded-3xl border border-red-100 dark:border-red-900/20 bg-red-50/10">
+                        <ShieldWarning className="w-12 h-12 text-red-500 mx-auto mb-4" weight="bold" />
+                        <h3 className="text-lg font-bold text-red-800 dark:text-red-400">Error Loading Users</h3>
+                        <p className="text-sm text-red-600/70 dark:text-red-400/60 mb-6">We couldn't retrieve the user list. This might be a temporary connection issue.</p>
+                        <button 
+                            onClick={() => allUsersQuery.refetch()}
+                            className="px-6 py-2 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all"
+                        >
+                            Retry Request
+                        </button>
+                    </div>
+                ) : filteredUsers.length === 0 ? (
+                    <div className="glass-card p-20 text-center rounded-3xl border border-white/60 dark:border-white/10 bg-white/40">
+                        <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" weight="bold" />
+                        <p className="text-xl font-bold text-gray-500 dark:text-gray-400">No users found matching your search.</p>
+                        <p className="text-sm text-gray-400 mt-1">Try adjusting your filters or adding a new user.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        <div className="overflow-hidden glass-card rounded-3xl border border-white/60 dark:border-white/10 bg-white/40 shadow-xl">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-gray-100 dark:border-white/5">
+                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">User</th>
+                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Type / Plan</th>
+                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
+                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Joined</th>
+                                            <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+                                        {filteredUsers.map((u: any) => (
+                                            <tr key={u._id} className="group hover:bg-white/50 dark:hover:bg-white/5 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-900 dark:text-white font-black shadow-inner">
+                                                            {u.full_name.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                                                {u.full_name}
+                                                                {u.is_admin && <ShieldCheck weight="fill" className="w-3.5 h-3.5 text-yellow-500" />}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400">{u.email}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className={cn(
+                                                            "text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md w-fit",
+                                                            u.user_type === "founder" ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" : "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400"
+                                                        )}>
+                                                            {u.user_type}
+                                                        </span>
+                                                        <span className="text-xs font-bold text-gray-400 uppercase">{u.plan_type}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                                                        <span className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase">Active</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <button className="p-2 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black rounded-xl transition-all opacity-0 group-hover:opacity-100">
+                                                        <UserGear weight="bold" className="w-5 h-5" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {usersPagination && usersPagination.totalPages > 1 && (
+                            <div className="flex justify-between items-center px-2">
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                    Showing <span className="text-gray-900 dark:text-white">{filteredUsers.length}</span> of <span className="text-gray-900 dark:text-white">{usersPagination.total}</span> users
+                                </p>
+                                <div className="flex gap-2">
+                                    <button 
+                                        disabled={usersPage === 1}
+                                        onClick={() => setUsersPage(prev => Math.max(1, prev - 1))}
+                                        className="p-2.5 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
+                                    >
+                                        <CaretLeft weight="bold" className="w-5 h-5" />
+                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        {[...Array(usersPagination.totalPages)].map((_, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setUsersPage(i + 1)}
+                                                className={cn(
+                                                    "w-10 h-10 rounded-xl text-sm font-bold transition-all cursor-pointer",
+                                                    usersPage === i + 1 
+                                                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black shadow-lg" 
+                                                    : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500"
+                                                )}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button 
+                                        disabled={usersPage === usersPagination.totalPages}
+                                        onClick={() => setUsersPage(prev => Math.min(usersPagination.totalPages, prev + 1))}
+                                        className="p-2.5 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
+                                    >
+                                        <CaretRight weight="bold" className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+             </div>
+         ) : activeTab === "bulk" ? (
              <div className="glass-card p-10 rounded-3xl border border-white/60 dark:border-white/10 bg-white/40 space-y-6">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Bulk Investor Import</h2>
@@ -647,8 +876,15 @@ export default function AdminPage() {
                 </div>
              </div>
         ) : (
-            // INVESTORS VIEW
-            filteredInvestors.length === 0 ? (
+            <>
+            {allInvestorsQuery.isError ? (
+                <div className="glass-card p-20 text-center rounded-3xl border border-red-100 dark:border-red-900/20 bg-red-50/10">
+                    <ShieldWarning className="w-12 h-12 text-red-500 mx-auto mb-4" weight="bold" />
+                    <h3 className="text-lg font-bold text-red-800 dark:text-red-400">Database Error</h3>
+                    <p className="text-sm text-red-600/70 dark:text-red-400/60 mb-6">Failed to load investor database.</p>
+                    <button onClick={() => allInvestorsQuery.refetch()} className="px-6 py-2 bg-zinc-900 text-white rounded-xl font-bold">Retry Load</button>
+                </div>
+            ) : filteredInvestors.length === 0 ? (
             <div className="glass-card p-20 text-center rounded-3xl border border-white/60 dark:border-white/10 bg-white/40">
                 <p className="text-xl font-bold text-gray-500 dark:text-gray-400">No investors found.</p>
             </div>
@@ -699,10 +935,10 @@ export default function AdminPage() {
                 </div>
                 ))}
             </div>
-            )
-        )}
+            )}
+            </>
+        ) }
       </div>
-
       <ConfirmationModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
@@ -711,6 +947,130 @@ export default function AdminPage() {
         message={confirmModal.message}
         isDestructive={confirmModal.isDestructive}
       />
+
+      {/* Create User Modal */}
+      {isCreateUserOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-white/10 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-8 pb-0 flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Create User</h2>
+                <p className="text-gray-500 text-sm">Add a new investor or founder to the platform.</p>
+              </div>
+              <button 
+                onClick={() => setIsCreateUserOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors"
+              >
+                <X weight="bold" className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form 
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    createUserMutation.mutate(newUserForm);
+                }}
+                className="p-8 space-y-6"
+            >
+              <div className="space-y-4">
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <IdentificationCard weight="bold" />
+                  </span>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
+                    value={newUserForm.full_name}
+                    onChange={e => setNewUserForm(prev => ({ ...prev, full_name: e.target.value }))}
+                  />
+                </div>
+
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <Envelope weight="bold" />
+                  </span>
+                  <input
+                    required
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
+                    value={newUserForm.email}
+                    onChange={e => setNewUserForm(prev => ({ ...prev, email: e.target.value }))}
+                  />
+                </div>
+
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                    <Lock weight="bold" />
+                  </span>
+                  <input
+                    required
+                    type="password"
+                    placeholder="Set Password"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
+                    value={newUserForm.password}
+                    onChange={e => setNewUserForm(prev => ({ ...prev, password: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <button
+                        type="button"
+                        onClick={() => setNewUserForm(prev => ({ ...prev, user_type: "founder" }))}
+                        className={cn(
+                            "py-3 rounded-2xl font-bold text-sm transition-all border",
+                            newUserForm.user_type === "founder" 
+                            ? "bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent" 
+                            : "bg-gray-50 dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/5"
+                        )}
+                    >
+                        Founder
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setNewUserForm(prev => ({ ...prev, user_type: "investor" }))}
+                        className={cn(
+                            "py-3 rounded-2xl font-bold text-sm transition-all border",
+                            newUserForm.user_type === "investor" 
+                            ? "bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent" 
+                            : "bg-gray-50 dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/5"
+                        )}
+                    >
+                        Investor
+                    </button>
+                </div>
+
+                <label className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors border border-gray-100 dark:border-white/5">
+                    <div className="relative flex items-center">
+                        <input 
+                            type="checkbox" 
+                            className="peer sr-only"
+                            checked={newUserForm.is_admin}
+                            onChange={e => setNewUserForm(prev => ({ ...prev, is_admin: e.target.checked }))}
+                        />
+                        <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-yellow-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-4 shadow-inner"></div>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">Grant Admin Access</span>
+                        <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Full Platform Control</span>
+                    </div>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={createUserMutation.isPending}
+                className="w-full py-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-2xl font-black shadow-xl shadow-yellow-500/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98]"
+              >
+                {createUserMutation.isPending ? <CircleNotch className="w-5 h-5 animate-spin" /> : <UserPlus weight="bold" className="w-5 h-5" />}
+                {createUserMutation.isPending ? "Creating Account..." : "Create User Account"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

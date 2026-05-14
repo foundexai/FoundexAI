@@ -16,8 +16,9 @@ const UserSchema = new mongoose.Schema({
   profile_image_url: { type: String },
   reset_code: { type: String },
   reset_code_expires: { type: Date },
-   trial_start_date: { type: Date, default: Date.now },
-   created_at: { type: Date, default: Date.now },
+  is_admin: { type: Boolean, default: false },
+  trial_start_date: { type: Date, default: Date.now },
+  created_at: { type: Date, default: Date.now },
 });
 
 // In development, the model might be cached with an old schema.

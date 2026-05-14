@@ -2,17 +2,19 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useMobileMenu } from "@/context/MobileMenuContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Bell, CaretDown, List } from "@phosphor-icons/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
-export default function Header() {
+export default function Header({ variant = 'global' }: { variant?: 'global' | 'dashboard' }) {
   const { user, logout, loading, token } = useAuth();
   const { toggle } = useMobileMenu();
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -89,10 +91,19 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  if (variant === 'global' && pathname?.startsWith('/dashboard')) {
+    return null;
+  }
+
   return (
-    <header className="w-full sticky top-0 z-50 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10 transition-all duration-300">
+    <header className={cn(
+        "w-full z-40 transition-all duration-300",
+        variant === 'global' 
+            ? "sticky top-0 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10" 
+            : "sticky top-0 bg-white/60 dark:bg-black/60 backdrop-blur-xl border-b border-gray-100 dark:border-zinc-800"
+    )}>
       <div className="max-w-7xl mx-auto p-4 lg:px-6 py-3 flex justify-between items-center bg-transparent">
-        <div className="flex items-center space-x-2.5">
+        <div className={cn("flex items-center space-x-2.5", variant === 'dashboard' && "lg:hidden")}>
           <div className="relative w-8 h-8 md:w-10 md:h-10">
             <Image
               src="/foundex.png"
@@ -216,7 +227,7 @@ export default function Header() {
                     className="flex items-center space-x-3 bg-white/40 hover:bg-white/80 border border-white/50 rounded-full pl-1 pr-4 py-1 transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer"
                   >
                     {user.profile_image_url ? (
-                      <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200 dark:border-white/10">
+                      <div className="w-8.5 h-9 rounded-full overflow-hidden shrink-0 border border-gray-200 dark:border-white/10">
                         <img
                           src={user.profile_image_url}
                           alt={user.full_name || "Profile"}
