@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useMobileMenu } from "@/context/MobileMenuContext";
@@ -17,6 +17,7 @@ import {
   ChartLineUp,
   CaretLeft,
   CaretRight,
+  CircleNotch,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -65,7 +66,12 @@ export default function DashboardLayout({
   const { user, logout } = useAuth();
   const { isOpen: isSidebarOpen, close: closeSidebar } = useMobileMenu();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [clickedItem, setClickedItem] = useState<string | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setClickedItem(null);
+  }, [pathname]);
 
   const getLinkClass = (path: string, exact = false) => {
     const isActive = exact ? pathname === path : pathname.startsWith(path);
@@ -121,7 +127,10 @@ export default function DashboardLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={closeSidebar}
+                  onClick={() => {
+                      setClickedItem(item.href);
+                      closeSidebar();
+                  }}
                   className={getLinkClass(item.href, item.exact)}
                   title={isCollapsed ? item.name : ""}
                 >
@@ -132,6 +141,9 @@ export default function DashboardLayout({
                       : "text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                   )} />
                   {!isCollapsed && <span className="truncate">{item.name}</span>}
+                  {clickedItem === item.href && pathname !== item.href && (
+                    <CircleNotch className="w-4 h-4 ml-auto animate-spin" />
+                  )}
                 </Link>
               ))}
             </div>
@@ -161,7 +173,7 @@ export default function DashboardLayout({
       </div>
 
       <div className={cn("mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800", isCollapsed ? "px-2" : "px-4")}>
-        <Link href="/dashboard/profile" className={cn("flex items-center mb-3 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors group", isCollapsed ? "justify-center py-3" : "gap-3 px-3 py-2")}>
+        <Link href="/dashboard/profile" onClick={() => setClickedItem('/dashboard/profile')} className={cn("flex items-center mb-3 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors group", isCollapsed ? "justify-center py-3" : "gap-3 px-3 py-2")}>
           {user?.profile_image_url ? (
             <img 
               src={user.profile_image_url} 
@@ -183,9 +195,13 @@ export default function DashboardLayout({
               </p>
             </div>
           )}
+          {clickedItem === '/dashboard/profile' && pathname !== '/dashboard/profile' && (
+            <CircleNotch className="w-4 h-4 ml-auto animate-spin text-gray-400" />
+          )}
         </Link>
         <button
           onClick={async () => {
+            setClickedItem('logout');
             await logout();
             window.location.href = "/";
           }}
@@ -197,6 +213,7 @@ export default function DashboardLayout({
         >
           <SignOut className="h-5 w-5 shrink-0" weight="bold" />
           {!isCollapsed && <span className="font-bold">Sign Out</span>}
+          {clickedItem === 'logout' && <CircleNotch className="w-4 h-4 ml-auto animate-spin" />}
         </button>
       </div>
     </div>

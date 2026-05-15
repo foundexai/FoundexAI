@@ -121,7 +121,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                 placeholder="name@company.com"
                 className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-medium focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all dark:text-white"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value.toLowerCase())}
               />
             </div>
 

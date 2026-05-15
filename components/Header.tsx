@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Bell, CaretDown, List } from "@phosphor-icons/react";
+import { Sun, Moon, Bell, CaretDown, List, CircleNotch } from "@phosphor-icons/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,11 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [clickedItem, setClickedItem] = useState<string | null>(null);
+
+  useEffect(() => {
+    setClickedItem(null);
+  }, [pathname]);
 
   useEffect(() => {
     setMounted(true);
@@ -261,21 +266,29 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                     </div>
                     <Link
                       href="/dashboard/profile"
-                      className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
+                      onClick={() => setClickedItem('/dashboard/profile')}
+                      className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
                     >
-                      Profile
+                      <span>Profile</span>
+                      {clickedItem === '/dashboard/profile' && <CircleNotch className="w-4 h-4 animate-spin" />}
                     </Link>
                     <Link
                       href="/dashboard/settings"
-                      className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
+                      onClick={() => setClickedItem('/dashboard/settings')}
+                      className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
                     >
-                      Settings
+                      <span>Settings</span>
+                      {clickedItem === '/dashboard/settings' && <CircleNotch className="w-4 h-4 animate-spin" />}
                     </Link>
                     <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 cursor-pointer"
+                      onClick={(e) => {
+                          setClickedItem('logout');
+                          handleLogout();
+                      }}
+                      className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 cursor-pointer"
                     >
-                      Sign Out
+                      <span>Sign Out</span>
+                      {clickedItem === 'logout' && <CircleNotch className="w-4 h-4 animate-spin" />}
                     </button>
                   </div>
                 </div>

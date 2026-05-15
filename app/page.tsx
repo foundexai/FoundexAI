@@ -199,7 +199,7 @@ function AuthForm() {
             type="email"
             placeholder="name@company.com"
             value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onChange={(e) => setForm({ ...form, email: e.target.value.toLowerCase() })}
             required
             disabled={isLoading}
           />
