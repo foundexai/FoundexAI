@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth, Startup as StartupModel } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Check, X, CircleNotch, ShieldWarning, FileText, MagnifyingGlass, Funnel, RocketLaunch, PencilSimple, Star, Trash, Checks, UserPlus, Users, UserGear, ShieldCheck, Envelope, Lock, IdentificationCard, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { Check, X, CircleNotch, ShieldWarning, FileText, MagnifyingGlass, Funnel, RocketLaunch, PencilSimple, Star, Trash, Checks, UserPlus, Users, UserGear, ShieldCheck, Envelope, Lock, IdentificationCard, CaretLeft, CaretRight, DownloadSimple } from "@phosphor-icons/react";
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { toast } from "sonner";
 import EditInvestorDialog from "@/components/admin/EditInvestorDialog";
@@ -31,6 +31,12 @@ export default function AdminPage() {
   const [bulkData, setBulkData] = useState("");
   const [isProcessingBulk, setIsProcessingBulk] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Filtering states for approved database
+  const [selectedFilterFocus, setSelectedFilterFocus] = useState<string>("");
+  const [selectedFilterRange, setSelectedFilterRange] = useState<string>("");
+  const [selectedFilterType, setSelectedFilterType] = useState<string>("");
+  const [showFilterPanel, setShowFilterPanel] = useState<boolean>(false);
   
   // Edit State
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -281,6 +287,87 @@ export default function AdminPage() {
     setIsEditOpen(true);
   };
 
+  const exportToCSV = (data: Investor[]) => {
+    const headers = [
+      "ID",
+      "Name",
+      "Type",
+      "Focus/Sectors",
+      "Location",
+      "HQ Country",
+      "Description",
+      "Investment Range",
+      "Stage",
+      "Website",
+      "LinkedIn",
+      "Email",
+      "Featured",
+      "Status"
+    ];
+
+    const escapeCSV = (val: any) => {
+      if (val === undefined || val === null) return "";
+      let str = "";
+      if (Array.isArray(val)) {
+        str = val.join(", ");
+      } else {
+        str = String(val);
+      }
+      str = str.replace(/"/g, '""');
+      if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+        return `"${str}"`;
+      }
+      return str;
+    };
+
+    const rows = data.map((inv) => [
+      inv.id,
+      inv.name,
+      inv.type,
+      inv.focus,
+      inv.location,
+      inv.hq_country || "",
+      inv.description,
+      inv.investmentRange || "",
+      inv.stage || "",
+      inv.website || "",
+      inv.linkedin || "",
+      inv.email || "",
+      inv.isFeatured ? "Yes" : "No",
+      inv.active_status || "Active"
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map(escapeCSV).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `investors_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("CSV export downloaded successfully!");
+  };
+
+  const exportToJSON = (data: Investor[]) => {
+    const jsonContent = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `investors_export_${new Date().toISOString().split('T')[0]}.json`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("JSON export downloaded successfully!");
+  };
+
   const isLoading = 
     (activeTab === "pending" && (pendingInvestorsQuery.isLoading || pendingStartupsQuery.isLoading)) ||
     (activeTab === "all" && allInvestorsQuery.isLoading) ||
@@ -294,15 +381,48 @@ export default function AdminPage() {
   const allUsers = allUsersQuery.data?.users || [];
   const usersPagination = allUsersQuery.data?.pagination;
 
-  const filteredInvestors = (activeTab === "pending" ? pendingInvestors : allInvestors).filter(inv => 
-    inv.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    inv.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const allSectors = useMemo(() => {
+    return Array.from(new Set(allInvestors.flatMap(inv => inv.focus || []))).sort();
+  }, [allInvestors]);
+
+  const allInvestmentRanges = useMemo(() => {
+    return Array.from(new Set(allInvestors.map(inv => inv.investmentRange).filter(Boolean))).sort();
+  }, [allInvestors]);
+
+  const allTypes = useMemo(() => {
+    return Array.from(new Set(allInvestors.map(inv => inv.type).filter(Boolean))).sort();
+  }, [allInvestors]);
+
+  const filteredInvestors = useMemo(() => {
+    const list = activeTab === "pending" ? pendingInvestors : allInvestors;
+    return list.filter(inv => {
+      const matchesSearch = 
+        inv.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        inv.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (inv.focus && inv.focus.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))) ||
+        (inv.location && inv.location.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      if (activeTab === "pending") return matchesSearch;
+
+      const matchesFocus = !selectedFilterFocus || 
+        (inv.focus && inv.focus.some(tag => tag.toLowerCase() === selectedFilterFocus.toLowerCase()));
+
+      const matchesRange = !selectedFilterRange || 
+        inv.investmentRange === selectedFilterRange;
+
+      const matchesType = !selectedFilterType || 
+        inv.type === selectedFilterType;
+
+      return matchesSearch && matchesFocus && matchesRange && matchesType;
+    });
+  }, [activeTab, pendingInvestors, allInvestors, searchQuery, selectedFilterFocus, selectedFilterRange, selectedFilterType]);
   
-  const filteredStartups = allStartups.filter(s =>
+  const filteredStartups = useMemo(() => {
+    return allStartups.filter(s =>
       s.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.business_description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    );
+  }, [allStartups, searchQuery]);
 
   // Users are filtered on the backend now, but we keep this for reactive consistency if needed
   const filteredUsers = allUsers;
@@ -421,6 +541,127 @@ export default function AdminPage() {
                 </div>
             </div>
         </div>
+
+        {/* Filter and Export Bar */}
+        {activeTab === "all" && (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-white/50 backdrop-blur-md border border-white/60 rounded-3xl shadow-sm dark:bg-white/5 dark:border-white/10 animate-in fade-in duration-300">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowFilterPanel(!showFilterPanel)}
+                className={cn(
+                  "px-5 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 border transition-all cursor-pointer",
+                  showFilterPanel || selectedFilterFocus || selectedFilterRange || selectedFilterType
+                    ? "bg-yellow-500 border-yellow-500 text-white shadow-md shadow-yellow-500/20"
+                    : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10"
+                )}
+              >
+                <Funnel weight="bold" className="w-4 h-4" />
+                <span>Filters</span>
+                {(selectedFilterFocus || selectedFilterRange || selectedFilterType) && (
+                  <span className="px-2 py-0.5 rounded-md bg-white text-yellow-600 text-[10px] font-black leading-none shrink-0">
+                    {[selectedFilterFocus, selectedFilterRange, selectedFilterType].filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+
+              {(selectedFilterFocus || selectedFilterRange || selectedFilterType) && (
+                <button
+                  onClick={() => {
+                    setSelectedFilterFocus("");
+                    setSelectedFilterRange("");
+                    setSelectedFilterType("");
+                  }}
+                  className="text-xs font-bold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => exportToCSV(filteredInvestors)}
+                disabled={filteredInvestors.length === 0}
+                className="flex-1 sm:flex-none px-5 py-2.5 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:opacity-90 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-50"
+                title="Export filtered list to CSV"
+              >
+                <DownloadSimple weight="bold" className="w-4 h-4" />
+                <span>Export CSV</span>
+              </button>
+              <button
+                onClick={() => exportToJSON(filteredInvestors)}
+                disabled={filteredInvestors.length === 0}
+                className="flex-1 sm:flex-none px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 dark:bg-white/5 dark:border-white/10 dark:text-white dark:hover:bg-white/10 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                title="Export filtered list to JSON"
+              >
+                <DownloadSimple weight="bold" className="w-4 h-4" />
+                <span>Export JSON</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Expanded Filters Drawer/Panel */}
+        {activeTab === "all" && showFilterPanel && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-white/40 dark:bg-white/5 backdrop-blur-md border border-white/60 dark:border-white/10 rounded-3xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Sector/Focus Filter */}
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                Focus / Sector
+              </label>
+              <select
+                value={selectedFilterFocus}
+                onChange={(e) => setSelectedFilterFocus(e.target.value)}
+                className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-2xl text-sm font-bold text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all cursor-pointer"
+              >
+                <option value="">All Sectors</option>
+                {allSectors.map((sector) => (
+                  <option key={sector} value={sector}>
+                    {sector}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Investment Range Filter */}
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                Investment Range / Fee
+              </label>
+              <select
+                value={selectedFilterRange}
+                onChange={(e) => setSelectedFilterRange(e.target.value)}
+                className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-2xl text-sm font-bold text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all cursor-pointer"
+              >
+                <option value="">All Ranges</option>
+                {allInvestmentRanges.map((range) => (
+                  <option key={range} value={range}>
+                    {range}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Investor Type Filter */}
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                Investor Type
+              </label>
+              <select
+                value={selectedFilterType}
+                onChange={(e) => setSelectedFilterType(e.target.value)}
+                className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 rounded-2xl text-sm font-bold text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all cursor-pointer"
+              >
+                <option value="">All Types</option>
+                {allTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Bulk Actions Bar */}
         {selectedIds.length > 0 && (

@@ -17,6 +17,13 @@ export interface Investor {
   website?: string;
   logo_url?: string;
   isFeatured?: boolean;
+  hq_country?: string;
+  stage?: string;
+  linkedin?: string;
+  email?: string;
+  active_status?: string;
+  thesis?: string;
+  notes?: string;
 }
 
 interface InvestorCardProps {
