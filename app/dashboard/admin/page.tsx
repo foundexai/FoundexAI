@@ -263,6 +263,29 @@ export default function AdminPage() {
     }
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "User deletion failed");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("User permanently removed");
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    }
+  });
+
   const handleToggleFeatured = async (investor: Investor) => {
     const newFeatured = !investor.isFeatured;
     try {
@@ -1026,11 +1049,28 @@ export default function AdminPage() {
                                                     <td className="px-6 py-4">
                                                         <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <button className="p-2 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black rounded-xl transition-all opacity-0 group-hover:opacity-100">
-                                                            <UserGear weight="bold" className="w-5 h-5" />
-                                                        </button>
-                                                    </td>
+                                                     <td className="px-6 py-4 text-right flex justify-end gap-2">
+                                                         <button className="p-2 hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black rounded-xl transition-all opacity-0 group-hover:opacity-100">
+                                                             <UserGear weight="bold" className="w-5 h-5" />
+                                                         </button>
+                                                         {user?.isSuperAdmin && (
+                                                           <button 
+                                                             onClick={() => {
+                                                               setConfirmModal({
+                                                                 isOpen: true,
+                                                                 title: "Delete User",
+                                                                 message: `Are you sure you want to permanently delete user ${u.full_name}? This action cannot be undone.`,
+                                                                 isDestructive: true,
+                                                                 onConfirm: () => deleteUserMutation.mutate(u._id)
+                                                               });
+                                                             }}
+                                                             className="p-2 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 text-red-500 cursor-pointer"
+                                                             title="Delete User"
+                                                           >
+                                                             <Trash weight="bold" className="w-5 h-5" />
+                                                           </button>
+                                                         )}
+                                                     </td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -1287,21 +1327,23 @@ export default function AdminPage() {
                     </button>
                 </div>
 
-                <label className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors border border-gray-100 dark:border-white/5">
-                    <div className="relative flex items-center">
-                        <input 
-                            type="checkbox" 
-                            className="peer sr-only"
-                            checked={newUserForm.is_admin}
-                            onChange={e => setNewUserForm(prev => ({ ...prev, is_admin: e.target.checked }))}
-                        />
-                        <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-yellow-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-4 shadow-inner"></div>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900 dark:text-white">Grant Admin Access</span>
-                        <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Full Platform Control</span>
-                    </div>
-                </label>
+                {user?.isSuperAdmin && (
+                  <label className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors border border-gray-100 dark:border-white/5">
+                      <div className="relative flex items-center">
+                          <input 
+                              type="checkbox" 
+                              className="peer sr-only"
+                              checked={newUserForm.is_admin}
+                              onChange={e => setNewUserForm(prev => ({ ...prev, is_admin: e.target.checked }))}
+                          />
+                          <div className="w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-yellow-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-4 shadow-inner"></div>
+                      </div>
+                      <div className="flex flex-col">
+                          <span className="text-sm font-bold text-gray-900 dark:text-white">Grant Admin Access</span>
+                          <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Full Platform Control</span>
+                      </div>
+                  </label>
+                )}
               </div>
 
               <button

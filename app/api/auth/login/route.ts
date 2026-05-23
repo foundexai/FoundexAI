@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
-import { comparePassword, signToken, isAdmin } from "@/lib/auth";
+import { comparePassword, signToken, isAdmin, isSuperAdmin } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -20,10 +20,17 @@ export async function POST(req: Request) {
       id: user._id.toString(), 
       email, 
       full_name: user.full_name, 
-      is_admin: isAdmin(email) || user.is_admin 
+      is_admin: isAdmin(email) || user.is_admin,
+      is_super_admin: isSuperAdmin(email) || !!user.isSuperAdmin
     });
     const res = NextResponse.json({
-      user: { id: user._id, full_name: user.full_name, email, isAdmin: isAdmin(email) || user.is_admin },
+      user: { 
+        id: user._id, 
+        full_name: user.full_name, 
+        email, 
+        isAdmin: isAdmin(email) || user.is_admin,
+        isSuperAdmin: isSuperAdmin(email) || !!user.isSuperAdmin
+      },
       token,
     });
     res.cookies.set("token", token, {

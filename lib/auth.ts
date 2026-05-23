@@ -6,7 +6,7 @@ import User from '@/lib/models/User';
 const JWT_SECRET = process.env.JWT_SECRET!;
 export const hashPassword = (pwd:string) => bcrypt.hash(pwd, 10);
 export const comparePassword = (pwd:string, hash:string) => bcrypt.compare(pwd, hash);
-export const signToken = (payload:{id:string, email:string, full_name?:string, is_admin?:boolean}) => 
+export const signToken = (payload:{id:string, email:string, full_name?:string, is_admin?:boolean, is_super_admin?:boolean}) => 
   jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 
 const ADMIN_EMAILS = [
@@ -17,11 +17,17 @@ const ADMIN_EMAILS = [
   "Interndemo2@foundex.ai",
 ];
 
+const SUPER_ADMIN_EMAILS = [
+  "sophzine@gmail.com",
+  "almussanplanner12@gmail.com",
+];
+
+export const isAdmin = (email: string) => ADMIN_EMAILS.includes(email);
+export const isSuperAdmin = (email: string) => SUPER_ADMIN_EMAILS.includes(email);
+
 // In-memory cache for verifyToken results to prevent DB thundering herd
 const verifyCache = new Map<string, { data: any, timestamp: number }>();
 const CACHE_TTL = 10000; // 10 seconds
-
-export const isAdmin = (email: string) => ADMIN_EMAILS.includes(email);
 
 export const verifyToken = async (token: string, requireFullUser: boolean = false) => {
   const start = Date.now();
@@ -46,7 +52,8 @@ export const verifyToken = async (token: string, requireFullUser: boolean = fals
                 email: (decoded as any).email,
                 full_name: (decoded as any).full_name || "",
                 isAdmin: isAdmin((decoded as any).email) || (decoded as any).is_admin,
-                is_admin: isAdmin((decoded as any).email) || (decoded as any).is_admin
+                is_admin: isAdmin((decoded as any).email) || (decoded as any).is_admin,
+                isSuperAdmin: isSuperAdmin((decoded as any).email) || (decoded as any).is_super_admin
             } as any 
         };
         verifyCache.set(cacheKey, { data: result, timestamp: Date.now() });
@@ -72,7 +79,8 @@ export const verifyToken = async (token: string, requireFullUser: boolean = fals
               email: (decoded as any).email,
               full_name: (decoded as any).full_name || "",
               isAdmin: isAdmin((decoded as any).email) || (decoded as any).is_admin,
-              is_admin: isAdmin((decoded as any).email) || (decoded as any).is_admin
+              is_admin: isAdmin((decoded as any).email) || (decoded as any).is_admin,
+              isSuperAdmin: isSuperAdmin((decoded as any).email) || (decoded as any).is_super_admin
           } as any 
       };
       verifyCache.set(cacheKey, { data: result, timestamp: Date.now() });
@@ -82,7 +90,8 @@ export const verifyToken = async (token: string, requireFullUser: boolean = fals
         ...user, 
         _id: user._id.toString(), 
         isAdmin: isAdmin(user.email) || user.is_admin,
-        is_admin: isAdmin(user.email) || user.is_admin
+        is_admin: isAdmin(user.email) || user.is_admin,
+        isSuperAdmin: isSuperAdmin(user.email) || !!user.isSuperAdmin
     };
     const finalResult = { user: finalUser as any };
     verifyCache.set(cacheKey, { data: finalResult, timestamp: Date.now() });

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import User from '@/lib/models/User';
-import { hashPassword, signToken } from '@/lib/auth';
+import { hashPassword, signToken, isSuperAdmin } from '@/lib/auth';
 
 export async function POST(req: Request) {
   await connectDB();
@@ -15,10 +15,18 @@ export async function POST(req: Request) {
     id: user._id.toString(), 
     email, 
     full_name: user.full_name, 
-    is_admin: user.is_admin 
+    is_admin: user.is_admin,
+    is_super_admin: isSuperAdmin(email) || !!user.isSuperAdmin
   });
   const res = NextResponse.json({ 
-    user: { id: user._id, full_name, email, user_type, isAdmin: user.is_admin },
+    user: { 
+      id: user._id, 
+      full_name, 
+      email, 
+      user_type, 
+      isAdmin: user.is_admin,
+      isSuperAdmin: isSuperAdmin(email) || !!user.isSuperAdmin
+    },
     token
   });
   // set httpOnly cookie

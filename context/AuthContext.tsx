@@ -19,6 +19,7 @@ interface User {
   user_type?: "founder" | "investor";
   plan_type?: "starter" | "founder" | "pro" | "license";
   isAdmin?: boolean;
+  isSuperAdmin?: boolean;
   profile_image_url?: string;
   linkedin_url?: string;
 }

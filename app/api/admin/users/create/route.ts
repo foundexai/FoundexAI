@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
-import { hashPassword, verifyToken, isAdmin } from "@/lib/auth";
+import { hashPassword, verifyToken, isAdmin, isSuperAdmin } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -11,15 +11,19 @@ export async function POST(req: Request) {
     }
 
     const decoded = await verifyToken(token, true);
-    if (!decoded || !isAdmin(decoded.user.email)) {
-        // Only hardcoded admins can create other admins for now, or maybe check is_admin too
-        if (!decoded || !(decoded.user as any).is_admin) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-        }
+    if (!decoded || (!isAdmin(decoded.user.email) && !(decoded.user as any).is_admin)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     await connectDB();
     const { full_name, email, password, user_type, is_admin } = await req.json();
+
+    if (is_admin) {
+      const isRequesterSuperAdmin = isSuperAdmin(decoded.user.email) || !!(decoded.user as any).isSuperAdmin;
+      if (!isRequesterSuperAdmin) {
+        return NextResponse.json({ error: "Only super admins can create admin users" }, { status: 403 });
+      }
+    }
 
     if (!full_name || !email || !password || !user_type) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

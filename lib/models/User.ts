@@ -17,6 +17,7 @@ const UserSchema = new mongoose.Schema({
   reset_code: { type: String },
   reset_code_expires: { type: Date },
   is_admin: { type: Boolean, default: false },
+  isSuperAdmin: { type: Boolean, default: false },
   trial_start_date: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now },
 });

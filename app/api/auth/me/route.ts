@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyToken, isAdmin } from '@/lib/auth';
+import { verifyToken, isAdmin, isSuperAdmin } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import User from '@/lib/models/User';
 import Startup from '@/lib/models/Startup';
@@ -22,7 +22,8 @@ export async function GET(req: Request) {
     
     const userObj = {
       ...((decoded.user as any).toObject ? (decoded.user as any).toObject() : decoded.user),
-      isAdmin: isAdmin(decoded.user.email) || (decoded.user as any).is_admin
+      isAdmin: isAdmin(decoded.user.email) || (decoded.user as any).is_admin,
+      isSuperAdmin: isSuperAdmin(decoded.user.email) || (decoded.user as any).isSuperAdmin
     };
         
     return NextResponse.json({ 
