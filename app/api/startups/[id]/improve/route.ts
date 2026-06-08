@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
+import { callAI } from "@/lib/ai";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }, // Correctly type params
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = await params; // Await params (Next.js 15+ requirement or good practice)
+    const { id } = await params;
     await connectDB();
     const token = req.headers.get("Authorization")?.split(" ")[1];
 
-    // Auth check
     const decoded = await verifyToken(token || "");
     if (!decoded) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,42 +34,26 @@ export async function POST(
       Return ONLY the improved string. Do not add quotes or "Here is the improved version".
     `;
 
-    // Call OpenRouter
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s
-
-    const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY2}`,
-        "HTTP-Referer": "https://foundex.ai",
-        "X-Title": "Foundex MVP",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (!aiRes.ok) {
-      throw new Error("AI Service Failed");
+    let improved = description;
+    try {
+      const result = await callAI({
+        prompt,
+        timeout: 15000,
+        cacheTtl: 0,
+      });
+      improved = result.content.trim() || description;
+    } catch (error) {
+      console.error("Improvement Error:", error);
     }
-
-    const data = await aiRes.json();
-    const improved = data.choices[0]?.message?.content?.trim() || description;
 
     return NextResponse.json({ improved });
   } catch (error) {
     console.error("Improvement Error:", error);
-    // Fallback if AI fails: Return the original description
     return NextResponse.json(
       {
         improved: "Unable to improve description automatically right now. Keeping original text.",
       },
-      { status: 200 }, // Change to 200 so UI doesn't break
+      { status: 200 },
     );
   }
 }

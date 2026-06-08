@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { MOCK_INVESTORS } from "@/lib/data";
 import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
+import { callAI } from "@/lib/ai";
+import { getCache, setCache } from "@/lib/redis";
 
 export async function POST(req: Request) {
   try {
@@ -12,6 +14,12 @@ export async function POST(req: Request) {
         { error: "Description or query is required" },
         { status: 400 },
       );
+    }
+
+    const cacheKey = `match:${query || ""}:${sector || ""}:${stage || ""}`;
+    const cached = await getCache<any[]>(cacheKey);
+    if (cached) {
+      return NextResponse.json({ matches: cached });
     }
 
     // 1. Fetch all available investors (Mock + Real)
@@ -33,7 +41,7 @@ export async function POST(req: Request) {
         name: inv.name,
         type: inv.type,
         focus: inv.focus || [],
-        description: (inv.description || "").substring(0, 300), // Truncate to save tokens
+        description: (inv.description || "").substring(0, 300),
         investmentRange: inv.investmentRange || inv.investment_range,
       }),
     );
@@ -56,10 +64,12 @@ export async function POST(req: Request) {
       return { ...inv, rankScore: score };
     })
     .sort((a, b) => b.rankScore - a.rankScore)
-    .slice(0, 40); // Send only top 40 most relevant to AI
+    .slice(0, 40);
 
     // 3. Construct Prompt
     let prompt = "";
+    let systemPrompt = "You are a helpful AI investment analyst. Output valid JSON only. Return 0-3 matches based on quality of fit. Do not force matches that do not exist.";
+    
     if (query) {
       prompt = `
         You are an expert Venture Capital Investment Analyst.
@@ -118,54 +128,19 @@ export async function POST(req: Request) {
       `;
     }
 
-    // 3. Call OpenAI/OpenRouter API
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
+    // 3. Call AI with multi-provider fallback + Redis caching
     let aiResult;
     try {
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY2}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://foundex.ai",
-            "X-Title": "FoundexAI",
-          },
-          body: JSON.stringify({
-            model: "openai/gpt-4o-mini",
-            messages: [
-              {
-                role: "system",
-                content: "You are a helpful AI investment analyst. Output valid JSON only. Return 0-3 matches based on quality of fit. Do not force matches that do not exist.",
-              },
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.7,
-          }),
-          signal: controller.signal,
-        },
-      );
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        const aiContent = data.choices[0]?.message?.content;
-        aiResult = JSON.parse(aiContent);
-      } else {
-        const errorText = await response.text();
-        console.warn("OpenRouter API Failed, using local fallback:", errorText);
-      }
+      const result = await callAI({
+        prompt,
+        systemPrompt,
+        responseFormat: "json_object",
+        timeout: 15000,
+        cacheTtl: 0,
+      });
+      aiResult = JSON.parse(result.content);
     } catch (error) {
-      clearTimeout(timeoutId);
-      console.warn("AI Service Timeout or Error, using local fallback:", error);
+      console.warn("AI Service Error, using fallback:", error);
     }
 
     // 4. Handle AI failure
@@ -176,7 +151,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. Map back to full investor objects to ensure frontend has all data
+    // 5. Map back to full investor objects
     const finalMatches = (aiResult.matches || []).map((m: any) => {
       const fullInvestor = allInvestors.find(inv => inv.id === m.id);
       return {
@@ -184,6 +159,8 @@ export async function POST(req: Request) {
         reason: m.reason
       };
     }).filter((m: any) => m.investor !== null);
+
+    await setCache(cacheKey, finalMatches, 1800);
 
     return NextResponse.json({ matches: finalMatches });
   } catch (error) {

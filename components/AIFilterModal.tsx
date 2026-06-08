@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkle, CircleNotch, CheckCircle, MagnifyingGlass } from "@phosphor-icons/react";
+import {
+  X,
+  Sparkle,
+  CircleNotch,
+  CheckCircle,
+  MagnifyingGlass,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { Investor } from "@/lib/data";
 import { InvestorCard } from "./InvestorCard";
@@ -12,10 +18,7 @@ interface AIFilterModalProps {
   onClose: () => void;
 }
 
-export function AIFilterModal({
-  isOpen,
-  onClose,
-}: AIFilterModalProps) {
+export function AIFilterModal({ isOpen, onClose }: AIFilterModalProps) {
   const [step, setStep] = useState<"input" | "searching" | "results">("input");
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState<Investor[]>([]);
@@ -39,7 +42,9 @@ export function AIFilterModal({
       });
 
       if (res.status === 429) {
-        toast.error("Sophia is currently handling many requests. Please take a short break and try again in a few moments.");
+        toast.error(
+          "Sophia is currently handling many requests. Please take a short break and try again in a few moments.",
+        );
         setStep("input");
         return;
       }
@@ -47,7 +52,7 @@ export function AIFilterModal({
       if (!res.ok) throw new Error("Search failed");
 
       const data = await res.json();
-      
+
       const reasons: Record<string, string> = {};
       const matchedInvestors: Investor[] = [];
 
@@ -95,7 +100,7 @@ export function AIFilterModal({
           </button>
           <div className="flex items-center gap-3 mb-2">
             <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-              AI Power Search
+              AI Powered Search
             </h2>
           </div>
           <p className="text-gray-500 dark:text-gray-400 font-medium">
@@ -112,12 +117,12 @@ export function AIFilterModal({
                   What are you looking for?
                 </label>
                 <div className="relative">
-                    <textarea
-                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 font-medium focus:ring-2 focus:ring-zinc-900 focus:outline-none min-h-[150px] dark:bg-zinc-800 dark:border-zinc-700 dark:text-white text-lg placeholder:text-gray-400"
-                        placeholder="e.g. Find me investors in Lagos who focus on early-stage fintech and have a check size between $50k and $200k..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
+                  <textarea
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 font-medium focus:ring-2 focus:ring-zinc-900 focus:outline-none min-h-[150px] dark:bg-zinc-800 dark:border-zinc-700 dark:text-white text-lg placeholder:text-gray-400"
+                    placeholder="e.g. Find me investors in Lagos who focus on early-stage fintech and have a check size between $50k and $200k..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -129,18 +134,25 @@ export function AIFilterModal({
                 <MagnifyingGlass className="w-5 h-5" weight="bold" />
                 Search with AI
               </button>
-              
+
               <div className="flex flex-wrap gap-2 pt-2">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest w-full mb-1">Try searching for:</span>
-                  {["Fintech in Nigeria", "Healthtech Series A", "Angel investors for SaaS", "Logistics focus in East Africa"].map(suggestion => (
-                      <button 
-                        key={suggestion}
-                        onClick={() => setQuery(suggestion)}
-                        className="text-xs font-bold px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
-                      >
-                          {suggestion}
-                      </button>
-                  ))}
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest w-full mb-1">
+                  Try searching for:
+                </span>
+                {[
+                  "Fintech in Nigeria",
+                  "Healthtech Series A",
+                  "Angel investors for SaaS",
+                  "Logistics focus in East Africa",
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => setQuery(suggestion)}
+                    className="text-xs font-bold px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -165,18 +177,18 @@ export function AIFilterModal({
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white">
-                        Search Results
-                    </h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        Showing top 3 matches for your query.
-                    </p>
+                  <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white">
+                    Search Results
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    Showing top 3 matches for your query.
+                  </p>
                 </div>
                 <button
-                    onClick={reset}
-                    className="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 text-sm"
+                  onClick={reset}
+                  className="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 text-sm"
                 >
-                    New Search
+                  New Search
                 </button>
               </div>
 
@@ -192,7 +204,9 @@ export function AIFilterModal({
                       {matchReasons[inv.id] && (
                         <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl text-sm text-zinc-800 dark:text-zinc-200 border border-zinc-100 dark:border-zinc-700 animate-in fade-in slide-in-from-top-2 leading-relaxed shadow-sm">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-black uppercase tracking-wider text-[10px]">AI Match Rationale</span>
+                            <span className="font-black uppercase tracking-wider text-[10px]">
+                              AI Match Rationale
+                            </span>
                           </div>
                           {matchReasons[inv.id]}
                         </div>
