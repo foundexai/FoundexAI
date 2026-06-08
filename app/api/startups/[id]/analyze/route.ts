@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Startup from "@/lib/models/Startup";
 import Task from "@/lib/models/Task";
 import { verifyToken } from "@/lib/auth";
+import { callAI } from "@/lib/ai";
 
 export async function POST(
   req: NextRequest,
@@ -59,35 +60,22 @@ export async function POST(
       }.
     `;
 
-    // Call OpenRouter with Timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
-
-    let aiRes;
+    // Call AI with multi-provider fallback + Redis caching
+    let content: string | null = null;
     try {
-      aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY2}`,
-          "HTTP-Referer": "https://foundex.ai", // Required by OpenRouter
-          "X-Title": "Foundex MVP",
-        },
-        body: JSON.stringify({
-          model: "openai/gpt-4o-mini", // Cost effective
-          messages: [{ role: "user", content: prompt }],
-          response_format: { type: "json_object" },
-        }),
-        signal: controller.signal,
+      const result = await callAI({
+        prompt,
+        responseFormat: "json_object",
+        timeout: 20000,
+        cacheTtl: 3600,
       });
-      clearTimeout(timeoutId);
+      content = result.content;
     } catch (error) {
       console.error("AI Fetch Error:", error);
-      // Fallback will be handled below by checking aiRes
     }
 
-    if (!aiRes || !aiRes.ok) {
-      // Fallback mock if AI fails or no key
+    if (!content) {
+      // Fallback mock if AI fails
       console.warn("AI Call failed or timed out, using mock score");
       const mockScore = Math.min(
         100,
@@ -125,8 +113,6 @@ export async function POST(
       });
     }
 
-    const aiData = await aiRes.json();
-    const content = aiData.choices[0].message.content;
     let result;
     try {
       result = JSON.parse(content);
