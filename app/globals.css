@@ -50,8 +50,8 @@ body {
   }
 
   .thin-scrollbar::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 2px;
+    height: 2px;
   }
 
   .thin-scrollbar::-webkit-scrollbar-track {
@@ -78,5 +78,41 @@ body {
 
   .dark .thin-scrollbar:hover::-webkit-scrollbar-thumb {
     background: rgba(255,255,255,0.2);
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.15) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.15);
+    border-radius: 20px;
+    transition: background 0.2s;
+  }
+
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.3);
+  }
+
+  .dark .custom-scrollbar {
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+  }
+
+  .dark .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
   }
 }

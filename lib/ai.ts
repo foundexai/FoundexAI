@@ -93,6 +93,9 @@ function extractJSON(text: string): string {
   return text
 }
 
+// Keep track of provider failures/rate limits locally in memory to avoid slow timeouts on future requests
+const providerBackoffs = new Map<string, number>()
+
 export async function callAI(options: AICallOptions): Promise<AICallResult> {
   const {
     prompt,
@@ -114,6 +117,13 @@ export async function callAI(options: AICallOptions): Promise<AICallResult> {
   for (const provider of PROVIDERS) {
     const apiKey = provider.apiKey()
     if (!apiKey) continue
+
+    const now = Date.now()
+    const backoffUntil = providerBackoffs.get(provider.name) || 0
+    if (now < backoffUntil) {
+      console.log(`[AI] Skipping ${provider.name} due to active backoff`)
+      continue
+    }
 
     const rl = await checkRateLimit(`provider:${provider.name}`, 30, 60)
     if (!rl.allowed) {
@@ -152,6 +162,10 @@ export async function callAI(options: AICallOptions): Promise<AICallResult> {
       if (!res.ok) {
         const errText = await res.text().catch(() => "")
         console.warn(`[AI] ${provider.name} failed (${res.status}): ${errText.slice(0, 200)}`)
+        if (res.status === 429) {
+          // Back off provider for 30s locally on rate limits
+          providerBackoffs.set(provider.name, Date.now() + 30000)
+        }
         continue
       }
 
@@ -174,13 +188,16 @@ export async function callAI(options: AICallOptions): Promise<AICallResult> {
 
       if (cacheTtl > 0 && result.content) {
         const cacheKey = hashPrompt(prompt)
-        await setCache(cacheKey, result, cacheTtl)
+        // Fire-and-forget: do not block response on Redis set cache write
+        setCache(cacheKey, result, cacheTtl).catch(() => {})
       }
 
       return result
     } catch (err) {
       clearTimeout(timeoutId)
       console.warn(`[AI] ${provider.name} error:`, err)
+      // Back off provider for 15s locally on network error or timeout
+      providerBackoffs.set(provider.name, Date.now() + 15000)
       continue
     }
   }

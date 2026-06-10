@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Subscription from "@/lib/models/Subscription";
 import User from "@/lib/models/User";
+import { deleteCache } from "@/lib/redis";
 
 /**
  * POST /api/subscriptions/webhook
@@ -93,8 +94,9 @@ export async function POST(req: Request) {
           { upsert: true, new: true }
         );
 
-        // Also update User.plan_type for fast lookups
         await User.findByIdAndUpdate(user_id, { plan_type: plan });
+
+        await deleteCache(`sub:status:${user_id}`);
 
         console.log(`[Webhook] Subscription activated: ${user_id} → ${plan}`);
         return NextResponse.json({ received: true, subscription_id: subscription._id });
@@ -115,6 +117,8 @@ export async function POST(req: Request) {
         );
         await User.findByIdAndUpdate(user_id, { plan_type: plan });
 
+        await deleteCache(`sub:status:${user_id}`);
+
         console.log(`[Webhook] Subscription updated: ${user_id} → ${plan}`);
         return NextResponse.json({ received: true });
       }
@@ -131,6 +135,8 @@ export async function POST(req: Request) {
           }
         );
 
+        await deleteCache(`sub:status:${user_id}`);
+
         console.log(`[Webhook] Subscription canceled: ${user_id}`);
         return NextResponse.json({ received: true });
       }
@@ -141,6 +147,8 @@ export async function POST(req: Request) {
           { $set: { status: "past_due" } }
         );
         await User.findByIdAndUpdate(user_id, { plan_type: "starter" });
+
+        await deleteCache(`sub:status:${user_id}`);
 
         console.log(`[Webhook] Payment failed: ${user_id}`);
         return NextResponse.json({ received: true });

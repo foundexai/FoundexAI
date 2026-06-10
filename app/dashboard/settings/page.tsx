@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { User, Lock, Bell, Shield, SignOut, ArrowUpRight } from "@phosphor-icons/react";
+import { User, Lock, Bell, Shield, SignOut, ArrowUpRight, CircleNotch } from "@phosphor-icons/react";
 import Link from "next/link";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   return (
     <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -124,11 +126,24 @@ export default function SettingsPage() {
         
         <div className="pt-6">
             <button 
-                onClick={logout}
-                className="flex items-center gap-2 text-red-600 font-bold hover:text-red-700 transition-colors px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
+                onClick={async () => {
+                  setLoggingOut(true);
+                  try {
+                    await logout();
+                  } catch (e) {
+                    console.error(e);
+                  }
+                  window.location.href = "/";
+                }}
+                disabled={loggingOut}
+                className="flex items-center gap-2 text-red-600 font-bold hover:text-red-700 transition-colors px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
             >
-                <SignOut className="w-5 h-5" weight="bold" />
-                Sign Out
+                {loggingOut ? (
+                  <CircleNotch className="w-5 h-5 animate-spin" weight="bold" />
+                ) : (
+                  <SignOut className="w-5 h-5" weight="bold" />
+                )}
+                <span>{loggingOut ? "Signing Out..." : "Sign Out"}</span>
             </button>
         </div>
       </div>
