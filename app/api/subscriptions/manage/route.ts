@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import { verifyToken, isAdmin } from "@/lib/auth";
 import Subscription from "@/lib/models/Subscription";
 import User from "@/lib/models/User";
+import { deleteCache } from "@/lib/redis";
 
 /**
  * POST /api/subscriptions/manage
@@ -80,6 +81,8 @@ export async function POST(req: Request) {
 
         await User.findByIdAndUpdate(target_user_id, { plan_type: plan });
 
+        await deleteCache(`sub:status:${target_user_id}`);
+
         return NextResponse.json({
           message: `Subscription granted: ${plan} for ${duration_days || 30} days`,
           subscription,
@@ -99,6 +102,8 @@ export async function POST(req: Request) {
         );
 
         await User.findByIdAndUpdate(target_user_id, { plan_type: "starter" });
+
+        await deleteCache(`sub:status:${target_user_id}`);
 
         return NextResponse.json({ message: "Subscription revoked" });
       }
@@ -122,6 +127,8 @@ export async function POST(req: Request) {
         );
 
         await User.findByIdAndUpdate(target_user_id, { plan_type: plan });
+
+        await deleteCache(`sub:status:${target_user_id}`);
 
         return NextResponse.json({ message: `Subscription updated to ${plan}` });
       }

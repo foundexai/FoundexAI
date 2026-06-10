@@ -330,9 +330,10 @@ function DescriptionBlock({
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex-1 py-4 bg-yellow-500 text-white rounded-2xl text-sm font-black hover:bg-yellow-600 shadow-lg shadow-yellow-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-50"
+                    className="flex-1 py-4 bg-yellow-500 text-white rounded-2xl text-sm font-black hover:bg-yellow-600 shadow-lg shadow-yellow-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {saving ? "Saving..." : "Save Changes"}
+                    {saving && <CircleNotch className="w-4 h-4 animate-spin text-white" weight="bold" />}
+                    <span>{saving ? "Saving..." : "Save Changes"}</span>
                   </button>
                 </div>
               </div>

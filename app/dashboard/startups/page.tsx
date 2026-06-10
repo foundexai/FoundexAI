@@ -155,7 +155,7 @@ export default function StartupsPage() {
         </div>
 
         <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1.5 rounded-2xl shadow-sm dark:bg-white/5 dark:border-white/10 overflow-hidden w-full">
-          <div className="flex gap-1 overflow-x-auto custom-scrollbar pb-1 px-1">
+          <div className="flex gap-1 overflow-x-auto thin-scrollbar pb-1 px-1">
              <div className="px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap text-gray-500 dark:text-gray-400 flex items-center gap-2 border-r border-gray-100 dark:border-white/5 mr-1 shrink-0">
                 <Funnel weight="bold" />
                 Filter

@@ -160,7 +160,8 @@ export async function POST(req: Request) {
       };
     }).filter((m: any) => m.investor !== null);
 
-    await setCache(cacheKey, finalMatches, 1800);
+    // Non-blocking cache write to avoid adding write latency on matching response
+    setCache(cacheKey, finalMatches, 1800).catch(() => {});
 
     return NextResponse.json({ matches: finalMatches });
   } catch (error) {

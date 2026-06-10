@@ -72,7 +72,12 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
   const notificationsRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
-    await logout();
+    setClickedItem('logout');
+    try {
+      await logout();
+    } catch (e) {
+      console.error(e);
+    }
     window.location.href = "/";
   };
 
@@ -281,11 +286,9 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                       {clickedItem === '/dashboard/settings' && <CircleNotch className="w-4 h-4 animate-spin" />}
                     </Link>
                     <button
-                      onClick={(e) => {
-                          setClickedItem('logout');
-                          handleLogout();
-                      }}
-                      className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 cursor-pointer"
+                      onClick={handleLogout}
+                      disabled={clickedItem === 'logout'}
+                      className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 cursor-pointer disabled:opacity-50"
                     >
                       <span>Sign Out</span>
                       {clickedItem === 'logout' && <CircleNotch className="w-4 h-4 animate-spin" />}
@@ -366,9 +369,11 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                 <div className="border-t border-gray-100 my-1 dark:border-zinc-800"></div>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 mx-2 rounded-lg dark:text-red-400 dark:hover:bg-red-900/20"
+                  disabled={clickedItem === 'logout'}
+                  className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 mx-2 rounded-lg dark:text-red-400 dark:hover:bg-red-900/20 disabled:opacity-50"
                 >
-                  Sign Out
+                  <span>Sign Out</span>
+                  {clickedItem === 'logout' && <CircleNotch className="w-4 h-4 animate-spin" />}
                 </button>
               </div>
             </div>

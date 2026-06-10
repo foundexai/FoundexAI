@@ -34,6 +34,7 @@ export default function BusinessModelCard({
 }: BusinessModelCardProps) {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { is_subscribed, is_admin } = useSubscription();
   const [currentModels, setCurrentModels] = useState<string[]>(selectedModels);
   const [customModel, setCustomModel] = useState("");
@@ -91,11 +92,14 @@ export default function BusinessModelCard({
   };
 
   const handleManualSave = async () => {
+    setSaving(true);
     try {
       await saveModels(currentModels);
       setIsEditing(false);
     } catch (e) {
       toast.error("Error saving models");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -280,9 +284,11 @@ export default function BusinessModelCard({
             </button>
             <button
               onClick={handleManualSave}
-              className="flex-1 py-2 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-500/30"
+              disabled={saving}
+              className="flex-1 py-2 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-500/30 flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-              Save Changes
+              {saving && <CircleNotch className="w-3.5 h-3.5 animate-spin" weight="bold" />}
+              <span>{saving ? "Saving..." : "Save Changes"}</span>
             </button>
           </div>
         )}

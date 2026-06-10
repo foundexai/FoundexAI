@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import Subscription from "@/lib/models/Subscription";
 import User from "@/lib/models/User";
 import { isAdmin } from "@/lib/auth";
+import { getCache, setCache } from "@/lib/redis";
 
 /**
  * Plan Hierarchy & Access Levels
@@ -68,6 +69,16 @@ export async function getSubscriptionStatus(
   userId: string,
   userEmail?: string
 ): Promise<SubscriptionStatus> {
+  const cacheKey = `sub:status:${userId}`;
+  try {
+    const cached = await getCache<SubscriptionStatus>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+  } catch (err) {
+    console.error(`[getSubscriptionStatus] Cache read error for userId ${userId}:`, err);
+  }
+
   console.log(`[getSubscriptionStatus] Checking status for userId: ${userId}`);
   
   await connectDB();
@@ -110,7 +121,7 @@ export async function getSubscriptionStatus(
   // Admins always have full access
   if (adminUser) {
     console.log(`[getSubscriptionStatus] User is admin`);
-    return {
+    const result = {
       is_subscribed: true,
       plan: "license",
       status: "active",
@@ -123,6 +134,8 @@ export async function getSubscriptionStatus(
       is_trial_active: isTrialActive, // Now includes trial info for admins
       trial_days_remaining: trialDaysRemaining,
     };
+    setCache(cacheKey, result, 120).catch(() => {});
+    return result;
   }
 
   // Find the most recent active subscription for this user
@@ -151,6 +164,7 @@ export async function getSubscriptionStatus(
       trial_days_remaining: trialDaysRemaining,
     };
     console.log(`[getSubscriptionStatus] Returning trial/starter status:`, result);
+    setCache(cacheKey, result, 120).catch(() => {});
     return result;
   }
 
@@ -162,7 +176,7 @@ export async function getSubscriptionStatus(
   if (isExpired) {
     // Even if subscription expired, check if user is still within their 30-day initial trial
     if (isTrialActive) {
-      return {
+      const result = {
         is_subscribed: true,
         plan: "founder",
         status: "trialing",
@@ -175,9 +189,11 @@ export async function getSubscriptionStatus(
         is_trial_active: true,
         trial_days_remaining: trialDaysRemaining,
       };
+      setCache(cacheKey, result, 120).catch(() => {});
+      return result;
     }
 
-    return {
+    const result = {
       is_subscribed: false,
       plan: subscription.plan || "starter",
       status: "expired",
@@ -191,12 +207,14 @@ export async function getSubscriptionStatus(
       is_trial_active: false,
       trial_days_remaining: 0,
     };
+    setCache(cacheKey, result, 120).catch(() => {});
+    return result;
   }
 
   const plan = subscription.plan || "starter";
   const isPaid = PLAN_HIERARCHY[plan] >= PLAN_HIERARCHY.founder;
 
-  return {
+  const result = {
     is_subscribed: isPaid || isTrialActive,
     plan,
     status: subscription.status,
@@ -212,6 +230,8 @@ export async function getSubscriptionStatus(
     is_trial_active: isTrialActive,
     trial_days_remaining: trialDaysRemaining,
   };
+  setCache(cacheKey, result, 120).catch(() => {});
+  return result;
 }
 
 /**
