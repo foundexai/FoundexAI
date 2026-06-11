@@ -7,7 +7,7 @@ const NotificationSchema = new mongoose.Schema({
   message: { type: String, required: true },
   type: { 
     type: String, 
-    enum: ["submission", "approval", "rejection", "system"],
+    enum: ["submission", "approval", "rejection", "system", "match"],
     default: "system"
   },
   link: { type: String }, // Optional link to the resource (e.g., /admin/startups)

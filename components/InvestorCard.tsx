@@ -24,6 +24,7 @@ export interface Investor {
   active_status?: string;
   thesis?: string;
   notes?: string;
+  isPlatformUser?: boolean;
 }
 
 interface InvestorCardProps {
@@ -172,6 +173,20 @@ export function InvestorCard({
         )}
       </div>
 
+      {/* Platform Badge */}
+      {variant !== "mini" && (
+        <div className="mb-3">
+          <span className={cn(
+            "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md",
+            investor.isPlatformUser
+              ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+              : "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"
+          )}>
+            {investor.isPlatformUser ? "On Platform" : "External"}
+          </span>
+        </div>
+      )}
+
       {/* Footer: Action */}
       <div className={cn("mt-auto flex justify-between items-center z-10", variant !== "mini" && "pt-4 border-t border-gray-100/50 dark:border-white/10")}>
         <div className="text-xs font-medium text-gray-500">
@@ -216,11 +231,46 @@ export function InvestorCard({
               </button>
             </>
           ) : (
-            <div className={cn(
-              "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white group-hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:group-hover:bg-white dark:group-hover:text-black",
-              variant === "mini" ? "w-8 h-8" : "w-10 h-10"
-            )}>
-              <ArrowRight className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
+            <div className="flex gap-2">
+              {investor.isPlatformUser ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/dashboard/pipeline?investorId=${investor.id}`);
+                  }}
+                  className={cn(
+                    "rounded-full flex items-center justify-center transition-all shadow-sm cursor-pointer",
+                    "bg-yellow-500 text-white hover:bg-yellow-600",
+                    variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+                  )}
+                  title="Send Request"
+                >
+                  <ArrowRight className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
+                </button>
+              ) : investor.email ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = `mailto:${investor.email}`;
+                  }}
+                  className={cn(
+                    "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-blue-500 dark:hover:text-white cursor-pointer",
+                    variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+                  )}
+                  title={`Email ${investor.name}`}
+                >
+                  <svg className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                </button>
+              ) : null}
+              <div className={cn(
+                "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white group-hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:group-hover:bg-white dark:group-hover:text-black",
+                variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+              )}>
+                <ArrowRight className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
+              </div>
             </div>
           )}
         </div>

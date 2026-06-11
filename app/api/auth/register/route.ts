@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import User from '@/lib/models/User';
 import { hashPassword, signToken, isSuperAdmin } from '@/lib/auth';
@@ -11,6 +12,31 @@ export async function POST(req: Request) {
 
   const password_hash = await hashPassword(password);
   const user = await User.create({ full_name, email, password_hash, user_type });
+
+  if (user_type === 'investor') {
+    const Investor = mongoose.models.Investor || (await import('@/lib/models/Investor')).default;
+    await Investor.create({
+      name: full_name,
+      type: "VC", // default type
+      focus: ["Fintech"], // default focus
+      location: "Lagos, Nigeria", // default location
+      logoInitial: full_name.charAt(0).toUpperCase(),
+      logoColor: "from-blue-500 to-indigo-600",
+      description: "Onboarded platform investor account awaiting approval.",
+      isApproved: false,
+      submittedBy: user._id.toString(),
+      platform_user_id: user._id
+    });
+
+    const { notifyAdmins } = await import('@/lib/notifications');
+    await notifyAdmins(
+      "💎 New Investor Signup",
+      `${full_name} has registered as an investor and is awaiting approval.`,
+      "submission",
+      "/dashboard/admin"
+    );
+  }
+
   const token = signToken({ 
     id: user._id.toString(), 
     email, 

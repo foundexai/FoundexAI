@@ -90,6 +90,7 @@ export async function GET(req: Request) {
       logo_url: inv.logo_url,
       notes: inv.notes,
       isFeatured: inv.isFeatured,
+      isPlatformUser: !!inv.platform_user_id,
     }));
 
     return NextResponse.json({

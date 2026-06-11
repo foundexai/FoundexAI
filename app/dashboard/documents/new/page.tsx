@@ -16,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function NewDocumentPage() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, activeStartupId } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"upload" | "write">("upload");
 
@@ -61,9 +61,12 @@ export default function NewDocumentPage() {
       headers: { Authorization: `Bearer ${token}` },
     });
     const startupsData = await startupsRes.json();
-    const startup = startupsData.startups?.[0];
+    if (!startupsData.startups || startupsData.startups.length === 0) {
+      throw new Error("No startup profile found");
+    }
 
-    if (!startup) throw new Error("No startup profile found");
+    const activeId = activeStartupId || localStorage.getItem("activeStartupId");
+    const startup = startupsData.startups.find((s: any) => s._id === activeId) || startupsData.startups[0];
 
     const newDoc = {
       name: docName || "Untitled Document",
