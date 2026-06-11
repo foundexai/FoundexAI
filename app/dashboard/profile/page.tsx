@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { uploadImage } from "@/lib/upload";
 import ProfileForm from "@/components/ProfileForm";
@@ -17,12 +18,13 @@ import {
   CircleNotch,
   RocketLaunch,
   Star,
+  ArrowRight,
 } from "@phosphor-icons/react";
-import { InvestorCard } from "@/components/InvestorCard";
+import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { InvestorCardSkeleton } from "@/components/ui/skeletons/InvestorCardSkeleton";
 import { StartupSmallCardSkeleton } from "@/components/ui/skeletons/StartupSmallCardSkeleton";
-import { MOCK_INVESTORS, Investor } from "@/lib/data";
+
 import { cn } from "@/lib/utils";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
@@ -134,9 +136,16 @@ export default function ProfilePage() {
     setDeleteStartupId(null);
   };
 
+  const [savingIdentity, setSavingIdentity] = useState(false);
+
   const handleSaveMetadata = async () => {
     if (!token) return;
+    if (!basicInfo.full_name.trim()) {
+      toast.error("Display name is required");
+      return;
+    }
 
+    setSavingIdentity(true);
     try {
       const res = await fetch("/api/auth/profile", {
         method: "PATCH",
@@ -155,6 +164,8 @@ export default function ProfilePage() {
       }
     } catch (e) {
       toast.error("Error saving basic info");
+    } finally {
+      setSavingIdentity(false);
     }
   };
 
@@ -380,10 +391,15 @@ export default function ProfilePage() {
                 <div className="flex justify-end">
                     <button
                         onClick={handleSaveMetadata}
-                        className="bg-zinc-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-lg hover:-translate-y-1 active:scale-95 text-sm dark:bg-white dark:text-black flex items-center gap-2"
+                        disabled={savingIdentity}
+                        className="bg-zinc-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-zinc-700 transition-all shadow-lg hover:-translate-y-1 active:scale-95 text-sm dark:bg-white dark:text-black dark:hover:bg-zinc-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     >
-                        <FloppyDiskBack className="h-4 w-4" weight="bold" />
-                        Update Identity
+                        {savingIdentity ? (
+                          <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+                        ) : (
+                          <FloppyDiskBack className="h-4 w-4" weight="bold" />
+                        )}
+                        {savingIdentity ? "Saving..." : "Update Identity"}
                     </button>
                 </div>
               </div>
@@ -391,14 +407,13 @@ export default function ProfilePage() {
           </div>
 
           {user?.user_type === "investor" ? (
-            // Investor Profile Form
+            <>
+            {/* Investor Profile Form */}
             <div className="glass-card p-10 rounded-3xl border border-white/60 bg-white/40 shadow-xl backdrop-blur-xl dark:bg-white/5 dark:border-white/10 dark:shadow-2xl mb-12">
               <h3 className="text-xl font-black text-gray-900 dark:text-white mb-8 border-b border-gray-100 dark:border-white/10 pb-4">
                 Investor Thesis & Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                {/* ... existing investor fields but inside this unified card ... */}
-                {/* Re-using the fields from original but without the image upload part which is now at top */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 dark:text-gray-400">Company Name</label>
                   <input
@@ -490,6 +505,24 @@ export default function ProfilePage() {
                 </button>
               </div>
             </div>
+
+            {/* Investor: Discover Founders */}
+            <div className="glass-card p-10 rounded-3xl border border-white/60 bg-white/40 shadow-xl backdrop-blur-xl dark:bg-white/5 dark:border-white/10 dark:shadow-2xl mb-12">
+              <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">
+                Discover Founders
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Browse startups looking for investment and reach out directly.
+              </p>
+              <Link
+                href="/dashboard/startups"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg text-sm"
+              >
+                Browse Startup Directory
+                <ArrowRight className="w-4 h-4" weight="bold" />
+              </Link>
+            </div>
+            </>
           ) : (
             // Founder Startups Management
             <>

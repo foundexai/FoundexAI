@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { MOCK_INVESTORS } from "@/lib/data";
 import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
+import User from "@/lib/models/User";
+import Notification from "@/lib/models/Notification";
 import { callAI } from "@/lib/ai";
 import { getCache, setCache } from "@/lib/redis";
 
@@ -162,6 +164,31 @@ export async function POST(req: Request) {
 
     // Non-blocking cache write to avoid adding write latency on matching response
     setCache(cacheKey, finalMatches, 1800).catch(() => {});
+
+    // Notify matched investors with dealFlowAlerts enabled
+    if (finalMatches.length > 0) {
+      const matchedIds = finalMatches
+        .map((m: any) => m.investor?.id)
+        .filter(Boolean);
+      const matchedInvestors = await Investor.find({
+        _id: { $in: matchedIds },
+        platform_user_id: { $exists: true },
+      });
+      for (const inv of matchedInvestors) {
+        if (inv.platform_user_id) {
+          const user = await User.findById(inv.platform_user_id);
+          if (user?.preferences?.dealFlowAlerts !== false) {
+            await Notification.create({
+              recipient_id: inv.platform_user_id,
+              type: "match",
+              title: "New Deal Match Found",
+              message: `A new startup matches ${inv.name}'s investment criteria. Check your pipeline.`,
+              link: "/dashboard/pipeline",
+            }).catch(() => {});
+          }
+        }
+      }
+    }
 
     return NextResponse.json({ matches: finalMatches });
   } catch (error) {

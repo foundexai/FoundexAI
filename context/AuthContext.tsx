@@ -22,6 +22,10 @@ interface User {
   isSuperAdmin?: boolean;
   profile_image_url?: string;
   linkedin_url?: string;
+  preferences?: {
+    dealFlowAlerts?: boolean;
+    profileVisibility?: boolean;
+  };
 }
 
 export interface Startup {

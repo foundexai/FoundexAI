@@ -19,6 +19,13 @@ const UserSchema = new mongoose.Schema({
   is_admin: { type: Boolean, default: false },
   isSuperAdmin: { type: Boolean, default: false },
   trial_start_date: { type: Date, default: Date.now },
+  preferences: {
+    type: {
+      dealFlowAlerts: { type: Boolean, default: true },
+      profileVisibility: { type: Boolean, default: true },
+    },
+    default: { dealFlowAlerts: true, profileVisibility: true },
+  },
   created_at: { type: Date, default: Date.now },
 });
 

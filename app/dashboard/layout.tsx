@@ -18,6 +18,7 @@ import {
   CaretLeft,
   CaretRight,
   CircleNotch,
+  ChatCircleDots,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -34,11 +35,12 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const NAVIGATION_GROUPS: NavGroup[] = [
+const FOUNDER_NAV_GROUPS: NavGroup[] = [
   {
     title: "Overview",
     items: [
       { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
+      { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
     ],
   },
   {
@@ -58,6 +60,36 @@ const NAVIGATION_GROUPS: NavGroup[] = [
   },
 ];
 
+const INVESTOR_NAV_GROUPS: NavGroup[] = [
+  {
+    title: "Overview",
+    items: [
+      { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
+      { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
+    ],
+  },
+  {
+    title: "Discover",
+    items: [
+      { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
+      { name: "Reports", href: "/dashboard/reports", icon: ChartLineUp },
+    ],
+  },
+  {
+    title: "Network",
+    items: [
+      { name: "Investors", href: "/dashboard/investors", icon: Compass },
+    ],
+  },
+  {
+    title: "Account",
+    items: [
+      { name: "Profile", href: "/dashboard/profile", icon: UserCircle },
+      { name: "Settings", href: "/dashboard/settings", icon: Gear },
+    ],
+  },
+];
+
 export default function DashboardLayout({
   children,
 }: {
@@ -66,12 +98,61 @@ export default function DashboardLayout({
   const { user, logout } = useAuth();
   const { isOpen: isSidebarOpen, close: closeSidebar } = useMobileMenu();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(288);
+  const [isDragging, setIsDragging] = useState(false);
   const [clickedItem, setClickedItem] = useState<string | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
     setClickedItem(null);
   }, [pathname]);
+
+  /*
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      let newWidth = e.clientX;
+      if (newWidth < 220) newWidth = 220;
+      if (newWidth > 450) newWidth = 450;
+      setSidebarWidth(newWidth);
+      if (isCollapsed) {
+        setIsCollapsed(false);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, isCollapsed]);
+
+  useEffect(() => {
+    if (isDragging) {
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    } else {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+    return () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isDragging]);
+  */
 
   const getLinkClass = (path: string, exact = false) => {
     const isActive = exact ? pathname === path : pathname.startsWith(path);
@@ -88,7 +169,8 @@ export default function DashboardLayout({
   };
 
   const NavContent = () => {
-    const groups = [...NAVIGATION_GROUPS];
+    const isInvestor = user?.user_type === "investor";
+    const groups = [...(isInvestor ? INVESTOR_NAV_GROUPS : FOUNDER_NAV_GROUPS)];
     if (user?.isAdmin) {
       groups.push({
         title: "Management",
@@ -314,6 +396,10 @@ export default function DashboardLayout({
 
         {/* Desktop Sidebar */}
         <aside
+          /* style={{
+            width: isCollapsed ? '80px' : `${sidebarWidth}px`,
+            transition: isDragging ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1), border-color 300ms, background-color 300ms',
+          }} */
           className={cn(
             "hidden lg:flex bg-white dark:bg-zinc-950 border-r border-gray-100 dark:border-zinc-900 flex-col h-screen fixed top-0 left-0 z-50 transition-all duration-300",
             isCollapsed ? "w-20" : "w-72",
@@ -331,9 +417,23 @@ export default function DashboardLayout({
             )}
           </button>
           <NavContent />
+          {/* Drag Handle */}
+          {/* {!isCollapsed && (
+            <div
+              onMouseDown={handleMouseDown}
+              className={cn(
+                "absolute top-0 right-0 bottom-0 w-1.5 cursor-col-resize z-30 hover:bg-yellow-500/50 active:bg-yellow-500 transition-colors",
+                isDragging && "bg-yellow-500"
+              )}
+            />
+          )} */}
         </aside>
 
         <main
+          /* style={{
+            marginLeft: isCollapsed ? '80px' : `${sidebarWidth}px`,
+            transition: isDragging ? 'none' : 'margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1), border-color 300ms, background-color 300ms',
+          }} */
           className={cn(
             "min-w-0 flex-1 min-h-screen bg-gray-50/50 dark:bg-black transition-all duration-300 relative",
             isCollapsed ? "lg:ml-20" : "lg:ml-72",

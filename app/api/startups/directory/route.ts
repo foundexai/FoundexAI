@@ -21,7 +21,8 @@ export async function GET() {
       logoInitial: startup.logoInitial || startup.company_name.charAt(0) || "S",
       logoColor: startup.logoColor || "bg-blue-500",
       description: startup.business_description,
-      website: startup.website_url, // Map website_url to website
+      website: startup.website_url,
+      readiness_score: startup.readiness_score || 0,
       traction: startup.funding_amount
         ? `$${startup.funding_amount.toLocaleString()} Raised`
         : startup.readiness_score

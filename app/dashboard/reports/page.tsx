@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Building, 
   TrendUp, 
@@ -40,10 +40,43 @@ interface ReportStats {
 }
 
 const E_REPORTS = [
-  { id: "fintech-2025", title: "Fintech Report 2025", sector: "FinTech", size: "4.2 MB", date: "Q1 2025", image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800" },
-  { id: "agritech-trends", title: "AgriTech Trends & Opportunities", sector: "AgriTech", size: "3.8 MB", date: "Q1 2025", image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=800" },
-  { id: "clean-energy", title: "Clean Energy Investment Map", sector: "Energy", size: "5.1 MB", date: "Dec 2024", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=800" },
-  { id: "edtech-landscape", title: "EdTech Growth Landscape", sector: "Education", size: "2.9 MB", date: "Jan 2025", image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800" },
+  { id: "fintech-2025", title: "Fintech Report 2025", sector: "FinTech", size: "4.2 MB", date: "Q1 2025", image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800", pdfUrl: "/reports/fintech-2025.pdf" },
+  { id: "agritech-trends", title: "AgriTech Trends & Opportunities", sector: "AgriTech", size: "3.8 MB", date: "Q1 2025", image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=800", pdfUrl: "/reports/agritech-trends.pdf" },
+  { id: "clean-energy", title: "Clean Energy Investment Map", sector: "Energy", size: "5.1 MB", date: "Dec 2024", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=800", pdfUrl: "/reports/clean-energy.pdf" },
+  { id: "edtech-landscape", title: "EdTech Growth Landscape", sector: "Education", size: "2.9 MB", date: "Jan 2025", image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800", pdfUrl: "/reports/edtech-landscape.pdf" },
+];
+
+const FEATURED_SLIDES = [
+  {
+    title: "The Venture Debt Revolution",
+    description: "How alternative non-dilutive capital is scaling Africa's tech hubs.",
+    image: "https://images.unsplash.com/photo-1559526323-cb2f2fe2591b?q=80&w=1200",
+    pdfUrl: "/reports/venture-debt-revolution.pdf"
+  },
+  {
+    title: "Silicon Savannah SaaS Expansion",
+    description: "Deep-dive into subscription business model scalability in East Africa.",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200",
+    pdfUrl: "/reports/saas-expansion.pdf"
+  },
+  {
+    title: "CleanTech & Solar Arbitrage",
+    description: "Grid volatility and the decentralized clean energy investment map in South Africa.",
+    image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=1200",
+    pdfUrl: "/reports/cleantech-arbitrage.pdf"
+  },
+  {
+    title: "AI & AgTech Yield Optimization",
+    description: "How satellite imaging and specialized computer vision pipelines are improving crop yields in North Africa.",
+    image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1200",
+    pdfUrl: "/reports/agtech-yield.pdf"
+  },
+  {
+    title: "Cross-Border Fintech Rails",
+    description: "Pan-African settlement rails, liquidity hubs, and regional currency corridors.",
+    image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1200",
+    pdfUrl: "/reports/fintech-rails.pdf"
+  }
 ];
 
 export default function ReportsPage() {
@@ -52,6 +85,19 @@ export default function ReportsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [mountedTime, setMountedTime] = useState<number>(0);
+
+  useEffect(() => {
+    setMountedTime(Date.now());
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % FEATURED_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: stats, isLoading } = useQuery<ReportStats>({
     queryKey: ["reports", "stats"],
@@ -71,7 +117,7 @@ export default function ReportsPage() {
     { year: '2024', funding: 2.00 },
   ];
 
-  const handleDownloadReport = (reportTitle: string) => {
+  const handleDownloadReport = (report: typeof E_REPORTS[number]) => {
     if (user?.plan_type !== "license") {
       toast.error("Institutional License Required", {
         description: "Please upgrade to the License plan to download e-reports.",
@@ -82,8 +128,24 @@ export default function ReportsPage() {
       });
       return;
     }
-    toast.success(`Downloading ${reportTitle}...`);
+    toast.success(`Downloading ${report.title}...`);
+    const link = document.createElement("a");
+    link.href = `${report.pdfUrl}?t=${Date.now()}`;
+    link.download = report.pdfUrl.split('/').pop() || "report.pdf";
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
+  const filteredReports = E_REPORTS.filter((report) => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    return (
+      report.title.toLowerCase().includes(query) ||
+      report.sector.toLowerCase().includes(query)
+    );
+  });
 
   if (isLoading) {
     return (
@@ -248,16 +310,61 @@ export default function ReportsPage() {
 
           {/* Featured Visual & Secondary Reports */}
           <div className="lg:col-span-4 flex flex-col gap-8">
-            <div className="bg-zinc-900/20 border border-zinc-800 rounded-[2.5rem] overflow-hidden group aspect-square lg:aspect-auto flex-1 relative">
-              <img 
-                src="https://images.unsplash.com/photo-1559526323-cb2f2fe2591b?q=80&w=1200" 
-                alt="Fintech Featured" 
-                className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000 grayscale group-hover:grayscale-0"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black to-transparent"></div>
-              <div className="absolute bottom-8 left-8 right-8">
-                 <p className="text-2xl font-black leading-tight mb-2">The Venture Debt Revolution</p>
-                 <p className="text-xs text-zinc-400">How alternative financing is scaling Africa's tech hubs.</p>
+            <div className="bg-zinc-900/20 border border-zinc-800 rounded-[2.5rem] overflow-hidden group aspect-square lg:aspect-auto flex-1 relative min-h-[350px]">
+              {FEATURED_SLIDES.map((slide, index) => {
+                const isActive = index === activeSlide;
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      "absolute inset-0 w-full h-full flex flex-col justify-end p-8 transition-all duration-1000",
+                      isActive 
+                        ? "opacity-100 scale-100 pointer-events-auto z-10" 
+                        : "opacity-0 scale-95 pointer-events-none z-0"
+                    )}
+                  >
+                    <img 
+                      src={slide.image} 
+                      alt={slide.title} 
+                      className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000 grayscale group-hover:grayscale-0"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black via-black/45 to-transparent"></div>
+                    <div className="relative z-10 space-y-4">
+                       <div className="flex items-center gap-2">
+                         <span className="text-[10px] font-black uppercase tracking-widest bg-yellow-400/10 text-yellow-500 border border-yellow-500/20 px-2.5 py-0.5 rounded-full">
+                           Featured Report {index + 1}/{FEATURED_SLIDES.length}
+                         </span>
+                       </div>
+                       <div>
+                         <p className="text-2xl font-black leading-tight mb-2 text-white">{slide.title}</p>
+                         <p className="text-xs text-zinc-300 max-w-sm">{slide.description}</p>
+                       </div>
+                       <a 
+                          href={mountedTime ? `${slide.pdfUrl}?t=${mountedTime}` : slide.pdfUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-500 hover:from-yellow-300 hover:via-amber-400 hover:to-yellow-400 text-black rounded-xl font-black text-xs uppercase tracking-wider transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.45)] border border-yellow-300/30 text-center justify-center w-fit"
+                        >
+                          <DownloadSimple className="w-4 h-4 text-black" weight="bold" />
+                          View PDF Report
+                        </a>
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {/* Pagination Dots */}
+              <div className="absolute top-6 right-6 z-20 flex gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
+                {FEATURED_SLIDES.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveSlide(index)}
+                    className={cn(
+                      "w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer",
+                      index === activeSlide ? "bg-yellow-400 w-3" : "bg-zinc-600 hover:bg-zinc-400"
+                    )}
+                  />
+                ))}
               </div>
             </div>
             
@@ -303,54 +410,61 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {E_REPORTS.map((report) => (
-            <div key={report.id} className="group bg-zinc-950 border border-zinc-900 rounded-3xl p-6 space-y-6 hover:shadow-2xl transition-all relative overflow-hidden">
-               <div className="absolute top-4 right-4 z-20">
-                 {user?.plan_type !== "license" && (
-                   <div className="w-8 h-8 bg-black/40 backdrop-blur-md border border-white/5 rounded-full flex items-center justify-center">
-                     <Lock className="w-4 h-4 text-zinc-600" weight="bold" />
-                   </div>
-                 )}
-               </div>
-
-               <div className="aspect-3/4 rounded-2xl bg-zinc-900 overflow-hidden relative border border-white/5">
-                 <img 
-                    src={report.image} 
-                    alt={report.title} 
-                    className={cn(
-                      "w-full h-full object-cover transition-all duration-700",
-                      user?.plan_type !== "license" ? "grayscale opacity-30 group-hover:opacity-50" : "opacity-80 group-hover:opacity-100"
-                    )}
-                 />
-                 <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent opacity-60"></div>
-                 <div className="absolute bottom-4 left-4 right-4">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500 bg-yellow-400/10 px-2 py-0.5 rounded-full border border-yellow-500/20">{report.sector}</span>
-                 </div>
-               </div>
-
-               <div className="space-y-4">
-                 <div>
-                    <h3 className="font-bold text-base leading-tight group-hover:text-yellow-400 transition-colors">{report.title}</h3>
-                    <p className="text-[10px] text-zinc-500 font-bold mt-1 uppercase tracking-widest">{report.date} • {report.size}</p>
-                 </div>
-                 
-                 <button 
-                   onClick={() => handleDownloadReport(report.title)}
-                   className={cn(
-                     "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer",
-                     user?.plan_type === "license" 
-                        ? "bg-white text-black hover:bg-yellow-400" 
-                        : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
+        {filteredReports.length === 0 ? (
+          <div className="w-full text-center py-16 bg-zinc-900/10 border border-zinc-900/40 rounded-[2rem] space-y-2 col-span-full">
+            <p className="text-zinc-400 font-bold text-lg">No reports found</p>
+            <p className="text-zinc-650 text-xs dark:text-zinc-500">Try adjusting your search terms or keywords.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+            {filteredReports.map((report) => (
+              <div key={report.id} className="group bg-zinc-950 border border-zinc-900 rounded-3xl p-6 hover:shadow-2xl transition-all relative overflow-hidden flex flex-col justify-between h-full">
+                 <div className="absolute top-4 right-4 z-20">
+                   {user?.plan_type !== "license" && (
+                     <div className="w-8 h-8 bg-black/40 backdrop-blur-md border border-white/5 rounded-full flex items-center justify-center">
+                       <Lock className="w-4 h-4 text-zinc-600" weight="bold" />
+                     </div>
                    )}
-                 >
-                   <DownloadSimple className="w-4 h-4" weight="bold" />
-                   {user?.plan_type === "license" ? "Download PDF" : "Get Access"}
-                 </button>
-               </div>
-            </div>
-          ))}
-        </div>
+                 </div>
+
+                 <div className="aspect-3/4 rounded-2xl bg-zinc-900 overflow-hidden relative border border-white/5 mb-6">
+                   <img 
+                      src={report.image} 
+                      alt={report.title} 
+                      className={cn(
+                        "w-full h-full object-cover transition-all duration-700",
+                        user?.plan_type !== "license" ? "grayscale opacity-30 group-hover:opacity-50" : "opacity-80 group-hover:opacity-100"
+                      )}
+                   />
+                   <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent opacity-60"></div>
+                   <div className="absolute bottom-4 left-4 right-4">
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500 bg-yellow-400/10 px-2 py-0.5 rounded-full border border-yellow-500/20">{report.sector}</span>
+                   </div>
+                 </div>
+
+                 <div className="flex flex-col grow justify-between space-y-4">
+                   <div>
+                      <h3 className="font-bold text-base leading-tight group-hover:text-yellow-400 transition-colors h-12 line-clamp-2">{report.title}</h3>
+                      <p className="text-[10px] text-zinc-500 font-bold mt-1 uppercase tracking-widest">{report.date} • {report.size}</p>
+                   </div>
+                   
+                   <button 
+                     onClick={() => handleDownloadReport(report)}
+                     className={cn(
+                       "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer mt-auto",
+                       user?.plan_type === "license" 
+                          ? "bg-white text-black hover:bg-yellow-400" 
+                          : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
+                     )}
+                   >
+                     <DownloadSimple className="w-4 h-4" weight="bold" />
+                     {user?.plan_type === "license" ? "Download PDF" : "Get Access"}
+                   </button>
+                 </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Global Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10">

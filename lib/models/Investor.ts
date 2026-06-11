@@ -39,6 +39,7 @@ const InvestorSchema = new mongoose.Schema({
   isApproved: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
   submittedBy: { type: String }, // User ID of the submitter
+  platform_user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Links to platform user account
   created_at: { type: Date, default: Date.now },
 });
 

@@ -25,6 +25,40 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    if (user.user_type === "investor") {
+      const DocumentShare = mongoose.models.DocumentShare || (await import("@/lib/models/DocumentShare")).default;
+      const InvestorProfile = mongoose.models.InvestorProfile || (await import("@/lib/models/InvestorProfile")).default;
+      
+      const profile = await InvestorProfile.findOne({ user_id: user._id });
+      const companyName = profile?.company_name || user.full_name;
+
+      const shares = await DocumentShare.find({
+        $or: [
+          { investor_id: user._id },
+          { investor_name: { $regex: new RegExp(`^${companyName}$`, "i") } }
+        ]
+      }).populate("startup_id");
+
+      const uniqueDeals = new Map();
+      for (const share of shares) {
+        const key = share.startup_id?._id?.toString() || share.founder_id?.toString();
+        if (!key) continue;
+        if (!uniqueDeals.has(key)) {
+          const startup = share.startup_id;
+          uniqueDeals.set(key, {
+            id: companyName || user._id.toString(), // Room ID is investor identity
+            name: startup?.company_name || "Foundex Startup",
+            website: startup?.website_url || "#",
+            type: startup?.sector || "Fintech",
+            location: startup?.location || "Lagos, Nigeria",
+            status: "In Conversation",
+          });
+        }
+      }
+
+      return NextResponse.json({ investors: Array.from(uniqueDeals.values()) });
+    }
+
     // Get IDs and Statuses
     const savedIds = user.saved_investors || [];
     const statuses = user.investor_statuses || new Map();
