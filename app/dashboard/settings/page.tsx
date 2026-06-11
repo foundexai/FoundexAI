@@ -178,59 +178,122 @@ export default function SettingsPage() {
             Plans & Billing
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {[
-              {
-                name: "Starter",
-                price: "$0",
-                features: isInvestor
-                  ? ["Basic Matching", "Curated Deals"]
-                  : ["Basic Matching", "3 Startups"],
-              },
-              {
-                name: "Pro",
-                price: "$49",
-                features: isInvestor
-                  ? ["AI Matchmaker", "Unlimited Access", "Priority Alerts"]
-                  : ["AI Matchmaker", "Unlimited Startups"],
-              },
-              {
-                name: "Enterprise",
-                price: "Custom",
-                features: isInvestor
-                  ? ["Dedicated Support", "Custom Integrations"]
-                  : ["Deep Diligence", "Priority Support"],
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className="p-6 rounded-2xl border border-gray-100 bg-white shadow-xs dark:bg-white/5 dark:border-white/5 flex flex-col"
-              >
-                <h3 className="font-bold text-gray-900 dark:text-white mb-1">
-                  {plan.name}
-                </h3>
-                <p className="text-2xl font-black text-gray-900 dark:text-white mb-4">
-                  {plan.price}
-                </p>
-                <ul className="space-y-2 mb-6 grow">
-                  {plan.features.map((f) => (
-                    <li
-                      key={f}
-                      className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2"
+            {(isInvestor
+              ? [
+                  {
+                    name: "Founder",
+                    id: "founder",
+                    price: "$20",
+                    billing: "/mo (Billed annually)",
+                    features: [
+                      "Expanded Investor Deep-dives",
+                      "5–10 Connect Requests /mo",
+                      "Save Unlimited Profiles",
+                    ],
+                  },
+                  {
+                    name: "Pro",
+                    id: "pro",
+                    price: "$80",
+                    billing: "/mo (Billed annually)",
+                    features: [
+                      "Unlimited Investor Profiles",
+                      "Unlimited Connect Requests",
+                      "Advanced Search & Filters",
+                    ],
+                  },
+                  {
+                    name: "License",
+                    id: "license",
+                    price: "$1,100",
+                    billing: "/yr (Billed annually)",
+                    features: [
+                      "Full Institutional Access",
+                      "Sector Intelligence Reports",
+                      "Predictive Analytics Dashboard",
+                    ],
+                  },
+                ]
+              : [
+                  {
+                    name: "Starter",
+                    id: "starter",
+                    price: "$0",
+                    billing: "Free forever",
+                    features: [
+                      "Limited Investor Profiles",
+                      "Basic Search & Filters",
+                      "Save 3 Profiles",
+                    ],
+                  },
+                  {
+                    name: "Founder",
+                    id: "founder",
+                    price: "$20",
+                    billing: "/mo (Billed annually)",
+                    features: [
+                      "Everything in Starter",
+                      "Expanded Investor Deep-dives",
+                      "Save Unlimited Profiles",
+                    ],
+                  },
+                  {
+                    name: "Pro",
+                    id: "pro",
+                    price: "$80",
+                    billing: "/mo (Billed annually)",
+                    features: [
+                      "Everything in Founder",
+                      "Unlimited Connect Requests",
+                      "Advanced Search & Filters",
+                    ],
+                  },
+                ]
+            ).map((plan) => {
+              const isCurrentPlan = user?.plan_type === plan.id || (!user?.plan_type && plan.id === "starter");
+              return (
+                <div
+                  key={plan.id}
+                  className="p-6 rounded-2xl border border-gray-100 bg-white shadow-xs dark:bg-white/5 dark:border-white/5 flex flex-col justify-between"
+                >
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-1">
+                      {plan.name}
+                    </h3>
+                    <div className="flex items-baseline gap-1 mb-4">
+                      <span className="text-2xl font-black text-gray-900 dark:text-white">
+                        {plan.price}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-medium">
+                        {plan.billing}
+                      </span>
+                    </div>
+                    <ul className="space-y-2 mb-6">
+                      {plan.features.map((f) => (
+                        <li
+                          key={f}
+                          className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2"
+                        >
+                          <span className="w-1 h-1 bg-yellow-500 rounded-full" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Link href="/dashboard/pricing" className="w-full">
+                    <button
+                      className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
+                        isCurrentPlan
+                          ? "bg-gray-50 text-gray-400 dark:bg-white/5 dark:text-zinc-650 cursor-default"
+                          : "bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-md"
+                      }`}
                     >
-                      <span className="w-1 h-1 bg-yellow-500 rounded-full" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/dashboard/pricing" className="w-full">
-                  <button
-                    className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${plan.name === "Pro" ? "bg-black text-white dark:bg-white dark:text-black shadow-lg" : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400"}`}
-                  >
-                    {plan.name === "Pro" ? "Current Plan" : "Upgrade"}
-                  </button>
-                </Link>
-              </div>
-            ))}
+                      {isCurrentPlan ? "Current Plan" : "Upgrade / Change"}
+                    </button>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </div>
 
