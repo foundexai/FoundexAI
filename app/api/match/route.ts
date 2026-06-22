@@ -3,9 +3,9 @@ import { MOCK_INVESTORS } from "@/lib/data";
 import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
 import User from "@/lib/models/User";
-import Notification from "@/lib/models/Notification";
 import { callAI } from "@/lib/ai";
 import { getCache, setCache } from "@/lib/redis";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(req: Request) {
   try {
@@ -178,8 +178,8 @@ export async function POST(req: Request) {
         if (inv.platform_user_id) {
           const user = await User.findById(inv.platform_user_id);
           if (user?.preferences?.dealFlowAlerts !== false) {
-            await Notification.create({
-              recipient_id: inv.platform_user_id,
+            createNotification({
+              userId: inv.platform_user_id.toString(),
               type: "match",
               title: "New Deal Match Found",
               message: `A new startup matches ${inv.name}'s investment criteria. Check your pipeline.`,

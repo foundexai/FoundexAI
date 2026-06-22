@@ -95,11 +95,18 @@ export async function POST(req: Request) {
 
     // Automatically resolve the startup ID if not passed from frontend
     let finalStartupId = startupId;
+    let companyName = "A startup";
+    const Startup = mongoose.models.Startup || (await import("@/lib/models/Startup")).default;
     if (!finalStartupId) {
-      const Startup = mongoose.models.Startup || (await import("@/lib/models/Startup")).default;
       const startup = await Startup.findOne({ user_id: user._id });
       if (startup) {
         finalStartupId = startup._id;
+        companyName = startup.company_name;
+      }
+    } else {
+      const startup = await Startup.findById(finalStartupId);
+      if (startup) {
+        companyName = startup.company_name;
       }
     }
 
@@ -113,6 +120,22 @@ export async function POST(req: Request) {
       doc_url: docUrl,
       message,
     });
+
+    // Notify the investor if they are a platform user
+    if (investorId) {
+      const { notifyUser } = await import("@/lib/notifications");
+      try {
+        await notifyUser(
+          investorId,
+          "📄 Document Shared",
+          `The founder of "${companyName}" has shared "${docName}" with you.`,
+          "system",
+          "/dashboard/documents"
+        );
+      } catch (err) {
+        console.error("Failed to notify investor of shared document:", err);
+      }
+    }
 
     // Also sync and add to pipeline chat message
     const ChatMessage = mongoose.models.ChatMessage || (await import("@/lib/models/ChatMessage")).default;

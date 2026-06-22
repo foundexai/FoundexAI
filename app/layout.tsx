@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
 import { TrialBanner } from "@/components/TrialBanner";
 import QueryProvider from "@/components/providers/QueryProvider";
+import GlobalNotificationListener from "@/components/GlobalNotificationListener";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -43,11 +44,12 @@ export default function RootLayout({
                   <TrialBanner />
                   <Header />
                   {children}
+                  <Toaster />
+                  <GlobalNotificationListener />
                 </MobileMenuProvider>
               </SubscriptionProvider>
             </AuthProvider>
           </QueryProvider>
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>
