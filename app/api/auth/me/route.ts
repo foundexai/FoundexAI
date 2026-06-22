@@ -22,6 +22,7 @@ export async function GET(req: Request) {
     
     const userObj = {
       ...((decoded.user as any).toObject ? (decoded.user as any).toObject() : decoded.user),
+      id: userId,
       isAdmin: isAdmin(decoded.user.email) || (decoded.user as any).is_admin,
       isSuperAdmin: isSuperAdmin(decoded.user.email) || (decoded.user as any).isSuperAdmin
     };

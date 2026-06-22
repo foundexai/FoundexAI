@@ -44,7 +44,7 @@ export default function RootLayout({
                   <TrialBanner />
                   <Header />
                   {children}
-                  <Toaster />
+                  <Toaster richColors theme="dark" position="top-right" />
                   <GlobalNotificationListener />
                 </MobileMenuProvider>
               </SubscriptionProvider>
