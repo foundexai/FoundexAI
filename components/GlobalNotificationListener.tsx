@@ -21,8 +21,9 @@ export default function GlobalNotificationListener() {
   const pusherRef = useRef<Pusher | null>(null);
 
   useEffect(() => {
+    const userId = user?.id || (user as any)?._id;
     // Only run if we have valid user and token - prevents auth errors during login/logout
-    if (!user?.id || !token) {
+    if (!userId || !token) {
       // Cleanup existing connection if user logs out
       if (pusherRef.current && lastChannelRef.current) {
         pusherRef.current.unsubscribe(lastChannelRef.current);
@@ -40,7 +41,7 @@ export default function GlobalNotificationListener() {
     if (!pusher) return;
 
     // Subscribe to the user's personal notification channel
-    const channelName = `private-esign-${user.id}`;
+    const channelName = `private-esign-${userId}`;
     
     // Prevent duplicate subscriptions to the same channel
     if (lastChannelRef.current === channelName && pusherRef.current) {
@@ -103,7 +104,7 @@ export default function GlobalNotificationListener() {
 
     // Capture the current channel name and user id for cleanup
     const currentChannelName = channelName;
-    const currentUserId = user.id;
+    const currentUserId = userId;
     
     // Cleanup on unmount or user change
     return () => {
