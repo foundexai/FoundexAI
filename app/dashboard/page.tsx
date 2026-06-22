@@ -562,10 +562,23 @@ function InvestorDashboard() {
     }
   };
 
-  const handleAcceptShare = (share: any) => {
+  const handleAcceptShare = async (share: any) => {
     toast.success(
       `Request accepted! Opening pipeline chat with ${share.startupName || "founder"}`,
     );
+    
+    // Call API to notify the founder of proposal acceptance
+    if (token) {
+      fetch("/api/documents/share", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: share.id || share._id }),
+      }).catch((err) => console.error("Error notifying proposal acceptance:", err));
+    }
+
     // Redirect to the pipeline messaging page
     router.push("/dashboard/pipeline");
   };

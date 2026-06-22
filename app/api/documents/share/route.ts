@@ -185,10 +185,77 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Missing share ID" }, { status: 400 });
     }
 
+    const share = await DocumentShare.findById(id);
+    if (share) {
+      const { notifyUser } = await import("@/lib/notifications");
+      const InvestorProfile = mongoose.models.InvestorProfile || (await import("@/lib/models/InvestorProfile")).default;
+      const profile = await InvestorProfile.findOne({ user_id: decoded.user._id });
+      const investorName = profile?.company_name || decoded.user.full_name;
+
+      try {
+        await notifyUser(
+          share.founder_id.toString(),
+          "❌ Outreach Request Declined",
+          `Investor "${investorName}" declined your request to share "${share.doc_name}".`,
+          "rejection",
+          "/dashboard/pipeline"
+        );
+      } catch (notifyErr) {
+        console.error("Failed to notify founder of declined share:", notifyErr);
+      }
+    }
+
     await DocumentShare.findByIdAndDelete(id);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Error deleting share:", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    await connectDB();
+    const token = req.headers.get("Authorization")?.split(" ")[1];
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const decoded = await verifyToken(token, true);
+    if (!decoded) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
+    const { id } = await req.json();
+    if (!id) {
+      return NextResponse.json({ error: "Missing share ID" }, { status: 400 });
+    }
+
+    const share = await DocumentShare.findById(id);
+    if (!share) {
+      return NextResponse.json({ error: "Share log not found" }, { status: 404 });
+    }
+
+    // Notify the founder that the investor accepted their proposal/share
+    const { notifyUser } = await import("@/lib/notifications");
+    const InvestorProfile = mongoose.models.InvestorProfile || (await import("@/lib/models/InvestorProfile")).default;
+    const profile = await InvestorProfile.findOne({ user_id: decoded.user._id });
+    const investorName = profile?.company_name || decoded.user.full_name;
+
+    try {
+      await notifyUser(
+        share.founder_id.toString(),
+        "✅ Outreach Request Accepted",
+        `Investor "${investorName}" accepted your request and opened a chat about "${share.doc_name}".`,
+        "approval",
+        "/dashboard/pipeline"
+      );
+    } catch (notifyErr) {
+      console.error("Failed to notify founder of accepted share:", notifyErr);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Error accepting share:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
