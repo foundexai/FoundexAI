@@ -19,10 +19,32 @@ export async function POST(req: Request) {
     if (!id)
       return NextResponse.json({ error: "ID required" }, { status: 400 });
 
+    const investor = await Investor.findById(id);
+    if (investor) {
+      const { notifyUser, notifyAdmins } = await import("@/lib/notifications");
+      if (investor.submittedBy) {
+        await notifyUser(
+          investor.submittedBy.toString(),
+          "❌ Investor Profile Rejected",
+          `The investor profile for "${investor.name}" has been rejected.`,
+          "rejection",
+          "/dashboard"
+        );
+      }
+      
+      await notifyAdmins(
+        "❌ Investor Rejected",
+        `An admin rejected the investor profile for ${investor.name}.`,
+        "rejection",
+        "/dashboard/admin"
+      );
+    }
+
     await Investor.findByIdAndDelete(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Error rejecting investor:", error);
     return NextResponse.json({ error: "Error" }, { status: 500 });
   }
 }

@@ -26,6 +26,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Startup not found" }, { status: 404 });
     }
 
+    const { notifyUser, notifyAdmins } = await import("@/lib/notifications");
+    if (startup.user_id) {
+      await notifyUser(
+        startup.user_id.toString(),
+        "❌ Startup Profile Rejected",
+        `Your startup profile for "${startup.company_name}" has been rejected.`,
+        "rejection",
+        "/dashboard"
+      );
+    }
+    
+    await notifyAdmins(
+      "❌ Startup Rejected",
+      `An admin rejected the startup "${startup.company_name}".`,
+      "rejection",
+      "/dashboard/admin"
+    );
+
     return NextResponse.json(
       { message: "Startup rejected/deleted" },
       { status: 200 },

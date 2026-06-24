@@ -83,6 +83,19 @@ export async function POST(req: Request) {
 
         await deleteCache(`sub:status:${target_user_id}`);
 
+        const { notifyUser } = await import("@/lib/notifications");
+        try {
+          await notifyUser(
+            target_user_id,
+            "🎉 Subscription Granted",
+            `An administrator has manually granted you the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan for ${duration_days || 30} days.`,
+            "approval",
+            "/dashboard"
+          );
+        } catch (notifyErr) {
+          console.error("Failed to notify user of subscription grant:", notifyErr);
+        }
+
         return NextResponse.json({
           message: `Subscription granted: ${plan} for ${duration_days || 30} days`,
           subscription,
@@ -104,6 +117,19 @@ export async function POST(req: Request) {
         await User.findByIdAndUpdate(target_user_id, { plan_type: "starter" });
 
         await deleteCache(`sub:status:${target_user_id}`);
+
+        const { notifyUser } = await import("@/lib/notifications");
+        try {
+          await notifyUser(
+            target_user_id,
+            "⚠️ Subscription Revoked",
+            "Your subscription has been manually revoked by an administrator.",
+            "rejection",
+            "/dashboard/pricing"
+          );
+        } catch (notifyErr) {
+          console.error("Failed to notify user of subscription revoke:", notifyErr);
+        }
 
         return NextResponse.json({ message: "Subscription revoked" });
       }
@@ -129,6 +155,19 @@ export async function POST(req: Request) {
         await User.findByIdAndUpdate(target_user_id, { plan_type: plan });
 
         await deleteCache(`sub:status:${target_user_id}`);
+
+        const { notifyUser } = await import("@/lib/notifications");
+        try {
+          await notifyUser(
+            target_user_id,
+            "🔄 Subscription Updated",
+            `Your subscription has been updated to the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan by an administrator.`,
+            "system",
+            "/dashboard"
+          );
+        } catch (notifyErr) {
+          console.error("Failed to notify user of subscription update:", notifyErr);
+        }
 
         return NextResponse.json({ message: `Subscription updated to ${plan}` });
       }
