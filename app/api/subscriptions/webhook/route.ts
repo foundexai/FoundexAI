@@ -98,6 +98,19 @@ export async function POST(req: Request) {
 
         await deleteCache(`sub:status:${user_id}`);
 
+        const { notifyUser } = await import("@/lib/notifications");
+        try {
+          await notifyUser(
+            user_id,
+            "💳 Subscription Activated",
+            `Your subscription to the "${plan.toUpperCase()}" plan is now active. Enjoy your premium features!`,
+            "approval",
+            "/dashboard"
+          );
+        } catch (notifyErr) {
+          console.error("Failed to notify subscription activation:", notifyErr);
+        }
+
         console.log(`[Webhook] Subscription activated: ${user_id} → ${plan}`);
         return NextResponse.json({ received: true, subscription_id: subscription._id });
       }
@@ -119,6 +132,19 @@ export async function POST(req: Request) {
 
         await deleteCache(`sub:status:${user_id}`);
 
+        const { notifyUser } = await import("@/lib/notifications");
+        try {
+          await notifyUser(
+            user_id,
+            "💳 Subscription Updated",
+            `Your subscription has been updated to the "${plan.toUpperCase()}" plan.`,
+            "system",
+            "/dashboard"
+          );
+        } catch (notifyErr) {
+          console.error("Failed to notify subscription update:", notifyErr);
+        }
+
         console.log(`[Webhook] Subscription updated: ${user_id} → ${plan}`);
         return NextResponse.json({ received: true });
       }
@@ -137,6 +163,19 @@ export async function POST(req: Request) {
 
         await deleteCache(`sub:status:${user_id}`);
 
+        const { notifyUser } = await import("@/lib/notifications");
+        try {
+          await notifyUser(
+            user_id,
+            "⚠️ Subscription Canceled",
+            `Your subscription has been canceled. You will still have access to premium features until the end of the billing cycle.`,
+            "system",
+            "/dashboard"
+          );
+        } catch (notifyErr) {
+          console.error("Failed to notify subscription cancellation:", notifyErr);
+        }
+
         console.log(`[Webhook] Subscription canceled: ${user_id}`);
         return NextResponse.json({ received: true });
       }
@@ -149,6 +188,19 @@ export async function POST(req: Request) {
         await User.findByIdAndUpdate(user_id, { plan_type: "starter" });
 
         await deleteCache(`sub:status:${user_id}`);
+
+        const { notifyUser } = await import("@/lib/notifications");
+        try {
+          await notifyUser(
+            user_id,
+            "❌ Subscription Payment Failed",
+            `We were unable to process your payment. Your account has been downgraded to the Starter plan. Please update your billing details.`,
+            "rejection",
+            "/dashboard"
+          );
+        } catch (notifyErr) {
+          console.error("Failed to notify subscription payment failure:", notifyErr);
+        }
 
         console.log(`[Webhook] Payment failed: ${user_id}`);
         return NextResponse.json({ received: true });

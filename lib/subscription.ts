@@ -118,6 +118,64 @@ export async function getSubscriptionStatus(
 
   const adminUser = userEmail ? isAdmin(userEmail) : false;
 
+  // Trigger trial-related notifications if needed
+  if (trialStart && !adminUser) {
+    try {
+      const now = new Date();
+      const start = new Date(trialStart);
+      const trialEnd = new Date(start);
+      trialEnd.setDate(trialEnd.getDate() + 30);
+      
+      const { notifyUser } = await import("@/lib/notifications");
+      const NotificationModel = (await import("@/lib/models/Notification")).default;
+
+      if (now >= trialEnd) {
+        // Expired - only if they don't have an active paid subscription
+        const activeSub = await Subscription.findOne({
+          user_id: userId,
+          status: "active",
+        });
+        
+        if (!activeSub) {
+          const alreadyNotified = await NotificationModel.findOne({
+            recipient_id: userId,
+            title: "❌ Free Trial Expired",
+          });
+          
+          if (!alreadyNotified) {
+            console.log(`[getSubscriptionStatus] Sending trial expired notification for user ${userId}`);
+            await notifyUser(
+              userId,
+              "❌ Free Trial Expired",
+              "Your 30-day free trial of the Founder plan has expired. Upgrade to a paid plan to restore premium features.",
+              "system",
+              "/dashboard/pricing"
+            );
+          }
+        }
+      } else if (trialDaysRemaining > 0 && trialDaysRemaining <= 3) {
+        // Expiring soon (2 or 3 days remaining)
+        const alreadyNotified = await NotificationModel.findOne({
+          recipient_id: userId,
+          title: "⏳ Free Trial Expiring Soon",
+        });
+        
+        if (!alreadyNotified) {
+          console.log(`[getSubscriptionStatus] Sending trial expiring soon notification for user ${userId}`);
+          await notifyUser(
+            userId,
+            "⏳ Free Trial Expiring Soon",
+            `Your 30-day free trial of the Founder plan has only ${trialDaysRemaining} days remaining. Upgrade today to keep full access!`,
+            "system",
+            "/dashboard/pricing"
+          );
+        }
+      }
+    } catch (notifyErr) {
+      console.error("[getSubscriptionStatus] Failed to trigger trial notifications:", notifyErr);
+    }
+  }
+
   // Admins always have full access
   if (adminUser) {
     console.log(`[getSubscriptionStatus] User is admin`);
