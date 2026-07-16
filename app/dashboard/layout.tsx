@@ -163,7 +163,7 @@ export default function DashboardLayout({
         ? "justify-center p-3"
         : "space-x-3 px-4 py-3 overflow-hidden",
       isActive
-        ? "bg-yellow-400 text-black shadow-lg shadow-yellow-400/20 font-bold"
+        ? "bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/10 dark:text-[#E5C158] font-bold"
         : "text-gray-500 font-medium hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5",
     );
   };
@@ -245,7 +245,7 @@ export default function DashboardLayout({
                         "h-5 w-5 transition-transform duration-200 group-hover:scale-110 shrink-0",
                         pathname === item.href ||
                           (!item.exact && pathname.startsWith(item.href))
-                          ? "text-black"
+                          ? "text-yellow-600 dark:text-[#E5C158]"
                           : "text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white",
                       )}
                     />
@@ -387,7 +387,7 @@ export default function DashboardLayout({
         {/* Mobile Sidebar */}
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-50 w-72 bg-white transform transition-transform duration-500 ease-spring lg:hidden dark:bg-zinc-950",
+            "fixed inset-y-0 left-0 z-50 w-72 bg-white transform transition-transform duration-500 ease-spring lg:hidden dark:bg-[#0B0B0C]",
             isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
@@ -401,7 +401,7 @@ export default function DashboardLayout({
             transition: isDragging ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1), border-color 300ms, background-color 300ms',
           }} */
           className={cn(
-            "hidden lg:flex bg-white dark:bg-zinc-950 border-r border-gray-100 dark:border-zinc-900 flex-col h-screen fixed top-0 left-0 z-50 transition-all duration-300",
+            "hidden lg:flex bg-white dark:bg-[#0B0B0C] border-r border-gray-100 dark:border-zinc-900/60 flex-col h-screen fixed top-0 left-0 z-50 transition-all duration-300",
             isCollapsed ? "w-20" : "w-72",
           )}
         >
