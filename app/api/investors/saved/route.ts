@@ -4,7 +4,9 @@ import { MOCK_INVESTORS } from "@/lib/data";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import Investor from "@/lib/models/Investor";
+import Startup from "@/lib/models/Startup";
 import { verifyToken } from "@/lib/auth";
+import { calculateFitScore } from "@/lib/fit-score";
 
 export async function GET(req: Request) {
   try {
@@ -63,6 +65,9 @@ export async function GET(req: Request) {
     const savedIds = user.saved_investors || [];
     const statuses = user.investor_statuses || new Map();
 
+    // Fetch Startup for this user
+    const startup = await Startup.findOne({ user_id: user._id });
+
     // Fetch Investors from DB
     const dbIds = savedIds.filter((id: string) =>
       mongoose.Types.ObjectId.isValid(id),
@@ -71,6 +76,7 @@ export async function GET(req: Request) {
 
     const formattedDBInvestors = investorsDocs.map((inv) => {
       const id = inv._id.toString();
+      const score = startup ? calculateFitScore(startup, inv).overall : null;
       return {
         id,
         name: inv.name,
@@ -83,16 +89,21 @@ export async function GET(req: Request) {
         investmentRange: inv.investmentRange || inv.investment_range,
         website: inv.website,
         status: (statuses as any).get ? (statuses as any).get(id) : statuses[id] || "Not Contacted",
+        fitScore: score,
       };
     });
 
     // Fetch saved Mock Investors
     const savedMocks = MOCK_INVESTORS.filter((inv) =>
       savedIds.includes(inv.id),
-    ).map(inv => ({
+    ).map(inv => {
+      const score = startup ? calculateFitScore(startup, inv).overall : null;
+      return {
         ...inv,
         status: (statuses as any).get ? (statuses as any).get(inv.id) : statuses[inv.id] || "Not Contacted",
-    }));
+        fitScore: score,
+      };
+    });
 
     const allSaved = [...formattedDBInvestors, ...savedMocks];
 
