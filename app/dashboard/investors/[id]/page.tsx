@@ -238,7 +238,6 @@ export default function InvestorDetailsPage() {
                   onClick={() => setIsCopilotOpen(true)}
                   className="inline-flex items-center px-5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all cursor-pointer"
                 >
-                  <Sparkle className="w-4 h-4 mr-2" weight="fill" />
                   Outreach Copilot
                 </button>
               )}
@@ -295,15 +294,37 @@ export default function InvestorDetailsPage() {
           </div>
 
           {/* Advanced Fit Score Section */}
-          {loadingFit ? (
-            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-zinc-800 flex flex-col items-center justify-center py-10 space-y-2">
-              <CircleNotch className="w-6 h-6 animate-spin text-yellow-500" />
-              <p className="text-xs font-bold text-gray-400">Calculating fit matrix...</p>
+          {loadingFit || !fitScore ? (
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-zinc-800 space-y-6 animate-pulse">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-28 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
+              </div>
+              
+              <div className="flex items-center justify-center py-2">
+                <div className="w-24 h-24 rounded-full border-8 border-gray-100 dark:border-zinc-800/80 animate-pulse flex items-center justify-center" />
+              </div>
+
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-3 w-20 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
+                      <div className="h-3 w-8 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-100 dark:bg-zinc-800 rounded-full animate-pulse" />
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2 border-t border-gray-100 dark:border-zinc-800 pt-4">
+                <div className="h-3 w-24 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
+                <div className="h-2 w-full bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+                <div className="h-2 w-5/6 bg-gray-100 dark:bg-zinc-800 rounded animate-pulse" />
+              </div>
             </div>
-          ) : fitScore ? (
+          ) : (
             <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-zinc-800 space-y-6">
               <div className="flex items-center gap-2">
-                <Sparkle className="w-5 h-5 text-yellow-500" weight="fill" />
                 <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider dark:text-white">
                   Sophia Fit Match
                 </h4>
@@ -416,7 +437,7 @@ export default function InvestorDetailsPage() {
                 </div>
               )}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
 

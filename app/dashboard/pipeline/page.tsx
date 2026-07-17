@@ -77,6 +77,7 @@ export default function PipelinePage() {
   const [deals, setDeals] = useState<EnrichedDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeMobileStage, setActiveMobileStage] = useState("shortlisted");
 
   // Drawer / Side Panel states
   const [selectedDeal, setSelectedDeal] = useState<EnrichedDeal | null>(null);
@@ -91,9 +92,9 @@ export default function PipelinePage() {
   const [activeCopilotDeal, setActiveCopilotDeal] = useState<EnrichedDeal | null>(null);
 
   // 1. Fetch Pipeline Deals
-  const fetchPipeline = async () => {
+  const fetchPipeline = async (showLoading = false) => {
     if (!token) return;
-    setLoading(true);
+    if (showLoading) setLoading(true);
     try {
       const res = await fetch("/api/pipeline", {
         headers: { Authorization: `Bearer ${token}` },
@@ -106,12 +107,12 @@ export default function PipelinePage() {
       console.error(e);
       toast.error("Failed to load pipeline deals");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPipeline();
+    fetchPipeline(true);
   }, [token]);
 
   // 2. Real-Time Sync with Pusher Client
@@ -124,11 +125,11 @@ export default function PipelinePage() {
     
     channel.bind("pipeline-updated", () => {
       // Reload pipeline on external update
-      fetchPipeline();
+      fetchPipeline(false);
     });
 
     channel.bind("pipeline-deleted", () => {
-      fetchPipeline();
+      fetchPipeline(false);
     });
 
     return () => {
@@ -164,6 +165,8 @@ export default function PipelinePage() {
     const deal = deals.find(d => d.id === dealId);
     if (!deal || deal.stage === targetStage) return;
 
+    const previousDeals = [...deals];
+
     // Optimistic Update
     setDeals(prev => 
       prev.map(d => d.id === dealId ? { ...d, stage: targetStage } : d)
@@ -181,13 +184,13 @@ export default function PipelinePage() {
 
       if (res.ok) {
         toast.success(`Moved ${deal.investorName} to ${targetStage.replace("_", " ")}`);
-        fetchPipeline();
+        fetchPipeline(false);
       } else {
         throw new Error();
       }
     } catch (err) {
       toast.error("Failed to move deal. Reverting.");
-      fetchPipeline();
+      setDeals(previousDeals);
     }
   };
 
@@ -209,7 +212,7 @@ export default function PipelinePage() {
 
       if (res.ok) {
         toast.success("Deal size updated!");
-        fetchPipeline();
+        fetchPipeline(false);
       }
     } catch (e) {
       toast.error("Failed to update size");
@@ -238,7 +241,7 @@ export default function PipelinePage() {
       if (res.ok) {
         setNewLogText("");
         toast.success("Activity log added!");
-        fetchPipeline();
+        fetchPipeline(false);
       }
     } catch (e) {
       toast.error("Failed to add note");
@@ -269,7 +272,7 @@ export default function PipelinePage() {
         setNewReminderText("");
         setNewReminderDate("");
         toast.success("Reminder scheduled!");
-        fetchPipeline();
+        fetchPipeline(false);
       }
     } catch (e) {
       toast.error("Failed to schedule reminder");
@@ -293,7 +296,7 @@ export default function PipelinePage() {
       });
 
       if (res.ok) {
-        fetchPipeline();
+        fetchPipeline(false);
       }
     } catch (e) {
       toast.error("Failed to complete reminder");
@@ -318,7 +321,7 @@ export default function PipelinePage() {
 
       if (res.ok) {
         toast.info("Reminder removed");
-        fetchPipeline();
+        fetchPipeline(false);
       }
     } catch (e) {
       toast.error("Failed to remove reminder");
@@ -339,7 +342,7 @@ export default function PipelinePage() {
         toast.success("Investor removed from pipeline");
         setIsDrawerOpen(false);
         setSelectedDeal(null);
-        fetchPipeline();
+        fetchPipeline(false);
       }
     } catch (e) {
       toast.error("Failed to delete deal");
@@ -393,7 +396,8 @@ export default function PipelinePage() {
           <p className="font-bold text-gray-400 animate-pulse">Summoning your pipeline...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4 overflow-x-auto pb-6 select-none min-h-[60vh] items-start">
+        /* Horizontal scrollable Kanban board (enabled on all screen sizes, including mobile) */
+        <div className="flex gap-4 overflow-x-auto pb-6 select-none min-h-[60vh] items-start w-full custom-scrollbar">
           {STAGES.map(stage => {
             const stageDeals = filteredDeals.filter(d => d.stage === stage.id);
             const totalStageAmount = stageDeals.reduce((sum, d) => sum + (d.dealAmount || 0), 0);
@@ -403,10 +407,10 @@ export default function PipelinePage() {
                 key={stage.id}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, stage.id)}
-                className="flex flex-col bg-gray-50/50 dark:bg-zinc-900/40 rounded-3xl p-3 border border-gray-100 dark:border-zinc-800/80 shrink-0 w-80 md:w-auto min-h-[400px] h-full"
+                className="flex flex-col bg-gray-50/50 dark:bg-zinc-900/40 rounded-3xl p-3.5 border border-gray-100 dark:border-zinc-800/80 shrink-0 w-[280px] md:w-[320px] min-h-[500px]"
               >
                 {/* Column Header */}
-                <div className="flex items-center justify-between mb-3 px-1.5 pt-1.5">
+                <div className="flex items-center justify-between mb-4 px-1.5 pt-1.5">
                   <div className="flex flex-col">
                     <span className="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">
                       {stage.label}
@@ -415,13 +419,13 @@ export default function PipelinePage() {
                       ${(totalStageAmount / 1000).toFixed(0)}k • {stageDeals.length}
                     </span>
                   </div>
-                  <span className="w-5 h-5 rounded-full bg-gray-200/50 dark:bg-white/5 flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                  <span className="w-5 h-5 bg-gray-200/50 dark:bg-white/5 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-gray-400">
                     {stageDeals.length}
                   </span>
                 </div>
 
                 {/* Column Card Slot */}
-                <div className="space-y-3 flex-1 overflow-y-auto">
+                <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar">
                   {stageDeals.map(deal => (
                     <div
                       key={deal.id}
@@ -432,14 +436,13 @@ export default function PipelinePage() {
                         setDealAmountInput(deal.dealAmount.toString());
                         setIsDrawerOpen(true);
                       }}
-                      className="glass-card bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800/80 hover:border-yellow-500/30 dark:hover:border-yellow-500/20 p-4 rounded-2xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all space-y-3 relative group"
+                      className="bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 hover:border-yellow-500/50 dark:hover:border-yellow-500/40 p-4 rounded-2xl shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all space-y-3 relative group"
                     >
                       {/* Fit Score Badge */}
                       <div className="flex items-start justify-between gap-2">
                         <span className="text-xs font-black text-gray-900 dark:text-white tracking-tight truncate max-w-[130px]">
                           {deal.investorName}
                         </span>
-                        
                         {deal.fitScore !== null && (
                           <span className={cn(
                             "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border",
@@ -467,7 +470,6 @@ export default function PipelinePage() {
                       {/* Footer Info */}
                       <div className="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-zinc-800/80 text-[10px] font-bold text-gray-600 dark:text-gray-400">
                         <span>${(deal.dealAmount / 1000).toFixed(0)}k</span>
-                        
                         <div className="flex items-center gap-1.5">
                           {deal.reminders.filter(r => !r.is_completed).length > 0 && (
                             <Calendar className="w-3.5 h-3.5 text-yellow-500" weight="fill" />
@@ -481,13 +483,12 @@ export default function PipelinePage() {
                             className="p-1 bg-yellow-500/10 hover:bg-yellow-500 hover:text-white rounded-md text-yellow-600 dark:text-yellow-400 transition-colors cursor-pointer"
                             title="Outreach Copilot"
                           >
-                            <Sparkle className="w-3.5 h-3.5" weight="fill" />
+                            <PaperPlaneTilt className="w-3.5 h-3.5" weight="bold" />
                           </button>
                         </div>
                       </div>
                     </div>
                   ))}
-                  
                   {stageDeals.length === 0 && (
                     <div className="h-24 flex items-center justify-center border border-dashed border-gray-200 dark:border-zinc-800/80 rounded-2xl text-[10px] font-bold text-gray-400 dark:text-gray-600 tracking-wider">
                       Drop here
@@ -558,6 +559,43 @@ export default function PipelinePage() {
                     Save
                   </button>
                 </div>
+              </div>
+
+              {/* Pipeline Stage Select dropdown */}
+              <div className="space-y-2 bg-gray-50/50 dark:bg-black/10 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800/80">
+                <label className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                  <TrendUp className="w-4 h-4 text-yellow-500" />
+                  Pipeline Stage
+                </label>
+                <select
+                  value={selectedDeal.stage}
+                  onChange={async (e) => {
+                    const nextStage = e.target.value;
+                    try {
+                      const res = await fetch(`/api/pipeline/${selectedDeal.id}`, {
+                        method: "PATCH",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ stage: nextStage }),
+                      });
+                      if (res.ok) {
+                        toast.success("Deal stage updated!");
+                        fetchPipeline(false);
+                      }
+                    } catch (e) {
+                      toast.error("Failed to update stage");
+                    }
+                  }}
+                  className="w-full p-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm focus:ring-2 focus:ring-yellow-500/20 outline-none dark:text-white"
+                >
+                  {STAGES.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Advanced Fit Score breakdown details */}
@@ -724,7 +762,6 @@ export default function PipelinePage() {
                 }}
                 className="inline-flex items-center gap-1.5 px-5 py-2 bg-yellow-500 text-white rounded-xl text-xs font-bold hover:bg-yellow-600 transition-all cursor-pointer"
               >
-                <Sparkle className="w-4 h-4" weight="fill" />
                 Outreach Copilot
               </button>
             </div>

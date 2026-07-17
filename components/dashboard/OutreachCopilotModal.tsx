@@ -96,9 +96,6 @@ export default function OutreachCopilotModal({
         {/* Modal Header */}
         <div className="p-6 md:p-8 flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 relative z-10 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
-              <Sparkle className="w-5 h-5 text-white" weight="fill" />
-            </div>
             <div>
               <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
                 AI Outreach <span className="text-yellow-500">Copilot</span>
@@ -130,26 +127,26 @@ export default function OutreachCopilotModal({
                   type="button"
                   onClick={() => setChannel("email")}
                   className={cn(
-                    "flex items-center justify-center gap-2 p-3.5 border rounded-2xl text-sm font-bold transition-all cursor-pointer",
+                    "flex items-center justify-center gap-2 p-2 border rounded-xl text-xs font-bold transition-all cursor-pointer",
                     channel === "email"
                       ? "bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-zinc-950 dark:border-white shadow-lg"
                       : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-zinc-900 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-zinc-800"
                   )}
                 >
-                  <EnvelopeSimple className="w-5 h-5" weight="bold" />
+                  <EnvelopeSimple className="w-4 h-4" weight="bold" />
                   Email Copy
                 </button>
                 <button
                   type="button"
                   onClick={() => setChannel("linkedin")}
                   className={cn(
-                    "flex items-center justify-center gap-2 p-3.5 border rounded-2xl text-sm font-bold transition-all cursor-pointer",
+                    "flex items-center justify-center gap-2 p-2 border rounded-xl text-xs font-bold transition-all cursor-pointer",
                     channel === "linkedin"
                       ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500 shadow-lg shadow-blue-500/20"
                       : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-zinc-900 dark:text-gray-400 dark:border-zinc-800 dark:hover:bg-zinc-800"
                   )}
                 >
-                  <LinkedinLogo className="w-5 h-5" weight="fill" />
+                  <LinkedinLogo className="w-4 h-4" weight="fill" />
                   LinkedIn InMail
                 </button>
               </div>
@@ -175,7 +172,6 @@ export default function OutreachCopilotModal({
           {/* Action Trigger */}
           {!generatedText && !loading && (
             <div className="flex flex-col items-center justify-center py-10 text-center border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-3xl space-y-4">
-              <Sparkle className="w-12 h-12 text-yellow-500 animate-pulse" weight="bold" />
               <div>
                 <p className="font-bold text-gray-700 dark:text-gray-300">Generate warm intro proposal</p>
                 <p className="text-xs text-gray-400 mt-1 max-w-sm">

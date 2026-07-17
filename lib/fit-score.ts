@@ -1,3 +1,5 @@
+import { callAI } from "./ai";
+
 /**
  * Core utility for calculating the Advanced Investor Fit Score.
  * Computes an overall compatibility rating (0-100) and dimensional breakdown
@@ -224,4 +226,74 @@ export function calculateFitScore(startup: any, investor: any): FitScoreBreakdow
     reasons,
     feedback
   };
+}
+
+export async function calculateFitScoreAI(startup: any, investor: any): Promise<FitScoreBreakdown> {
+  const localFallback = calculateFitScore(startup, investor);
+  
+  try {
+    const prompt = `
+      You are Sophia, an expert AI venture capitalist and investment analyst.
+      
+      Analyze the compatibility between the following Startup and Investor.
+      
+      Startup Profile:
+      - Name: ${startup.company_name}
+      - Sector: ${startup.sector || "Unspecified"}
+      - Stage: ${startup.stage || "Pre-Seed"}
+      - Target Funding: $${(startup.funding_amount || 0).toLocaleString()}
+      - Location: ${startup.location || "Unspecified"}
+      - Business Models: ${startup.business_models?.join(", ") || "Unspecified"}
+      
+      Investor Profile:
+      - Name: ${investor.name}
+      - Type: ${investor.type} (e.g. VC, Angel, PE)
+      - Focus Sectors: ${investor.focus?.join(", ") || "Unspecified"}
+      - Location/HQ: ${investor.location || "Unspecified"}
+      - Typical Check Size Range: ${investor.investmentRange || "Unspecified"}
+      - Investment Stage Focus: ${investor.stage || "Unspecified"}
+      
+      Evaluate compatibility across 4 dimensions:
+      1. Sector Match (30% weight): How well the startup's sector aligns with the investor's focus.
+      2. Stage Match (30% weight): How well the startup's current funding stage aligns with the investor's target stage.
+      3. Funding Range Match (20% weight): How well the startup's target funding amount aligns with the investor's check size range.
+      4. Geographic Match (20% weight): How well the startup's location aligns with the investor's geographic mandate.
+      
+      Calculate a score (0 to 100) for each dimension and an overall compatibility score (0 to 100).
+      Provide 2-3 specific reasons for the alignment (Key Alignments) and 1-2 actionable tips (Recommendations) to improve compatibility or prepare for pitch.
+      
+      Return ONLY a valid JSON object in this format:
+      {
+        "overall": number,
+        "sector": number,
+        "stage": number,
+        "funding": number,
+        "geography": number,
+        "reasons": ["Reason 1", "Reason 2"],
+        "feedback": ["Tip 1", "Tip 2"]
+      }
+    `;
+
+    const result = await callAI({
+      prompt,
+      systemPrompt: "You are an expert investment analyst returning JSON only. Do not wrap the JSON in markdown blocks or backticks. Return the JSON object directly.",
+      responseFormat: "json_object",
+      cacheTtl: 86400, // Cache for 24h
+      timeout: 12000,
+    });
+
+    const parsed = JSON.parse(result.content);
+    return {
+      overall: typeof parsed.overall === "number" ? parsed.overall : localFallback.overall,
+      sector: typeof parsed.sector === "number" ? parsed.sector : localFallback.sector,
+      stage: typeof parsed.stage === "number" ? parsed.stage : localFallback.stage,
+      funding: typeof parsed.funding === "number" ? parsed.funding : localFallback.funding,
+      geography: typeof parsed.geography === "number" ? parsed.geography : localFallback.geography,
+      reasons: Array.isArray(parsed.reasons) ? parsed.reasons : localFallback.reasons,
+      feedback: Array.isArray(parsed.feedback) ? parsed.feedback : localFallback.feedback,
+    };
+  } catch (error) {
+    console.warn("AI fit-score calculation failed, using fallback:", error);
+    return localFallback;
+  }
 }

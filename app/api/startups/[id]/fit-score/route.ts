@@ -4,7 +4,7 @@ import { verifyToken } from "@/lib/auth";
 import Startup from "@/lib/models/Startup";
 import Investor from "@/lib/models/Investor";
 import { MOCK_INVESTORS } from "@/lib/data";
-import { calculateFitScore } from "@/lib/fit-score";
+import { calculateFitScoreAI } from "@/lib/fit-score";
 import mongoose from "mongoose";
 
 export async function GET(
@@ -66,8 +66,8 @@ export async function GET(
       return NextResponse.json({ error: "Investor not found" }, { status: 404 });
     }
 
-    // 3. Calculate Fit Score
-    const fitScore = calculateFitScore(startup, investor);
+    // 3. Calculate Fit Score using AI Orchestration Layer
+    const fitScore = await calculateFitScoreAI(startup, investor);
 
     return NextResponse.json({ fitScore });
   } catch (error) {
