@@ -9,10 +9,8 @@ import {
   FileText,
   DownloadSimple,
   WarningCircle,
-  Eye,
   MagnifyingGlassPlus,
   MagnifyingGlassMinus,
-  Sparkle,
   ArrowRight,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -42,6 +40,8 @@ export default function SecureSharePage({ params }: PageProps) {
   // Verified Payload Content & Watermark
   const [docContent, setDocContent] = useState<any>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [pdfPages, setPdfPages] = useState<string[]>([]);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   // 1. Initial Link Metadata Check
   useEffect(() => {
@@ -118,9 +118,6 @@ export default function SecureSharePage({ params }: PageProps) {
 
       setOtpSent(true);
       toast.success(data.message || "Code sent to your email!");
-      if (data.simulationCode) {
-        toast.info(`[Dev Testing Code: ${data.simulationCode}]`);
-      }
     } catch (err: any) {
       toast.error(err.message || "Failed to send code.");
     } finally {
@@ -152,6 +149,69 @@ export default function SecureSharePage({ params }: PageProps) {
       setVerifying(false);
     }
   };
+
+  // 4. Dynamic PDF.js rendering to canvas to support overlay watermarks
+  useEffect(() => {
+    if (!isVerified || !docContent?.docUrl) return;
+
+    const isPdf = !docContent.docUrl.endsWith(".txt") && !docContent.docUrl.endsWith(".md");
+    if (!isPdf) return;
+
+    setPdfLoading(true);
+
+    const loadAndRenderPdf = async () => {
+      try {
+        const pdfjsLib = (window as any).pdfjsLib;
+        if (!pdfjsLib) {
+          // If script not loaded yet, retry shortly
+          setTimeout(loadAndRenderPdf, 200);
+          return;
+        }
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+        
+        const loadingTask = pdfjsLib.getDocument(docContent.docUrl);
+        const pdf = await loadingTask.promise;
+        const pageImages: string[] = [];
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.5 });
+          
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          if (context) {
+            await page.render({ canvasContext: context, viewport }).promise;
+            pageImages.push(canvas.toDataURL("image/png"));
+          }
+        }
+
+        setPdfPages(pageImages);
+      } catch (err) {
+        console.error("Error rendering PDF pages via PDF.js:", err);
+      } finally {
+        setPdfLoading(false);
+      }
+    };
+
+    // Load PDF.js CDN script
+    const scriptId = "pdfjs-cdn-script";
+    let script = document.getElementById(scriptId) as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js";
+      script.onload = () => {
+        loadAndRenderPdf();
+      };
+      document.body.appendChild(script);
+    } else {
+      loadAndRenderPdf();
+    }
+  }, [isVerified, docContent]);
 
   // Prevent Context Menu & Keyboard Print Shortcuts
   useEffect(() => {
@@ -198,7 +258,7 @@ export default function SecureSharePage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col selection:bg-none select-none">
+    <div className="h-screen bg-zinc-950 text-white flex flex-col selection:bg-none select-none overflow-hidden">
       {/* Top Header */}
       <header className="bg-zinc-900 border-b border-zinc-800 px-6 py-3.5 flex items-center justify-between z-20 sticky top-0 shrink-0">
         <div className="flex items-center gap-3">
@@ -253,7 +313,7 @@ export default function SecureSharePage({ params }: PageProps) {
       </header>
 
       {/* Main Body: Access Gate OR Protected Document Viewer */}
-      <main className="grow flex flex-col relative overflow-hidden">
+      <main className="flex-1 flex flex-col relative overflow-hidden">
         {!isVerified ? (
           /* ================= ACCESS GATE SCREEN ================= */
           <div className="grow flex items-center justify-center p-6 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
@@ -299,8 +359,8 @@ export default function SecureSharePage({ params }: PageProps) {
                 </form>
               )}
 
-              {/* Form B: Email OTP or Domain Restricted */}
-              {(linkInfo?.accessType === "email_otp" || linkInfo?.accessType === "domain_restricted") && (
+              {/* Form B: Email OTP Restricted */}
+              {linkInfo?.accessType === "email_otp" && (
                 <div className="space-y-4">
                   {!otpSent ? (
                     <form onSubmit={handleSendOtp} className="space-y-4">
@@ -316,11 +376,6 @@ export default function SecureSharePage({ params }: PageProps) {
                           className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-sm focus:ring-2 focus:ring-yellow-500 focus:outline-none text-white"
                           required
                         />
-                        {linkInfo?.allowedDomains?.length > 0 && (
-                          <p className="text-[10px] text-zinc-500 mt-1.5">
-                            Restricted to domains: @{linkInfo.allowedDomains.join(", @")}
-                          </p>
-                        )}
                       </div>
                       <button
                         type="submit"
@@ -378,16 +433,20 @@ export default function SecureSharePage({ params }: PageProps) {
           /* ================= PROTECTED DOCUMENT VIEWER + WATERMARK ================= */
           <div className="grow flex flex-col relative overflow-hidden bg-zinc-900 items-center justify-center">
             
-            {/* 45-Degree Dynamic Tiled Watermark Overlay */}
+            {/* 45-Degree Dynamic Tiled Watermark Overlay — fixed so it layers above the scrollable PDF canvas */}
             {docContent?.watermarkEnabled && (
               <div
-                className="absolute inset-0 pointer-events-none z-10 overflow-hidden flex flex-wrap content-start justify-around gap-x-24 gap-y-20 p-10 select-none"
-                style={{ opacity: docContent.watermarkOpacity || 0.18 }}
+                className="fixed inset-0 pointer-events-none z-50 overflow-hidden flex flex-wrap content-start justify-around gap-x-24 gap-y-20 p-10 select-none"
+                style={{
+                  opacity: (docContent.watermarkOpacity || 0.18) * 4,
+                  mixBlendMode: "multiply",
+                }}
               >
                 {Array.from({ length: 48 }).map((_, idx) => (
                   <div
                     key={idx}
-                    className="transform -rotate-45 text-white font-mono font-extrabold text-xs md:text-sm tracking-widest whitespace-nowrap shadow-sm"
+                    className="transform -rotate-45 font-mono font-extrabold text-xs md:text-sm tracking-widest whitespace-nowrap"
+                    style={{ color: "#1a1a1a" }}
                   >
                     {docContent.watermarkText}
                   </div>
@@ -397,10 +456,27 @@ export default function SecureSharePage({ params }: PageProps) {
 
             {/* Document Content Frame */}
             <div
-              className="w-full h-full grow flex items-center justify-center overflow-auto transition-all p-4"
+              className="w-full h-full grow flex flex-col items-center overflow-y-auto transition-all p-4"
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "top center" }}
             >
-              {docContent?.docUrl?.endsWith(".txt") || docContent?.docUrl?.endsWith(".md") ? (
+              {pdfLoading ? (
+                <div className="flex flex-col items-center justify-center text-zinc-400 p-12 my-auto">
+                  <CircleNotch className="w-8 h-8 animate-spin text-yellow-500 mb-3" />
+                  <p className="text-xs font-bold">Rendering high-resolution document pages...</p>
+                </div>
+              ) : pdfPages.length > 0 ? (
+                <div className="flex flex-col gap-6 items-center w-full max-w-3xl py-6 select-none pointer-events-none">
+                  {pdfPages.map((pageUrl, idx) => (
+                    <img
+                      key={idx}
+                      src={pageUrl}
+                      alt={`Page ${idx + 1}`}
+                      className="w-full shadow-2xl border border-zinc-800 rounded-xl"
+                      onContextMenu={(e) => e.preventDefault()}
+                    />
+                  ))}
+                </div>
+              ) : docContent?.docUrl?.endsWith(".txt") || docContent?.docUrl?.endsWith(".md") ? (
                 <div className="bg-zinc-950 p-8 md:p-12 rounded-2xl border border-zinc-800 max-w-4xl w-full min-h-[600px] shadow-2xl text-zinc-200 font-sans text-sm md:text-base leading-relaxed whitespace-pre-wrap">
                   {docContent.docUrl}
                 </div>

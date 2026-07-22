@@ -18,7 +18,6 @@ import {
   Trash,
   Copy,
   Check,
-  Sparkle,
   Globe,
   EnvelopeSimple,
   Sliders,
@@ -571,7 +570,7 @@ export default function DocumentsPage() {
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono text-gray-900 dark:text-white focus:outline-none"
               />
               <div className="flex gap-1 mt-2">
-                {["{email}", "{date}", "{ip}"].map((tag) => (
+                {["{email}", "{date}"].map((tag) => (
                   <span key={tag} className="text-[10px] font-mono px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded font-bold">
                     {tag}
                   </span>

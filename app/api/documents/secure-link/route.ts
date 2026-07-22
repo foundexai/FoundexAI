@@ -80,6 +80,7 @@ export async function POST(req: Request) {
       accessType,
       passcode,
       allowedDomains,
+      allowedEmails,
       expiresAt,
       maxViews,
       allowDownload,
@@ -92,6 +93,10 @@ export async function POST(req: Request) {
 
     if (!docName || !docUrl) {
       return NextResponse.json({ error: "Document name and URL are required" }, { status: 400 });
+    }
+
+    if (accessType === "email_otp" && (!allowedEmails || !Array.isArray(allowedEmails) || allowedEmails.length === 0)) {
+      return NextResponse.json({ error: "At least one pre-authorized viewer email is required for the Email OTP Gate." }, { status: 400 });
     }
 
     // Resolve startup ID
@@ -117,6 +122,7 @@ export async function POST(req: Request) {
       access_type: accessType || "public",
       passcode: passcode || "",
       allowed_domains: Array.isArray(allowedDomains) ? allowedDomains : [],
+      allowed_emails: Array.isArray(allowedEmails) ? allowedEmails : [],
       expires_at: expiresAt ? new Date(expiresAt) : undefined,
       max_views: maxViews ? Number(maxViews) : undefined,
       allow_download: Boolean(allowDownload),

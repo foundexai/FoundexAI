@@ -37,11 +37,19 @@ export async function POST(
       }
     }
 
-    // 2. Check Email OTP / Domain Restriction Verification
+    // 2. Check Email OTP Verification
     let authenticatedEmail = email ? email.trim().toLowerCase() : "Viewer";
-    if (link.access_type === "email_otp" || link.access_type === "domain_restricted") {
+    if (link.access_type === "email_otp") {
       if (!email || !otpCode) {
         return NextResponse.json({ error: "Email address and 6-digit verification code are required" }, { status: 400 });
+      }
+
+      const allowedList = link.allowed_emails || [];
+      if (allowedList.length > 0) {
+        const isEmailAllowed = allowedList.some((e: string) => e.trim().toLowerCase() === authenticatedEmail);
+        if (!isEmailAllowed) {
+          return NextResponse.json({ error: "Access denied. Your email is not authorized to view this document." }, { status: 403 });
+        }
       }
 
       const match = (link.otp_requests || []).find(
@@ -84,7 +92,6 @@ export async function POST(
     finalWatermarkText = finalWatermarkText
       .replace(/\{email\}/gi, authenticatedEmail)
       .replace(/\{date\}/gi, `${formattedDate} ${formattedTime}`)
-      .replace(/\{ip\}/gi, clientIp)
       .replace(/\{token\}/gi, link.share_token);
 
     return NextResponse.json({

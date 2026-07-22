@@ -19,6 +19,7 @@ import {
   CaretRight,
   CircleNotch,
   ChatCircleDots,
+  FileText,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -41,6 +42,7 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
     items: [
       { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
       { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
+      { name: "Documents", href: "/dashboard/documents", icon: FileText },
     ],
   },
   {
@@ -66,6 +68,7 @@ const INVESTOR_NAV_GROUPS: NavGroup[] = [
     items: [
       { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
       { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
+      { name: "Documents", href: "/dashboard/documents", icon: FileText },
     ],
   },
   {

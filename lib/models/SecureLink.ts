@@ -31,6 +31,7 @@ const SecureLinkSchema = new mongoose.Schema({
   },
   passcode: { type: String },
   allowed_domains: [{ type: String }],
+  allowed_emails: [{ type: String }],
   expires_at: { type: Date },
   max_views: { type: Number },
   view_count: { type: Number, default: 0 },
