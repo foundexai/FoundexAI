@@ -20,6 +20,8 @@ import {
   CircleNotch,
   ChatCircleDots,
   FileText,
+  ChartPie,
+  CheckSquare,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -43,6 +45,8 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
       { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
       { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
       { name: "Documents", href: "/dashboard/documents", icon: FileText },
+      { name: "Cap Table", href: "/dashboard/captable", icon: ChartPie },
+      { name: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
     ],
   },
   {
