@@ -16,10 +16,17 @@ import {
   X,
   CheckCircle,
   TrendUp,
+  CurrencyDollar,
+  Lightning,
+  Sliders,
+  CaretDown,
+  CaretUp,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { toast } from "sonner";
+import { runWaterfallSimulation, WaterfallSimulationOutput } from "@/lib/waterfall";
 
 interface Shareholder {
   _id: string;
@@ -61,6 +68,16 @@ export default function CapTablePage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Waterfall & Dilution Simulation States
+  const [exitValuation, setExitValuation] = useState<number>(15000000); // Default $15M exit
+  const [liquidationMultiple, setLiquidationMultiple] = useState<number>(1.0);
+  const [showDilutionControls, setShowDilutionControls] = useState<boolean>(false);
+  const [newInvestment, setNewInvestment] = useState<number>(0);
+  const [preMoneyValuation, setPreMoneyValuation] = useState<number>(0);
+  const [newOptionPoolPct, setNewOptionPoolPct] = useState<number>(0);
+
+  const [waterfallResult, setWaterfallResult] = useState<WaterfallSimulationOutput | null>(null);
 
   // Modal Form State
   const [form, setForm] = useState({
@@ -109,6 +126,33 @@ export default function CapTablePage() {
       setIsLoading(false);
     }
   }
+
+  // Recalculate Waterfall Simulation whenever inputs or shareholders change
+  useEffect(() => {
+    if (shareholders.length === 0) {
+      setWaterfallResult(null);
+      return;
+    }
+
+    const formattedEntries = shareholders.map((s) => ({
+      _id: s._id,
+      shareholder_name: s.shareholder_name,
+      shareholder_type: s.shareholder_type,
+      share_class: s.share_class,
+      share_count: s.share_count || 0,
+      investment_amount: s.investment_amount || 0,
+    }));
+
+    const result = runWaterfallSimulation(formattedEntries, {
+      exitValuation,
+      liquidationMultiple,
+      newInvestment,
+      preMoneyValuation,
+      newOptionPoolPct,
+    });
+
+    setWaterfallResult(result);
+  }, [shareholders, exitValuation, liquidationMultiple, newInvestment, preMoneyValuation, newOptionPoolPct]);
 
   const handleCreateShareholder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -453,6 +497,252 @@ export default function CapTablePage() {
           </div>
         </div>
 
+        {/* Exit Waterfall & Dilution Simulator Section */}
+        {shareholders.length > 0 && (
+          <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-gray-200/80 dark:border-zinc-800 p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-zinc-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold shrink-0">
+                  <Lightning className="w-5 h-5" weight="bold" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    Exit Waterfall & Dilution Simulator
+                    <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-mono font-bold rounded-md">
+                      Scenario Modeling
+                    </span>
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Model liquidation preference payouts, Common stock pro-rata distributions, and future funding round dilution.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowDilutionControls(!showDilutionControls)}
+                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              >
+                <Sliders className="w-4 h-4" />
+                {showDilutionControls ? "Hide Round Dilution Controls" : "Model Future Round Dilution"}
+                {showDilutionControls ? <CaretUp className="w-3.5 h-3.5" /> : <CaretDown className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {/* Interactive Simulation Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 dark:bg-zinc-800/30 p-5 rounded-2xl border border-gray-200/60 dark:border-zinc-800">
+              
+              {/* Exit Valuation Slider & Selector */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                    <CurrencyDollar className="w-4 h-4 text-green-500" weight="bold" />
+                    Simulated Exit Sale Price ($)
+                  </label>
+                  <span className="text-sm font-mono font-black text-yellow-600 dark:text-yellow-400">
+                    ${exitValuation.toLocaleString()}
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min={1000000}
+                  max={100000000}
+                  step={1000000}
+                  value={exitValuation}
+                  onChange={(e) => setExitValuation(Number(e.target.value))}
+                  className="w-full accent-yellow-500 cursor-pointer"
+                />
+
+                {/* Quick Presets */}
+                <div className="flex gap-2 flex-wrap">
+                  {[5000000, 10000000, 25000000, 50000000, 100000000].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setExitValuation(preset)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                        exitValuation === preset
+                          ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
+                          : "bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      ${preset / 1000000}M
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Liquidation Preference Multiple Selector */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-gray-800 dark:text-gray-200 block">
+                  Preferred Liquidation Multiple
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { mult: 1.0, label: "1.0x (Standard)" },
+                    { mult: 1.5, label: "1.5x Preference" },
+                    { mult: 2.0, label: "2.0x Preference" },
+                  ].map((item) => (
+                    <button
+                      key={item.mult}
+                      type="button"
+                      onClick={() => setLiquidationMultiple(item.mult)}
+                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                        liquidationMultiple === item.mult
+                          ? "border-yellow-500 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 font-bold"
+                          : "border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      <span className="text-xs font-bold block">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-gray-400">
+                  Preferred shareholders are paid their liquidation preference claims before Common stock receives distributions.
+                </p>
+              </div>
+
+            </div>
+
+            {/* Optional Future Round Dilution Controls */}
+            {showDilutionControls && (
+              <div className="bg-purple-500/5 border border-purple-500/20 p-5 rounded-2xl space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-300">
+                  <Sparkle className="w-4 h-4" /> Model Next Funding Round Dilution
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                      New Round Capital Raised ($)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 2000000"
+                      value={newInvestment || ""}
+                      onChange={(e) => setNewInvestment(Number(e.target.value))}
+                      className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-mono focus:outline-none dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                      Pre-Money Valuation ($)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 8000000"
+                      value={preMoneyValuation || ""}
+                      onChange={(e) => setPreMoneyValuation(Number(e.target.value))}
+                      className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-mono focus:outline-none dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                      Option Pool Expansion (%)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 10"
+                      value={newOptionPoolPct || ""}
+                      onChange={(e) => setNewOptionPoolPct(Number(e.target.value))}
+                      className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-mono focus:outline-none dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Waterfall Scenario Summary Bar */}
+            {waterfallResult && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-900 text-white p-4 rounded-2xl">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-gray-400 block">
+                    Preferred Preference Paid
+                  </span>
+                  <span className="text-sm font-extrabold text-yellow-400">
+                    ${waterfallResult.totalPreferredPreferencePaid.toLocaleString()}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-gray-400 block">
+                    Common Pool Distributed
+                  </span>
+                  <span className="text-sm font-extrabold text-green-400">
+                    ${waterfallResult.totalCommonProceedsPaid.toLocaleString()}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-gray-400 block">
+                    Total Founder Payout
+                  </span>
+                  <span className="text-sm font-extrabold text-white">
+                    ${waterfallResult.founderTotalPayout.toLocaleString()}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-gray-400 block">
+                    Investor Avg Return (MOIC)
+                  </span>
+                  <span className="text-sm font-extrabold text-purple-400">
+                    {waterfallResult.investorAverageMoic}x
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Waterfall Shareholder Payout Table */}
+            {waterfallResult && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-gray-100 dark:border-zinc-800 text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                      <th className="pb-3">Shareholder</th>
+                      <th className="pb-3">Share Class</th>
+                      <th className="pb-3">Initial Ownership</th>
+                      <th className="pb-3">Diluted Ownership</th>
+                      <th className="pb-3">Pref Payout</th>
+                      <th className="pb-3">Common Payout</th>
+                      <th className="pb-3">Total Exit Payout</th>
+                      <th className="pb-3 text-right">Return MOIC</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/60 font-medium text-gray-700 dark:text-gray-300">
+                    {waterfallResult.shareholders.map((res, idx) => (
+                      <tr key={res._id || idx} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                        <td className="py-3.5 pr-3 font-bold text-gray-900 dark:text-white">
+                          {res.shareholder_name}
+                        </td>
+                        <td className="py-3.5 pr-3 font-bold">{res.share_class}</td>
+                        <td className="py-3.5 pr-3 font-mono">{res.initial_ownership_pct}%</td>
+                        <td className="py-3.5 pr-3 font-mono font-bold text-purple-600 dark:text-purple-400">
+                          {res.effective_ownership_pct}%
+                        </td>
+                        <td className="py-3.5 pr-3 font-mono text-gray-500">
+                          {res.preference_payout > 0 ? `$${res.preference_payout.toLocaleString()}` : "—"}
+                        </td>
+                        <td className="py-3.5 pr-3 font-mono text-gray-500">
+                          {res.common_payout > 0 ? `$${res.common_payout.toLocaleString()}` : "—"}
+                        </td>
+                        <td className="py-3.5 pr-3 font-mono font-extrabold text-green-600 dark:text-green-400">
+                          ${res.total_exit_payout.toLocaleString()}
+                        </td>
+                        <td className="py-3.5 text-right font-mono font-black text-yellow-600 dark:text-yellow-400">
+                          {res.moic > 0 ? `${res.moic}x` : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
 
       {/* Add Shareholder Modal */}
@@ -479,18 +769,33 @@ export default function CapTablePage() {
 
             <form onSubmit={handleCreateShareholder} className="space-y-4 text-xs">
               
-              <div>
-                <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
-                  Shareholder Name *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Mustapha Shuaibu or Sequoia Capital"
-                  value={form.shareholderName}
-                  onChange={(e) => setForm({ ...form, shareholderName: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-medium focus:ring-2 focus:ring-black dark:focus:ring-white focus:outline-none dark:text-white"
-                  required
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Shareholder Name *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mustapha Shuaibu or Sequoia Capital"
+                    value={form.shareholderName}
+                    onChange={(e) => setForm({ ...form, shareholderName: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-medium focus:ring-2 focus:ring-black dark:focus:ring-white focus:outline-none dark:text-white"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Shareholder Email (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="e.g. partner@sequoiacap.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-medium focus:ring-2 focus:ring-black dark:focus:ring-white focus:outline-none dark:text-white"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -516,7 +821,14 @@ export default function CapTablePage() {
                   </label>
                   <select
                     value={form.shareClass}
-                    onChange={(e) => setForm({ ...form, shareClass: e.target.value })}
+                    onChange={(e) => {
+                      const newClass = e.target.value;
+                      setForm((prev) => ({
+                        ...prev,
+                        shareClass: newClass,
+                        isVesting: newClass === "Options / ESOP" ? true : prev.isVesting,
+                      }));
+                    }}
                     className="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-bold dark:text-white"
                   >
                     <option value="Common">Common Stock</option>
@@ -552,7 +864,7 @@ export default function CapTablePage() {
                     placeholder="e.g. 250000"
                     value={form.investmentAmount}
                     onChange={(e) => setForm({ ...form, investmentAmount: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-mono focus:ring-2 focus:ring-black dark:focus:ring-white focus:outline-none dark:text-white"
+                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-mono focus:outline-none dark:text-white"
                   />
                 </div>
               </div>
