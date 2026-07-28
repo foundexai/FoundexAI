@@ -332,33 +332,25 @@ export default function DocumentsPage() {
                 {filteredDocs.map((doc, i) => (
                   <div
                     key={i}
-                    className="group bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 dark:bg-zinc-900 dark:border-zinc-800 flex flex-col h-full"
+                    className="group bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800/80 shadow-xs hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col h-full"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                          doc.type === "deck"
-                            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                            : doc.type === "financials"
-                              ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400"
-                        }`}
-                      >
-                        <FileText className="w-6 h-6" weight="bold" />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-50 border border-gray-150 text-gray-500 dark:bg-zinc-900 dark:border-zinc-850 dark:text-zinc-400">
+                        <FileText className="w-5 h-5" />
                       </div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                      <span className="text-[10px] font-mono font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
                         {doc.type}
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 dark:text-white">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm line-clamp-1">
                       {doc.name}
                     </h3>
 
                     {/* Action Row */}
-                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-800 space-y-2">
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                        <span className="flex items-center gap-1">
+                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-900/60 space-y-3">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                        <span className="flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5" />
                           {doc.date ? format(new Date(doc.date), "MMM d, yyyy") : "Recently"}
                         </span>
@@ -371,17 +363,17 @@ export default function DocumentsPage() {
                             setSelectedDocForSecureLink(doc);
                             setIsSecureLinkModalOpen(true);
                           }}
-                          className="py-2 px-3 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          className="py-2 px-3 border border-zinc-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-900 text-gray-800 dark:text-zinc-200 text-[10px] font-mono font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                         >
-                          <ShieldCheck className="w-4 h-4" weight="bold" /> Secure Link
+                          <ShieldCheck className="w-3.5 h-3.5" weight="bold" /> Secure Link
                         </button>
 
                         {/* 2. Direct Preview */}
                         <Link
                           href={`/dashboard/documents/view?url=${encodeURIComponent(doc.url)}&name=${encodeURIComponent(doc.name)}&type=${doc.type}`}
-                          className="py-2 px-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                          className="py-2 px-3 bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:text-black dark:hover:bg-white text-[10px] font-mono font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all"
                         >
-                          <Eye className="w-4 h-4" /> View Deck
+                          <Eye className="w-3.5 h-3.5" /> View Deck
                         </Link>
                       </div>
                     </div>

@@ -17,11 +17,9 @@ import {
   CheckCircle,
   TrendUp,
   CurrencyDollar,
-  Lightning,
   Sliders,
   CaretDown,
   CaretUp,
-  Sparkle,
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
@@ -503,7 +501,7 @@ export default function CapTablePage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-zinc-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold shrink-0">
-                  <Lightning className="w-5 h-5" weight="bold" />
+                  <ChartPie className="w-5 h-5" weight="bold" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -608,7 +606,7 @@ export default function CapTablePage() {
             {showDilutionControls && (
               <div className="bg-purple-500/5 border border-purple-500/20 p-5 rounded-2xl space-y-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-300">
-                  <Sparkle className="w-4 h-4" /> Model Next Funding Round Dilution
+                  <Percent className="w-4 h-4" /> Model Next Funding Round Dilution
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
