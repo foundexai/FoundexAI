@@ -22,6 +22,7 @@ import {
   FileText,
   ChartPie,
   CheckSquare,
+  EnvelopeSimple,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -46,6 +47,7 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
       { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
       { name: "Documents", href: "/dashboard/documents", icon: FileText },
       { name: "Cap Table", href: "/dashboard/captable", icon: ChartPie },
+      { name: "Investor Updates", href: "/dashboard/updates", icon: EnvelopeSimple },
       { name: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
     ],
   },
@@ -53,6 +55,7 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
     title: "Discover",
     items: [
       { name: "Investors", href: "/dashboard/investors", icon: Compass },
+      { name: "Smart Grants", href: "/dashboard/grants", icon: ShieldCheck },
       { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
       { name: "Reports", href: "/dashboard/reports", icon: ChartLineUp },
     ],
