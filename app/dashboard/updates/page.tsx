@@ -254,11 +254,11 @@ export default function InvestorUpdatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-black">
+    <div className="min-h-screen bg-zinc-50/50 dark:bg-black flex flex-col">
       {/* Toast popup managed globally */}
       
       {/* Header Banner */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between sticky top-0 z-10 dark:bg-zinc-900 dark:border-zinc-800 gap-4">
+      <div className="bg-white border-b border-gray-100 px-6 py-4 flex flex-col sm:flex-row items-center justify-between sticky top-0 z-10 dark:bg-zinc-900 dark:border-zinc-800/80 gap-4">
         <div className="flex items-center gap-4 w-full sm:w-auto">
           <Link
             href="/dashboard"
@@ -280,7 +280,7 @@ export default function InvestorUpdatesPage() {
           {activeTab === "history" ? (
             <button
               onClick={() => { resetForm(); setActiveTab("compose"); }}
-              className="px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+              className="px-4 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-xl dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Compose Update
@@ -288,7 +288,7 @@ export default function InvestorUpdatesPage() {
           ) : (
             <button
               onClick={() => { resetForm(); setActiveTab("history"); }}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-200 text-xs font-bold rounded-xl transition-all"
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-200 text-xs font-bold rounded-xl transition-all cursor-pointer"
             >
               Back to History
             </button>
@@ -309,92 +309,94 @@ export default function InvestorUpdatesPage() {
                 {updates.map((update) => (
                   <div
                     key={update._id}
-                    className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-gray-200/80 dark:border-zinc-800/80 shadow-xs hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col"
+                    className="group bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800/80 shadow-xs hover:border-zinc-400 dark:hover:border-zinc-700 transition-all duration-300 flex flex-col"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono font-bold tracking-widest text-yellow-600 dark:text-yellow-400 uppercase bg-yellow-500/10 px-2 py-0.5 rounded">
+                          <span className="text-[9px] font-mono font-bold tracking-widest text-yellow-600 dark:text-yellow-400 uppercase bg-yellow-500/10 px-2 py-0.5 rounded">
                             {update.month}
                           </span>
-                          <span className="text-[10px] text-zinc-500 font-mono">
+                          <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-mono">
                             {format(new Date(update.created_at), "MMM d, yyyy")}
                           </span>
                         </div>
-                        <h3 className="font-bold text-base text-gray-900 dark:text-white mt-2 line-clamp-1">
+                        <h3 className="font-semibold text-base text-gray-900 dark:text-white mt-2 line-clamp-1">
                           {update.title}
                         </h3>
                       </div>
                       <div className="flex gap-1.5">
                         <button
                           onClick={() => handleEdit(update)}
-                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-lg text-gray-500 dark:text-gray-400"
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-lg text-gray-500 dark:text-gray-400 cursor-pointer transition-colors"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(update._id)}
-                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-lg text-rose-500"
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-lg text-rose-500 cursor-pointer transition-colors"
                         >
                           <Trash className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
-                    {/* Pre-defined KPI metrics preview */}
-                    <div className="grid grid-cols-3 gap-2 bg-gray-50 dark:bg-zinc-900/50 p-3 rounded-xl text-xs mb-4">
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block font-mono">MRR</span>
-                        <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">
+                    {/* Pre-defined KPI metrics preview (refined border-y dividers layout) */}
+                    <div className="grid grid-cols-3 gap-2 border-y border-gray-100 dark:border-zinc-900 py-3.5 mb-4 text-xs font-mono">
+                      <div className="space-y-0.5 text-center">
+                        <span className="text-[9px] uppercase font-bold text-gray-400 dark:text-zinc-500 block leading-none">MRR</span>
+                        <span className="font-bold text-gray-800 dark:text-zinc-200 mt-1 block">
                           ${(update.metrics?.mrr || 0).toLocaleString()}
                         </span>
                       </div>
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block font-mono">Cash</span>
-                        <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">
+                      <div className="space-y-0.5 text-center border-x border-gray-100 dark:border-zinc-900">
+                        <span className="text-[9px] uppercase font-bold text-gray-400 dark:text-zinc-500 block leading-none">Cash</span>
+                        <span className="font-bold text-gray-800 dark:text-zinc-200 mt-1 block">
                           ${(update.metrics?.cash_in_bank || 0).toLocaleString()}
                         </span>
                       </div>
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block font-mono">Runway</span>
-                        <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">
+                      <div className="space-y-0.5 text-center">
+                        <span className="text-[9px] uppercase font-bold text-gray-400 dark:text-zinc-500 block leading-none">Runway</span>
+                        <span className="font-bold text-gray-800 dark:text-zinc-200 mt-1 block">
                           {update.metrics?.runway_months || 0} mos
                         </span>
                       </div>
                     </div>
 
                     {/* Brief KPI bullet previews */}
-                    <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400 line-clamp-3 flex-1 mb-4">
+                    <div className="space-y-2.5 text-xs text-gray-600 dark:text-zinc-400 line-clamp-3 flex-1 mb-5">
                       {update.kpis?.highlights && (
-                        <div>
-                          <strong className="text-gray-900 dark:text-white">🚀 Highlight:</strong> {update.kpis.highlights.substring(0, 100)}...
+                        <div className="flex items-start gap-1.5">
+                          <span className="text-emerald-500 shrink-0">🚀</span>
+                          <span className="leading-relaxed"><strong className="text-gray-900 dark:text-white font-semibold">Highlight:</strong> {update.kpis.highlights.substring(0, 95)}...</span>
                         </div>
                       )}
                       {update.kpis?.help_needed && (
-                        <div>
-                          <strong className="text-gray-900 dark:text-white">🤝 Help Needed:</strong> {update.kpis.help_needed.substring(0, 100)}...
+                        <div className="flex items-start gap-1.5">
+                          <span className="text-yellow-500 shrink-0">🤝</span>
+                          <span className="leading-relaxed"><strong className="text-gray-900 dark:text-white font-semibold">Help Needed:</strong> {update.kpis.help_needed.substring(0, 95)}...</span>
                         </div>
                       )}
                     </div>
 
                     <button
                       onClick={() => setPreviewUpdate(update)}
-                      className="w-full py-2 px-3 bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:text-black dark:hover:bg-white text-[11px] font-mono font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all mt-auto"
+                      className="w-full py-2 px-3 border border-zinc-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-900 text-gray-800 dark:text-zinc-200 text-[10px] font-mono font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all mt-auto cursor-pointer"
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye className="w-3.5 h-3.5" />
                       Read Full Update
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-200 dark:bg-zinc-900 dark:border-zinc-800 max-w-xl mx-auto w-full my-auto">
+              <div className="text-center py-24 bg-white dark:bg-zinc-950 rounded-3xl border border-dashed border-gray-200 dark:border-zinc-800 max-w-xl mx-auto w-full my-auto shadow-xs">
                 <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                 <h3 className="text-lg font-bold text-gray-900 mb-1 dark:text-white">No updates published yet</h3>
                 <p className="text-gray-500 text-xs mb-4">Compose your first monthly progress report for investors.</p>
                 <button
                   onClick={() => setActiveTab("compose")}
-                  className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-xl transition-all"
+                  className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
                   Create Monthly Update
                 </button>
@@ -402,227 +404,232 @@ export default function InvestorUpdatesPage() {
             )}
           </div>
         ) : (
-          <form onSubmit={handleSave} className="space-y-6 flex-1 flex flex-col max-w-4xl mx-auto w-full">
-            {/* Meta Row */}
-            <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-gray-250/60 dark:border-zinc-850 space-y-4">
-              <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
-                Update Metadata
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider block">
-                    Target Month
-                  </label>
-                  <input
-                    type="month"
-                    value={month}
-                    onChange={(e) => setMonth(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-xs dark:text-white outline-none focus:border-zinc-500 font-mono"
-                    required
-                  />
-                </div>
-                <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider block">
-                    Update Title
-                  </label>
+          <form onSubmit={handleSave} className="flex flex-col lg:flex-row gap-8 items-start w-full animate-fade-in">
+            {/* Left Workspace Column: Document & Editor */}
+            <div className="flex-1 w-full space-y-6">
+              {/* Paper Document Wrapper */}
+              <div className="bg-white dark:bg-zinc-950 p-6 sm:p-8 rounded-3xl border border-gray-150/80 dark:border-zinc-900 shadow-2xs space-y-6">
+                
+                {/* Meta Inputs on the Paper */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[9px] font-mono font-bold tracking-widest text-yellow-600 dark:text-yellow-400 uppercase bg-yellow-500/10 px-2.5 py-1 rounded">
+                      Month Update
+                    </span>
+                    <input
+                      type="month"
+                      value={month}
+                      onChange={(e) => setMonth(e.target.value)}
+                      className="bg-transparent text-xs font-mono font-bold text-zinc-500 dark:text-zinc-400 border-none outline-none p-0 focus:ring-0 w-32 cursor-pointer hover:text-zinc-800 dark:hover:text-white"
+                      required
+                    />
+                  </div>
+                  
                   <input
                     type="text"
-                    placeholder="e.g. Q3 Traction, New Product Milestones & Funding Runway"
+                    placeholder="Enter Update Title..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-xs dark:text-white outline-none focus:border-zinc-500"
+                    className="w-full bg-transparent text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white border-none p-0 outline-none focus:ring-0 placeholder-gray-300 dark:placeholder-zinc-800"
                     required
                   />
+                  <div className="h-[1px] bg-gray-100 dark:bg-zinc-900 w-full" />
+                </div>
+
+                {/* Narrative Workspace text editor */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center bg-zinc-50 dark:bg-zinc-905 p-1.5 rounded-xl border border-gray-150 dark:border-zinc-850">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-400 px-2">Narrative</span>
+                    
+                    {/* Quick Editor Helpers */}
+                    <div className="flex gap-1 items-center">
+                      <button
+                        type="button"
+                        onClick={() => injectText("**", "**")}
+                        className="px-2.5 py-0.5 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] font-bold rounded font-mono cursor-pointer transition-colors"
+                        title="Bold"
+                      >
+                        B
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => injectText("*", "*")}
+                        className="px-2.5 py-0.5 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] italic rounded font-mono cursor-pointer transition-colors"
+                        title="Italic"
+                      >
+                        I
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => injectText("### ")}
+                        className="px-2.5 py-0.5 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] rounded font-mono cursor-pointer transition-colors"
+                        title="Header"
+                      >
+                        H3
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => injectText("- ")}
+                        className="px-2.5 py-0.5 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] rounded font-mono cursor-pointer transition-colors"
+                        title="List"
+                      >
+                        • List
+                      </button>
+                    </div>
+                  </div>
+
+                  <textarea
+                    id="body-composer"
+                    rows={14}
+                    placeholder="Share your detailed monthly updates here... markdown is supported."
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    className="w-full bg-transparent border-none p-0 text-sm dark:text-white outline-none focus:ring-0 font-sans resize-none leading-relaxed min-h-[300px] placeholder-zinc-400 dark:placeholder-zinc-700"
+                  />
+                </div>
+              </div>
+
+              {/* KPI Summary inputs - Styled nicely below the main document narrative */}
+              <div className="bg-white dark:bg-zinc-950 p-6 sm:p-8 rounded-3xl border border-gray-150/80 dark:border-zinc-900 shadow-2xs space-y-6">
+                <div className="flex items-center gap-2 border-b border-gray-150 dark:border-zinc-900 pb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                  <h3 className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-550">
+                    Key Performance Indicators
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Highlights Card */}
+                  <div className="bg-emerald-500/5 dark:bg-emerald-500/5/30 border border-emerald-500/10 dark:border-emerald-500/10 p-4.5 rounded-2xl transition-all duration-300 focus-within:border-emerald-500/30 dark:focus-within:border-emerald-500/40">
+                    <div className="flex items-center gap-2 border-b border-emerald-500/10 dark:border-emerald-500/20 pb-2 mb-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-[9px] font-mono font-bold text-emerald-850 dark:text-emerald-400 uppercase tracking-widest block">
+                        🚀 Highlights & Wins
+                      </span>
+                    </div>
+                    <textarea
+                      rows={4}
+                      placeholder="Key milestones hit, contracts closed, hiring updates, product releases..."
+                      value={highlights}
+                      onChange={(e) => setHighlights(e.target.value)}
+                      className="w-full bg-transparent border-none p-0 text-xs text-gray-800 dark:text-zinc-200 outline-none focus:ring-0 leading-relaxed resize-none placeholder-zinc-400 dark:placeholder-zinc-650"
+                    />
+                  </div>
+
+                  {/* Roadblocks Card */}
+                  <div className="bg-rose-500/5 dark:bg-rose-500/5/30 border border-rose-500/10 dark:border-rose-500/10 p-4.5 rounded-2xl transition-all duration-300 focus-within:border-rose-500/30 dark:focus-within:border-rose-500/40">
+                    <div className="flex items-center gap-2 border-b border-rose-500/10 dark:border-rose-500/20 pb-2 mb-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                      <span className="text-[9px] font-mono font-bold text-rose-850 dark:text-rose-400 uppercase tracking-widest block">
+                        📉 Roadblocks & Wins
+                      </span>
+                    </div>
+                    <textarea
+                      rows={4}
+                      placeholder="Bottlenecks, churn metrics, target misses, operational issues..."
+                      value={lowlights}
+                      onChange={(e) => setLowlights(e.target.value)}
+                      className="w-full bg-transparent border-none p-0 text-xs text-gray-800 dark:text-zinc-200 outline-none focus:ring-0 leading-relaxed resize-none placeholder-zinc-400 dark:placeholder-zinc-650"
+                    />
+                  </div>
+
+                  {/* Help Needed Card */}
+                  <div className="bg-yellow-500/5 dark:bg-yellow-500/5/30 border border-yellow-500/10 dark:border-yellow-500/10 p-4.5 rounded-2xl transition-all duration-300 focus-within:border-yellow-500/30 dark:focus-within:border-yellow-500/40">
+                    <div className="flex items-center gap-2 border-b border-yellow-500/10 dark:border-yellow-500/20 pb-2 mb-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                      <span className="text-[9px] font-mono font-bold text-yellow-850 dark:text-yellow-450 uppercase tracking-widest block">
+                        🤝 Help Needed
+                      </span>
+                    </div>
+                    <textarea
+                      rows={4}
+                      placeholder="Specific requests for investor help (intros, pilot partners, talent search)..."
+                      value={helpNeeded}
+                      onChange={(e) => setHelpNeeded(e.target.value)}
+                      className="w-full bg-transparent border-none p-0 text-xs text-gray-800 dark:text-zinc-200 outline-none focus:ring-0 leading-relaxed resize-none placeholder-zinc-400 dark:placeholder-zinc-650"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Structured Financial KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-gray-200 dark:border-zinc-800 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center font-bold shrink-0">
-                  <Coins className="w-5 h-5" />
-                </div>
-                <div className="space-y-1 w-full min-w-0">
-                  <label className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider block">
-                    Monthly Revenue (MRR)
-                  </label>
-                  <input
-                    type="number"
-                    value={mrr}
-                    onChange={(e) => setMrr(Number(e.target.value))}
-                    className="w-full bg-transparent border-none p-0 text-sm font-bold font-mono dark:text-white focus:outline-none"
-                    placeholder="$0"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-gray-200 dark:border-zinc-800 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0">
-                  <TrendUp className="w-5 h-5" />
-                </div>
-                <div className="space-y-1 w-full min-w-0">
-                  <label className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider block">
-                    Cash in Bank ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={cashInBank}
-                    onChange={(e) => setCashInBank(Number(e.target.value))}
-                    className="w-full bg-transparent border-none p-0 text-sm font-bold font-mono dark:text-white focus:outline-none"
-                    placeholder="$0"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-gray-200 dark:border-zinc-800 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold shrink-0">
-                  <Hourglass className="w-5 h-5" />
-                </div>
-                <div className="space-y-1 w-full min-w-0">
-                  <label className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider block">
-                    Runway (Months)
-                  </label>
-                  <input
-                    type="number"
-                    value={runwayMonths}
-                    onChange={(e) => setRunwayMonths(Number(e.target.value))}
-                    className="w-full bg-transparent border-none p-0 text-sm font-bold font-mono dark:text-white focus:outline-none"
-                    placeholder="12"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* KPI Cards (Highlights, Lowlights, Help Needed) */}
-            <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-gray-250/60 dark:border-zinc-850 space-y-4">
-              <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
-                Key Performance Indicators (KPIs)
-              </h3>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    🚀 Highlights & Wins
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Key milestones hit, contracts closed, hiring updates, product releases..."
-                    value={highlights}
-                    onChange={(e) => setHighlights(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-xs dark:text-white outline-none focus:border-zinc-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-rose-500" />
-                    📉 Roadblocks & Lowlights
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Bottlenecks, churn metrics, target misses, operational issues..."
-                    value={lowlights}
-                    onChange={(e) => setLowlights(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-xs dark:text-white outline-none focus:border-zinc-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                    🤝 Help Needed
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Specific requests for investor help (intros, pilot partners, talent search)..."
-                    value={helpNeeded}
-                    onChange={(e) => setHelpNeeded(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-xs dark:text-white outline-none focus:border-zinc-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Custom Styled Body Editor */}
-            <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-gray-250/60 dark:border-zinc-850 space-y-4 flex-1 flex flex-col">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
-                  Detailed Narrative
-                </h3>
-
-                {/* Quick Editor Helpers */}
-                <div className="flex gap-1.5 flex-wrap items-center bg-gray-50 dark:bg-zinc-900 p-1.5 rounded-xl border border-gray-150 dark:border-zinc-800">
-                  <button
-                    type="button"
-                    onClick={() => injectText("**", "**")}
-                    className="px-2 py-1 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] font-bold rounded font-mono"
-                    title="Bold"
-                  >
-                    B
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => injectText("*", "*")}
-                    className="px-2 py-1 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] italic rounded font-mono"
-                    title="Italic"
-                  >
-                    I
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => injectText("### ")}
-                    className="px-2 py-1 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] rounded font-mono"
-                    title="Header"
-                  >
-                    H3
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => injectText("- ")}
-                    className="px-2 py-1 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] rounded font-mono"
-                    title="List"
-                  >
-                    • List
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => injectText("> ")}
-                    className="px-2 py-1 hover:bg-gray-200 dark:hover:bg-zinc-800 text-[10px] rounded font-mono"
-                    title="Blockquote"
-                  >
-                    Quote
-                  </button>
-                </div>
-              </div>
-
-              <textarea
-                id="body-composer"
-                rows={12}
-                placeholder="Share your detailed monthly updates here... markdown is supported."
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                className="w-full flex-1 p-4 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-xs dark:text-white outline-none focus:border-zinc-500 font-mono resize-none leading-relaxed min-h-[220px]"
-              />
-
-              {/* KPI Data / Pitch Deck / Report Link Integration */}
-              <div className="border-t border-gray-100 dark:border-zinc-900/60 pt-4 space-y-3.5">
-                <h4 className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1.5">
-                  <Paperclip className="w-3.5 h-3.5" />
-                  Integrate Reports & Links
+            {/* Right Sidebar: Key Metrics & Report Attachments & Form Actions */}
+            <div className="w-full lg:w-80 lg:sticky lg:top-24 space-y-6 shrink-0">
+              
+              {/* Financial Metrics Box */}
+              <div className="bg-white dark:bg-zinc-950 p-5 rounded-3xl border border-gray-150/80 dark:border-zinc-900 shadow-2xs space-y-5">
+                <h4 className="text-[10px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">
+                  Key Metrics
                 </h4>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-mono font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      Monthly Revenue (MRR)
+                    </label>
+                    <div className="flex items-center bg-zinc-50/50 dark:bg-zinc-900/40 border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 focus-within:border-zinc-450 dark:focus-within:border-zinc-700 transition-colors">
+                      <span className="text-xs font-semibold text-zinc-400 font-mono select-none">$</span>
+                      <input
+                        type="number"
+                        value={mrr}
+                        onChange={(e) => setMrr(Number(e.target.value))}
+                        className="w-full bg-transparent border-none p-0 ml-1 text-xs font-bold font-mono dark:text-white focus:outline-none focus:ring-0"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-mono font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      Cash in Bank
+                    </label>
+                    <div className="flex items-center bg-zinc-50/50 dark:bg-zinc-900/40 border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 focus-within:border-zinc-450 dark:focus-within:border-zinc-700 transition-colors">
+                      <span className="text-xs font-semibold text-zinc-400 font-mono select-none">$</span>
+                      <input
+                        type="number"
+                        value={cashInBank}
+                        onChange={(e) => setCashInBank(Number(e.target.value))}
+                        className="w-full bg-transparent border-none p-0 ml-1 text-xs font-bold font-mono dark:text-white focus:outline-none focus:ring-0"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-mono font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      Runway (Months)
+                    </label>
+                    <div className="flex items-center bg-zinc-50/50 dark:bg-zinc-900/40 border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 focus-within:border-zinc-450 dark:focus-within:border-zinc-700 transition-colors">
+                      <input
+                        type="number"
+                        value={runwayMonths}
+                        onChange={(e) => setRunwayMonths(Number(e.target.value))}
+                        className="w-full bg-transparent border-none p-0 text-xs font-bold font-mono dark:text-white focus:outline-none focus:ring-0"
+                        placeholder="12"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attachments & Integrations */}
+              <div className="bg-white dark:bg-zinc-950 p-5 rounded-3xl border border-gray-150/80 dark:border-zinc-900 shadow-2xs space-y-4">
+                <h4 className="text-[10px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block flex items-center gap-1.5">
+                  <Paperclip className="w-3.5 h-3.5 text-zinc-400" />
+                  Integrations
+                </h4>
+
+                <div className="space-y-4">
                   {/* Insert existing PDF report link */}
-                  <div className="space-y-1 bg-gray-50 dark:bg-zinc-900/40 p-3 rounded-xl border border-gray-200/50 dark:border-zinc-850">
-                    <label className="text-[9px] font-mono text-zinc-500 block">Link to Pitch Deck or Report</label>
-                    <div className="flex gap-2 mt-1">
+                  <div className="space-y-1 bg-zinc-50/50 dark:bg-zinc-900/30 p-3 rounded-xl border border-gray-200 dark:border-zinc-900">
+                    <label className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-550 uppercase block">Foundex Docs</label>
+                    <div className="space-y-2 mt-1.5">
                       <select
                         value={selectedDocLink}
                         onChange={(e) => setSelectedDocLink(e.target.value)}
-                        className="flex-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-[11px] outline-none text-gray-800 dark:text-white"
+                        className="w-full bg-white dark:bg-zinc-900 border border-gray-250 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-[10px] font-mono outline-none text-gray-800 dark:text-white focus:border-zinc-400"
                       >
-                        <option value="">-- Choose document --</option>
+                        <option value="">-- Select doc --</option>
                         {documents.map((d, i) => (
                           <option key={i} value={d.url}>
                             {d.name} ({d.type})
@@ -633,66 +640,66 @@ export default function InvestorUpdatesPage() {
                         type="button"
                         onClick={handleInsertDocumentLink}
                         disabled={!selectedDocLink}
-                        className="px-3 py-1 bg-black dark:bg-zinc-100 text-white dark:text-black font-bold text-[10px] rounded-lg disabled:opacity-50"
+                        className="w-full py-1.5 bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:text-black dark:hover:bg-white font-mono font-bold text-[10px] rounded-lg disabled:opacity-50 transition-colors cursor-pointer"
                       >
-                        Insert
+                        Insert Doc Reference
                       </button>
                     </div>
                   </div>
 
                   {/* Custom link */}
-                  <div className="space-y-1 bg-gray-50 dark:bg-zinc-900/40 p-3 rounded-xl border border-gray-200/50 dark:border-zinc-850">
-                    <label className="text-[9px] font-mono text-zinc-500 block">Custom URL Link</label>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
+                  <div className="space-y-2 bg-zinc-50/50 dark:bg-zinc-900/30 p-3 rounded-xl border border-gray-200 dark:border-zinc-900">
+                    <label className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-550 uppercase block">Custom Hyperlink</label>
+                    <div className="space-y-2 mt-1.5">
                       <input
                         type="text"
                         placeholder="Link Text"
                         value={customLinkText}
                         onChange={(e) => setCustomLinkText(e.target.value)}
-                        className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg px-2 py-1 text-[10px] outline-none text-gray-800 dark:text-white"
+                        className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-[10px] font-mono outline-none text-gray-800 dark:text-white focus:border-zinc-400"
                       />
                       <input
                         type="text"
                         placeholder="https://..."
                         value={customLinkUrl}
                         onChange={(e) => setCustomLinkUrl(e.target.value)}
-                        className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg px-2 py-1 text-[10px] outline-none text-gray-800 dark:text-white"
+                        className="w-full bg-white dark:bg-zinc-900 border border-gray-250 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-[10px] font-mono outline-none text-gray-800 dark:text-white focus:border-zinc-400"
                       />
+                      <button
+                        type="button"
+                        onClick={handleInsertCustomLink}
+                        disabled={!customLinkUrl}
+                        className="w-full py-1.5 bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:text-black dark:hover:bg-white font-mono font-bold text-[10px] rounded-lg disabled:opacity-50 transition-colors cursor-pointer"
+                      >
+                        Insert Link
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleInsertCustomLink}
-                      disabled={!customLinkUrl}
-                      className="w-full mt-2 py-1 bg-black dark:bg-zinc-100 text-white dark:text-black font-bold text-[10px] rounded-lg disabled:opacity-50"
-                    >
-                      Insert Custom Link
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Action Row */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-zinc-800 shrink-0">
-              <button
-                type="button"
-                onClick={() => { resetForm(); setActiveTab("history"); }}
-                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-850 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-xl transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-6 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer"
-              >
-                {saving ? (
-                  <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
-                ) : (
-                  <FloppyDiskBack className="w-4 h-4" />
-                )}
-                {selectedId ? "Save Changes" : "Publish Update"}
-              </button>
+              {/* Actions panel */}
+              <div className="bg-white dark:bg-zinc-950 p-5 rounded-3xl border border-gray-150/80 dark:border-zinc-900 shadow-2xs space-y-3">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-yellow-500/10 disabled:opacity-50 cursor-pointer"
+                >
+                  {saving ? (
+                    <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
+                  ) : (
+                    <FloppyDiskBack className="w-4 h-4" />
+                  )}
+                  {selectedId ? "Save Changes" : "Publish Update"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { resetForm(); setActiveTab("history"); }}
+                  className="w-full py-2 bg-gray-50 hover:bg-gray-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-gray-500 dark:text-gray-400 text-xs font-semibold rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </form>
         )}

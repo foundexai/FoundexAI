@@ -23,6 +23,7 @@ import {
   ChartPie,
   CheckSquare,
   EnvelopeSimple,
+  CreditCard,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -189,7 +190,7 @@ export default function DashboardLayout({
           {
             name: "Subscriptions",
             href: "/dashboard/admin/subscriptions",
-            icon: Lightning,
+            icon: CreditCard,
           },
         ],
       });
