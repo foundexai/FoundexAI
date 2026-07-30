@@ -49,6 +49,8 @@ export default function SmartGrantsPage() {
   const [draftContent, setDraftContent] = useState<string>("");
   const [draftLoading, setDraftLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [isEditingDraft, setIsEditingDraft] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const currentStartup = startups.find((s) => s._id === activeStartupId) || startups[0];
 
@@ -94,6 +96,7 @@ export default function SmartGrantsPage() {
     setDrawerOpen(true);
     setDraftContent("");
     setDraftLoading(true);
+    setIsEditingDraft(false);
 
     try {
       // Check for existing draft
@@ -110,6 +113,37 @@ export default function SmartGrantsPage() {
       console.error("Failed to fetch existing draft:", err);
     } finally {
       setDraftLoading(false);
+    }
+  };
+
+  const saveEdits = async () => {
+    if (!selectedGrant || !activeStartupId) return;
+    setSaveLoading(true);
+    try {
+      const res = await fetch("/api/grants/draft", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          startup_id: activeStartupId,
+          grant_id: selectedGrant._id,
+          content: draftContent,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success("Draft edits saved successfully!");
+        setIsEditingDraft(false);
+      } else {
+        toast.error("Failed to save draft edits");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error saving draft edits");
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -476,35 +510,57 @@ export default function SmartGrantsPage() {
                 </p>
               </div>
             ) : draftContent ? (
-              /* Loaded Markdown Preview */
-              <div className="space-y-4">
-                <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-900 pb-3">
+              /* Loaded Markdown Preview or Editor */
+              <div className="space-y-4 flex flex-col h-full">
+                <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-900 pb-3 shrink-0">
                   <span className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-                    Proposal Workspace
+                    Proposal Workspace {isEditingDraft ? "(Editing)" : "(Preview)"}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={handleCopy}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider"
-                      title="Copy to Clipboard"
+                      onClick={() => setIsEditingDraft(!isEditingDraft)}
+                      className={`px-2.5 py-1 border border-zinc-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 text-zinc-650 dark:text-zinc-300 rounded-xl transition-all cursor-pointer flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-wider ${
+                        isEditingDraft ? "bg-zinc-100 dark:bg-zinc-800 text-yellow-600 dark:text-yellow-450 border-yellow-500/20" : ""
+                      }`}
                     >
-                      <Copy className="w-3.5 h-3.5" />
-                      Copy
+                      {isEditingDraft ? "Preview" : "Edit"}
                     </button>
-                    <button
-                      onClick={handleDownload}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider"
-                      title="Download Markdown"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Download
-                    </button>
+                    {!isEditingDraft && (
+                      <>
+                        <button
+                          onClick={handleCopy}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider"
+                          title="Copy to Clipboard"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Copy
+                        </button>
+                        <button
+                          onClick={handleDownload}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider"
+                          title="Download Markdown"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Download
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                <div className="bg-zinc-50/50 dark:bg-zinc-900/10 p-5 rounded-2xl border border-gray-150/40 dark:border-zinc-900/60 font-sans text-xs text-gray-700 dark:text-zinc-350 leading-relaxed whitespace-pre-wrap space-y-4">
-                  {draftContent}
-                </div>
+                {isEditingDraft ? (
+                  <textarea
+                    value={draftContent}
+                    onChange={(e) => setDraftContent(e.target.value)}
+                    rows={16}
+                    className="w-full p-5 bg-zinc-50/50 dark:bg-zinc-900/10 rounded-2xl border border-gray-150/40 dark:border-zinc-900/60 font-sans text-xs text-gray-700 dark:text-zinc-350 leading-relaxed outline-none focus:border-zinc-400 dark:focus:border-zinc-700 focus:ring-0 resize-y min-h-[350px]"
+                    placeholder="Customize proposal content..."
+                  />
+                ) : (
+                  <div className="bg-zinc-50/50 dark:bg-zinc-900/10 p-5 rounded-2xl border border-gray-150/40 dark:border-zinc-900/60 font-sans text-xs text-gray-700 dark:text-zinc-350 leading-relaxed whitespace-pre-wrap space-y-4 overflow-y-auto">
+                    {draftContent}
+                  </div>
+                )}
               </div>
             ) : (
               /* Empty Draft State */
@@ -534,20 +590,41 @@ export default function SmartGrantsPage() {
           {/* Drawer Footer */}
           {draftContent && !draftLoading && (
             <div className="p-5 border-t border-gray-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/40 shrink-0 flex items-center justify-between">
-              <button
-                onClick={() => generateDraft(true)}
-                className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 text-gray-800 dark:text-zinc-300 text-[10px] font-mono font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <FileText className="w-3.5 h-3.5 text-zinc-400" />
-                Regenerate Draft
-              </button>
+              {isEditingDraft ? (
+                <>
+                  <button
+                    onClick={() => setIsEditingDraft(false)}
+                    className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 text-gray-800 dark:text-zinc-350 text-[10px] font-mono font-bold rounded-xl transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveEdits}
+                    disabled={saveLoading}
+                    className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-[10px] font-mono font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-yellow-500/10"
+                  >
+                    {saveLoading ? <CircleNotch className="w-3.5 h-3.5 animate-spin" /> : null}
+                    Save Edits
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => generateDraft(true)}
+                    className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 text-gray-800 dark:text-zinc-350 text-[10px] font-mono font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-zinc-400" />
+                    Regenerate Draft
+                  </button>
 
-              <button
-                onClick={() => setDrawerOpen(false)}
-                className="px-5 py-2 bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:text-black dark:hover:bg-white text-[10px] font-mono font-bold rounded-xl transition-all cursor-pointer"
-              >
-                Close Drawer
-              </button>
+                  <button
+                    onClick={() => setDrawerOpen(false)}
+                    className="px-5 py-2 bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:text-black dark:hover:bg-white text-[10px] font-mono font-bold rounded-xl transition-all cursor-pointer"
+                  >
+                    Close Drawer
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

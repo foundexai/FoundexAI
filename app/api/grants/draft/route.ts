@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     const userId = await getUserId(req);
 
     const body = await req.json();
-    const { startup_id, grant_id, regenerate = false } = body;
+    const { startup_id, grant_id, content: editedContent, regenerate = false } = body;
 
     if (!startup_id || !grant_id) {
       return NextResponse.json({ error: "Missing startup_id or grant_id" }, { status: 400 });
@@ -83,6 +83,22 @@ export async function POST(req: Request) {
       startup_id: new mongoose.Types.ObjectId(startup_id),
       grant_id: new mongoose.Types.ObjectId(grant_id),
     });
+
+    // If edited content is passed, save it directly
+    if (editedContent !== undefined) {
+      if (existingDraft) {
+        existingDraft.content = editedContent;
+        existingDraft.created_at = new Date();
+        await existingDraft.save();
+      } else {
+        existingDraft = await GrantDraft.create({
+          startup_id: new mongoose.Types.ObjectId(startup_id),
+          grant_id: new mongoose.Types.ObjectId(grant_id),
+          content: editedContent,
+        });
+      }
+      return NextResponse.json({ draft: existingDraft });
+    }
 
     if (existingDraft && !regenerate) {
       return NextResponse.json({ draft: existingDraft });

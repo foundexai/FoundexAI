@@ -8,6 +8,14 @@ const ChatMessageSchema = new mongoose.Schema({
     name: { type: String },
     url: { type: String }
   },
+  thread_id: { type: mongoose.Schema.Types.ObjectId, ref: "ChatMessage" },
+  subject: { type: String },
+  context: {
+    type: { type: String, enum: ["general", "document", "grant", "update", "captable"], default: "general" },
+    ref_id: { type: String },
+    title: { type: String },
+    url: { type: String }
+  },
   created_at: { type: Date, default: Date.now }
 });
 
