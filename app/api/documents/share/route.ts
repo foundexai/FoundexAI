@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import DocumentShare from "@/lib/models/DocumentShare";
 import InvestorProfile from "@/lib/models/InvestorProfile";
+import { eventBus } from "@/lib/eventBus";
 
 export async function GET(req: Request) {
   try {
@@ -137,27 +138,15 @@ export async function POST(req: Request) {
       }
     }
 
-    // Also sync and add to pipeline chat message
-    const ChatMessage = mongoose.models.ChatMessage || (await import("@/lib/models/ChatMessage")).default;
-    
-    // Add founder message with document attachment
-    await ChatMessage.create({
-      investor_id: investorId || investorName,
-      sender: "founder",
-      text: message,
-      sharedDoc: {
-        name: docName,
-        url: docUrl
-      },
-      created_at: new Date()
-    });
-
-    // Create automatic reply in database immediately (stamped 3 seconds later)
-    await ChatMessage.create({
-      investor_id: investorId || investorName,
-      sender: "investor",
-      text: `Thank you for sharing ${docName}. Our investment committee will review these details and follow up on the next steps.`,
-      created_at: new Date(Date.now() + 3000)
+    // Delegate chat synchronization and automatic reply logic to eventBus
+    eventBus.emit("document:shared", {
+      share: newShare,
+      companyName,
+      docName,
+      docUrl,
+      investorId,
+      investorName,
+      message
     });
 
     return NextResponse.json({ success: true, share: newShare });
