@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
 import { verifyToken, isAdmin } from "@/lib/auth";
+import { eventBus } from "@/lib/eventBus";
 
 export async function POST(req: Request) {
   try {
@@ -22,6 +23,9 @@ export async function POST(req: Request) {
     const investor = await Investor.findByIdAndUpdate(id, { isApproved: true }, { new: true });
 
     if (investor) {
+      // Emit event trigger for search indexing
+      eventBus.safeEmit("investor:changed", { investor });
+
       // Notify Submitter
       const { notifyUser, notifyAdmins } = await import("@/lib/notifications");
       if (investor.submittedBy) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Startup from "@/lib/models/Startup";
 import { verifyToken } from "@/lib/auth";
+import { eventBus } from "@/lib/eventBus";
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,6 +46,9 @@ export async function POST(req: NextRequest) {
       funding_stage: funding_stage || "Pre-seed",
       logo_url,
     });
+
+    // Emit EventBus trigger for search indexing
+    eventBus.safeEmit("startup:changed", { startup: newStartup });
 
     // Notify Admins
     const { notifyAdmins } = await import("@/lib/notifications");

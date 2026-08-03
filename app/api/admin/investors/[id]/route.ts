@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
 import { verifyToken, isAdmin } from "@/lib/auth";
+import { eventBus } from "@/lib/eventBus";
 
 export async function PATCH(
   req: Request,
@@ -33,6 +34,9 @@ export async function PATCH(
     if (!updatedInvestor) {
       return NextResponse.json({ error: "Investor not found" }, { status: 404 });
     }
+
+    // Emit event trigger for search indexing
+    eventBus.safeEmit("investor:changed", { investor: updatedInvestor });
 
     return NextResponse.json({ success: true, investor: updatedInvestor });
   } catch (error) {

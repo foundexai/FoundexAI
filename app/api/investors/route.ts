@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Investor from "@/lib/models/Investor";
 import { verifyToken } from "@/lib/auth";
+import { eventBus } from "@/lib/eventBus";
 
 export async function GET(req: Request) {
   try {
@@ -147,6 +148,9 @@ export async function POST(req: Request) {
 
     // Explicitly cast to any or correct type to avoid TS errors with toObject/_id
     const createdInv = newInvestor as any;
+
+    // Emit event trigger for search indexing
+    eventBus.safeEmit("investor:changed", { investor: newInvestor });
 
     // Notify Admins
     const { notifyAdmins } = await import("@/lib/notifications");

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Startup from '@/lib/models/Startup';
 import { verifyToken } from '@/lib/auth';
+import { eventBus } from '@/lib/eventBus';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -89,6 +90,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!updatedStartup) {
       return NextResponse.json({ message: 'Startup not found or unauthorized' }, { status: 404 });
     }
+
+    // Emit event trigger for search indexing
+    eventBus.safeEmit("startup:changed", { startup: updatedStartup });
 
     return NextResponse.json(updatedStartup, { status: 200 });
   } catch (error) {
