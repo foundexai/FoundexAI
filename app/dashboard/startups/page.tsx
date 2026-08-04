@@ -18,9 +18,18 @@ import { StartupCardSkeleton } from "@/components/ui/skeletons/StartupCardSkelet
 export default function StartupsPage() {
   const { user, token } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [startups, setStartups] = useState<Startup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   
   // Submission Modal State
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -41,7 +50,8 @@ export default function StartupsPage() {
       // 2. Real Startups
       let allStartups = [...MOCK_STARTUPS];
       try {
-        const res = await fetch("/api/startups/directory");
+        const queryParam = debouncedSearch ? `?search=${encodeURIComponent(debouncedSearch)}` : "";
+        const res = await fetch(`/api/startups/directory${queryParam}`);
         if (res.ok) {
           const data = await res.json();
           const realStartups = data.startups || [];
@@ -62,7 +72,7 @@ export default function StartupsPage() {
 
   useEffect(() => {
     fetchData();
-  }, [user]);
+  }, [user, debouncedSearch]);
 
   async function handleSubmit() {
     if (!submitData.name || !submitData.description) {
