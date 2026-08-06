@@ -29,7 +29,8 @@ export async function POST(req: Request) {
       newOptionPoolPct = 0,
     } = body;
 
-    const startup = await Startup.findOne({ user_id: user._id });
+    const userStartups = await Startup.find({ user_id: user._id }).sort({ created_at: 1 });
+    const startup = (body.startupId && userStartups.find((s: any) => s._id.toString() === body.startupId)) || userStartups[0];
     if (!startup) {
       return NextResponse.json({ error: "Startup profile not found" }, { status: 404 });
     }

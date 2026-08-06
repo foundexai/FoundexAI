@@ -441,17 +441,13 @@ export default function DashboardLayout({
         </aside>
 
         <main
-          /* style={{
-            marginLeft: isCollapsed ? '80px' : `${sidebarWidth}px`,
-            transition: isDragging ? 'none' : 'margin-left 300ms cubic-bezier(0.4, 0, 0.2, 1), border-color 300ms, background-color 300ms',
-          }} */
           className={cn(
-            "min-w-0 flex-1 min-h-screen bg-gray-50/50 dark:bg-black transition-all duration-300 relative",
+            "min-w-0 flex-1 h-screen overflow-y-auto flex flex-col bg-gray-50/50 dark:bg-black transition-all duration-300 relative",
             isCollapsed ? "lg:ml-20" : "lg:ml-72",
           )}
         >
           <Header variant="dashboard" />
-          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 w-full flex-1">
             {children}
           </div>
         </main>

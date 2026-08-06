@@ -229,7 +229,7 @@ export default function DocumentsPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-black">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between sticky top-0 z-10 dark:bg-zinc-900 dark:border-zinc-800 gap-4">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between dark:bg-zinc-900 dark:border-zinc-800 gap-4">
         <div className="flex items-center gap-4 w-full sm:w-auto">
           <Link
             href="/dashboard"

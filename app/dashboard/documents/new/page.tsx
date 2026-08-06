@@ -127,7 +127,7 @@ export default function NewDocumentPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-black">
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center sticky top-0 z-10 dark:bg-zinc-900 dark:border-zinc-800">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center dark:bg-zinc-900 dark:border-zinc-800">
         <Link
           href="/dashboard/documents"
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-bold transition-colors dark:text-gray-400 dark:hover:text-white"

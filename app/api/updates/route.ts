@@ -18,22 +18,34 @@ export async function GET(req: Request) {
     await connectDB();
     const userId = await getUserId(req);
     const { searchParams } = new URL(req.url);
-    const startupId = searchParams.get("startup_id");
+    const requestedStartupId = searchParams.get("startup_id") || req.headers.get("x-startup-id");
 
-    if (!startupId) {
-      return NextResponse.json({ error: "No startup_id" }, { status: 400 });
+    const userStartups = await Startup.find({
+      user_id: new mongoose.Types.ObjectId(userId),
+    }).sort({ created_at: 1 });
+
+    if (!userStartups || userStartups.length === 0) {
+      return NextResponse.json({ updates: [], userStartups: [], currentStartup: null });
     }
 
-    // Verify ownership
-    const startup = await Startup.findOne({
-      _id: startupId,
-      user_id: new mongoose.Types.ObjectId(userId),
+    const targetStartup =
+      (requestedStartupId && userStartups.find((s) => s._id.toString() === requestedStartupId)) ||
+      userStartups[0];
+
+    const updates = await InvestorUpdate.find({ startup_id: targetStartup._id }).sort({ month: -1 });
+    return NextResponse.json({
+      updates,
+      userStartups: userStartups.map((s) => ({
+        _id: s._id.toString(),
+        company_name: s.company_name,
+        stage: s.stage,
+      })),
+      currentStartup: {
+        _id: targetStartup._id.toString(),
+        company_name: targetStartup.company_name,
+        stage: targetStartup.stage,
+      },
     });
-
-    if (!startup) return NextResponse.json({ error: "Access denied" }, { status: 403 });
-
-    const updates = await InvestorUpdate.find({ startup_id: startup._id }).sort({ month: -1 });
-    return NextResponse.json({ updates });
   } catch (err) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -46,22 +58,24 @@ export async function POST(req: Request) {
     const data = await req.json();
     const { startup_id, month, title, metrics, kpis, body, attachments } = data;
 
-    if (!startup_id) {
-      return NextResponse.json({ error: "No startup_id provided" }, { status: 400 });
-    }
+    const requestedStartupId = startup_id || req.headers.get("x-startup-id");
+
     if (!month || !title) {
       return NextResponse.json({ error: "Month and title are required" }, { status: 400 });
     }
 
     // Verify startup ownership
-    const startup = await Startup.findOne({
-      _id: startup_id,
+    const userStartups = await Startup.find({
       user_id: new mongoose.Types.ObjectId(userId),
-    });
+    }).sort({ created_at: 1 });
 
-    if (!startup) {
+    if (!userStartups || userStartups.length === 0) {
       return NextResponse.json({ error: "Startup not found or access denied" }, { status: 403 });
     }
+
+    const startup =
+      (requestedStartupId && userStartups.find((s) => s._id.toString() === requestedStartupId)) ||
+      userStartups[0];
 
     // Check if an update for this month already exists
     const existing = await InvestorUpdate.findOne({ startup_id: startup._id, month });

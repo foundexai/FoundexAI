@@ -38,8 +38,10 @@ interface MatchedGrant {
 }
 
 export default function SmartGrantsPage() {
-  const { token, activeStartupId, startups } = useAuth();
+  const { token, activeStartupId, setActiveStartupId, startups: authStartups } = useAuth();
   const [grants, setGrants] = useState<MatchedGrant[]>([]);
+  const [userStartups, setUserStartups] = useState<any[]>([]);
+  const [selectedStartupId, setSelectedStartupId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
@@ -52,11 +54,11 @@ export default function SmartGrantsPage() {
   const [isEditingDraft, setIsEditingDraft] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
 
-  const currentStartup = startups.find((s) => s._id === activeStartupId) || startups[0];
-
   useEffect(() => {
-    if (token && activeStartupId) {
-      fetchMatches();
+    if (token) {
+      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : undefined;
+      const activeId = activeStartupId || storedId || undefined;
+      fetchMatches(activeId);
     }
   }, [token, activeStartupId]);
 
@@ -73,15 +75,27 @@ export default function SmartGrantsPage() {
     return () => clearInterval(interval);
   }, [draftLoading]);
 
-  const fetchMatches = async () => {
+  const fetchMatches = async (targetStartupId?: string) => {
     setLoading(true);
+    const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+    const activeId = targetStartupId || activeStartupId || selectedStartupId || storedId || "";
     try {
-      const res = await fetch(`/api/match/grant?startup_id=${activeStartupId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const url = activeId ? `/api/match/grant?startup_id=${activeId}` : "/api/match/grant";
+      const res = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "x-startup-id": activeId,
+        },
       });
       if (res.ok) {
         const data = await res.json();
         setGrants(data.matches || []);
+        if (data.userStartups && data.userStartups.length > 0) {
+          setUserStartups(data.userStartups.map((s: any) => ({ ...s, _id: String(s._id) })));
+        }
+        if (data.currentStartup?._id) {
+          setSelectedStartupId(String(data.currentStartup._id));
+        }
       }
     } catch (err) {
       console.error(err);
@@ -89,6 +103,17 @@ export default function SmartGrantsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStartupSwitch = (newStartupId: string) => {
+    setSelectedStartupId(newStartupId);
+    if (setActiveStartupId) {
+      setActiveStartupId(newStartupId);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeStartupId", newStartupId);
+    }
+    fetchMatches(newStartupId);
   };
 
   const openDraftDrawer = async (grant: MatchedGrant) => {
@@ -212,61 +237,88 @@ export default function SmartGrantsPage() {
   return (
     <div className="min-h-screen bg-zinc-50/50 dark:bg-black flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex flex-col sm:flex-row items-center justify-between sticky top-0 z-10 dark:bg-zinc-900 dark:border-zinc-800/80 gap-4">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Link
-            href="/dashboard"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
-          >
-            <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              Smart Grant Matching
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Get matched to non-dilutive federal and global grants matching your stage, sector, and location.
-            </p>
-          </div>
-        </div>
+      {(() => {
+        const displayStartups = (authStartups && authStartups.length > 0) ? authStartups : userStartups;
+        const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+        const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
 
-        <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
-          {/* Grid / Table Toggle */}
-          <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-xl border border-gray-200/50 dark:border-zinc-800">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === "grid"
-                  ? "bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-2xs"
-                  : "text-gray-450 dark:text-zinc-500 hover:text-gray-900"
-              }`}
-              title="Grid View"
-            >
-              <SquaresFour className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("table")}
-              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === "table"
-                  ? "bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-2xs"
-                  : "text-gray-450 dark:text-zinc-500 hover:text-gray-900"
-              }`}
-              title="Table List View"
-            >
-              <Table className="w-4 h-4" />
-            </button>
-          </div>
+        return (
+          <div className="bg-white border-b border-gray-100 px-6 py-4 flex flex-col sm:flex-row items-center justify-between dark:bg-zinc-900 dark:border-zinc-800/80 gap-4">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <Link
+                href="/dashboard"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
+              >
+                <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
+              </Link>
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    Smart Grant Matching
+                  </h1>
+                  {displayStartups.length > 1 ? (
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1 rounded-xl">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
+                      <select
+                        value={currentActiveId}
+                        onChange={(e) => handleStartupSwitch(e.target.value)}
+                        className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer"
+                      >
+                        {displayStartups.map((s: any) => (
+                          <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
+                            {s.company_name || s.name || "Startup"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : displayStartups.length === 1 ? (
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                      {displayStartups[0]?.company_name || displayStartups[0]?.name}
+                    </div>
+                  ) : null}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  AI-evaluated grant eligibility matching tailored to your startup's sector, stage, and R&D scope.
+                </p>
+              </div>
+            </div>
 
-          {activeStartupId && currentStartup && (
-            <div className="bg-yellow-500/10 border border-yellow-500/20 px-3 py-1.5 rounded-xl flex items-center gap-2">
+            {/* Grid / Table Toggle */}
+            <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-xl border border-gray-200/50 dark:border-zinc-800">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === "grid"
+                    ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
+                    : "text-gray-500 hover:text-gray-800 dark:text-gray-400"
+                }`}
+              >
+                Grid View
+              </button>
+              <button
+                onClick={() => setViewMode("table")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === "table"
+                    ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
+                    : "text-gray-500 hover:text-gray-800 dark:text-gray-400"
+                }`}
+              >
+                Table View
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+          {activeStartupId && (
+            <div className="bg-yellow-500/10 border border-yellow-500/20 px-3 py-1.5 rounded-xl flex items-center gap-2 max-w-7xl mx-auto mt-4 mx-6">
               <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-              <span className="text-[9px] font-mono font-bold text-yellow-700 dark:text-yellow-400">
-                MATCHING: {currentStartup.company_name.toUpperCase()}
+              <span className="text-[9px] font-mono font-bold text-yellow-700 dark:text-yellow-400 uppercase">
+                ACTIVE COMPANY MATCHING ENGINES ENGAGED
               </span>
             </div>
           )}
-        </div>
-      </div>
 
       <div className="p-4 py-8 lg:p-8 max-w-7xl mx-auto w-full flex-1 flex flex-col">
         {loading ? (

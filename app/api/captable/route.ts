@@ -48,15 +48,36 @@ export async function GET(req: Request) {
     }
 
     const { user } = decoded;
+    const { searchParams } = new URL(req.url);
+    const requestedStartupId = searchParams.get("startup_id");
 
-    // Fetch startup
-    const startup = await Startup.findOne({ user_id: user._id });
-    if (!startup) {
-      return NextResponse.json({ error: "Startup profile not found" }, { status: 404 });
+    // Fetch all startups belonging to this user (sorted by created_at ascending: earliest created first)
+    const userStartups = await Startup.find({ user_id: user._id }).sort({ created_at: 1 });
+    if (!userStartups || userStartups.length === 0) {
+      return NextResponse.json({
+        success: true,
+        userStartups: [],
+        currentStartup: null,
+        summary: null,
+        shareholders: [],
+        auditLogs: [],
+      });
     }
 
-    // Fetch all cap table entries for this startup
-    const entries = await CapTable.find({ startup_id: startup._id }).sort({ created_at: -1 });
+    // Resolve target startup: requested startup_id OR default to first created startup
+    const targetStartup =
+      (requestedStartupId && userStartups.find((s) => s._id.toString() === requestedStartupId)) ||
+      userStartups[0];
+
+    // Fetch all cap table entries STRICTLY for this target startup
+    const entries = await CapTable.find({ startup_id: targetStartup._id }).sort({ created_at: -1 });
+
+    // Fetch recent audit logs STRICTLY for this target startup
+    const AuditLog = (await import("@/lib/models/AuditLog")).default;
+    const auditLogs = await AuditLog.find({ startup_id: targetStartup._id })
+      .sort({ created_at: -1 })
+      .limit(10)
+      .populate("user_id", "email name");
 
     // Calculate aggregated metrics
     let totalShares = 0;
@@ -117,6 +138,16 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
+      userStartups: userStartups.map((s) => ({
+        _id: s._id,
+        company_name: s.company_name,
+        stage: s.stage,
+      })),
+      currentStartup: {
+        _id: targetStartup._id,
+        company_name: targetStartup.company_name,
+        stage: targetStartup.stage,
+      },
       summary: {
         totalIssuedShares: totalShares,
         totalCapitalRaised,
@@ -126,6 +157,7 @@ export async function GET(req: Request) {
         classTotals,
       },
       shareholders: shareholdersWithOwnership,
+      auditLogs,
     });
   } catch (err: any) {
     console.error("Error fetching Cap Table data:", err);
@@ -150,6 +182,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const {
+      startupId,
       shareholderName,
       shareholderType = "investor",
       email,
@@ -168,14 +201,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Shareholder name and positive share count are required" }, { status: 400 });
     }
 
-    // Resolve startup ID
-    const startup = await Startup.findOne({ user_id: user._id });
-    if (!startup) {
+    // Resolve target startup owned by user
+    const userStartups = await Startup.find({ user_id: user._id }).sort({ created_at: 1 });
+    if (!userStartups || userStartups.length === 0) {
       return NextResponse.json({ error: "Startup profile not found" }, { status: 404 });
     }
 
+    const targetStartup =
+      (startupId && userStartups.find((s) => s._id.toString() === startupId)) ||
+      userStartups[0];
+
     const entry = await CapTable.create({
-      startup_id: startup._id,
+      startup_id: targetStartup._id,
       shareholder_name: shareholderName,
       shareholder_type: shareholderType,
       email,
@@ -193,6 +230,17 @@ export async function POST(req: Request) {
       notes,
     });
 
+    // Audit Logging
+    const { logAction } = await import("@/lib/auditLogger");
+    await logAction({
+      startupId: targetStartup._id,
+      userId: user._id,
+      action: "create",
+      entity: "CapTable",
+      entityId: entry._id,
+      details: { shareholder_name: shareholderName, share_count: shareCount, share_class: shareClass }
+    });
+
     return NextResponse.json({
       success: true,
       entry,
@@ -200,6 +248,120 @@ export async function POST(req: Request) {
   } catch (err: any) {
     console.error("Error creating Cap Table entry:", err);
     return NextResponse.json({ error: "Failed to add cap table entry" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    await connectDB();
+    const token = req.headers.get("Authorization")?.split(" ")[1];
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = await verifyToken(token, true);
+    if (!decoded) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
+    const { user } = decoded;
+    const body = await req.json();
+    const {
+      id,
+      shareholderName,
+      shareholderType,
+      email,
+      shareClass,
+      shareCount,
+      investmentAmount,
+      pricePerShare,
+      grantDate,
+      isVesting,
+      totalMonths,
+      cliffMonths,
+      notes,
+    } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Entry ID required" }, { status: 400 });
+    }
+
+    const entry = await CapTable.findById(id);
+    if (!entry) {
+      return NextResponse.json({ error: "Shareholder entry not found" }, { status: 404 });
+    }
+
+    // Verify startup ownership across user's companies
+    const userStartups = await Startup.find({ user_id: user._id });
+    const isOwner = userStartups.some((s) => s._id.toString() === entry.startup_id.toString());
+    if (!isOwner) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const previousDetails = {
+      shareholder_name: entry.shareholder_name,
+      shareholder_type: entry.shareholder_type,
+      email: entry.email,
+      share_class: entry.share_class,
+      share_count: entry.share_count,
+      investment_amount: entry.investment_amount,
+      price_per_share: entry.price_per_share,
+      notes: entry.notes,
+    };
+
+    if (shareholderName !== undefined) entry.shareholder_name = shareholderName;
+    if (shareholderType !== undefined) entry.shareholder_type = shareholderType;
+    if (email !== undefined) entry.email = email;
+    if (shareClass !== undefined) entry.share_class = shareClass;
+    if (shareCount !== undefined) entry.share_count = Number(shareCount);
+    if (investmentAmount !== undefined) entry.investment_amount = Number(investmentAmount);
+    if (pricePerShare !== undefined) entry.price_per_share = Number(pricePerShare);
+    if (notes !== undefined) entry.notes = notes;
+    if (grantDate !== undefined) {
+      entry.grant_date = new Date(grantDate);
+      if (entry.esop_vesting) {
+        entry.esop_vesting.start_date = new Date(grantDate);
+      }
+    }
+    if (entry.esop_vesting) {
+      if (isVesting !== undefined) entry.esop_vesting.is_vesting = Boolean(isVesting);
+      if (totalMonths !== undefined) entry.esop_vesting.total_months = Number(totalMonths);
+      if (cliffMonths !== undefined) entry.esop_vesting.cliff_months = Number(cliffMonths);
+    }
+
+    entry.updated_at = new Date();
+    await entry.save();
+
+    // Audit Logging
+    const { logAction } = await import("@/lib/auditLogger");
+    await logAction({
+      startupId: entry.startup_id,
+      userId: user._id,
+      action: "update",
+      entity: "CapTable",
+      entityId: entry._id,
+      details: {
+        previous: previousDetails,
+        current: {
+          shareholder_name: entry.shareholder_name,
+          shareholder_type: entry.shareholder_type,
+          email: entry.email,
+          share_class: entry.share_class,
+          share_count: entry.share_count,
+          investment_amount: entry.investment_amount,
+          price_per_share: entry.price_per_share,
+          notes: entry.notes,
+        }
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      entry,
+    });
+  } catch (err: any) {
+    console.error("Error updating Cap Table entry:", err);
+    return NextResponse.json({ error: "Failed to update cap table entry" }, { status: 500 });
   }
 }
 
@@ -221,6 +383,29 @@ export async function DELETE(req: Request) {
     if (!id) {
       return NextResponse.json({ error: "Entry ID required" }, { status: 400 });
     }
+
+    const entry = await CapTable.findById(id);
+    if (!entry) {
+      return NextResponse.json({ error: "Shareholder entry not found" }, { status: 404 });
+    }
+
+    // Verify startup ownership across user's companies
+    const userStartups = await Startup.find({ user_id: decoded.user._id });
+    const isOwner = userStartups.some((s) => s._id.toString() === entry.startup_id.toString());
+    if (!isOwner) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Audit Logging
+    const { logAction } = await import("@/lib/auditLogger");
+    await logAction({
+      startupId: entry.startup_id,
+      userId: decoded.user._id,
+      action: "delete",
+      entity: "CapTable",
+      entityId: entry._id,
+      details: { shareholder_name: entry.shareholder_name, share_count: entry.share_count, share_class: entry.share_class }
+    });
 
     await CapTable.findByIdAndDelete(id);
 

@@ -92,19 +92,19 @@ export async function GET(req: Request) {
     const userId = await getUserId(req);
     
     const { searchParams } = new URL(req.url);
-    const startupId = searchParams.get("startup_id");
-    if (!startupId) {
-      return NextResponse.json({ error: "No startup_id" }, { status: 400 });
-    }
+    const requestedStartupId = searchParams.get("startup_id") || req.headers.get("x-startup-id");
 
-    const startup = await Startup.findOne({
-      _id: startupId,
+    const userStartups = await Startup.find({
       user_id: new mongoose.Types.ObjectId(userId),
-    });
+    }).sort({ created_at: 1 });
 
-    if (!startup) {
-      return NextResponse.json({ error: "Startup not found" }, { status: 404 });
+    if (!userStartups || userStartups.length === 0) {
+      return NextResponse.json({ matches: [], userStartups: [], currentStartup: null });
     }
+
+    const startup =
+      (requestedStartupId && userStartups.find((s) => s._id.toString() === requestedStartupId)) ||
+      userStartups[0];
 
     // Seed mock grants if none exist in the DB
     const count = await Grant.countDocuments();
@@ -190,10 +190,22 @@ export async function GET(req: Request) {
       };
     });
 
-    // Sort by highest match score first
+    // Sort matches descending by score
     matches.sort((a, b) => b.matchScore - a.matchScore);
 
-    return NextResponse.json({ matches });
+    return NextResponse.json({
+      matches,
+      userStartups: userStartups.map((s) => ({
+        _id: s._id.toString(),
+        company_name: s.company_name,
+        stage: s.stage,
+      })),
+      currentStartup: {
+        _id: startup._id.toString(),
+        company_name: startup.company_name,
+        stage: startup.stage,
+      },
+    });
   } catch (err) {
     console.error("GET /api/match/grant error:", err);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

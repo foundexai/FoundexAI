@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { Sun, Moon, Bell, CaretDown, List, CircleNotch, MagnifyingGlass, ClockCounterClockwise } from "@phosphor-icons/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import CommandPaletteModal from "@/components/CommandPaletteModal";
 
 export default function Header({ variant = 'global' }: { variant?: 'global' | 'dashboard' }) {
   const { user, logout, loading, token } = useAuth();
@@ -21,7 +22,14 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
   const [isDesktopDropdownOpen, setIsDesktopDropdownOpen] = useState(false);
   const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [clickedItem, setClickedItem] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleOpenCommand = () => setIsCommandPaletteOpen(true);
+    window.addEventListener("open-command-palette", handleOpenCommand);
+    return () => window.removeEventListener("open-command-palette", handleOpenCommand);
+  }, []);
 
   useEffect(() => {
     setClickedItem(null);
@@ -107,10 +115,10 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
 
   return (
     <header className={cn(
-        "w-full z-40 transition-all duration-300",
+        "w-full z-50 transition-all duration-300",
         variant === 'global' 
             ? "sticky top-0 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10" 
-            : "sticky top-0 bg-white dark:bg-[#0B0B0C] border-b border-gray-100 dark:border-zinc-900/60"
+            : "sticky top-0 bg-white/90 backdrop-blur-md dark:bg-[#0B0B0C]/90 border-b border-gray-100 dark:border-zinc-900/60 shadow-2xs"
     )}>
       {variant === 'dashboard' ? (
         <div className="w-full px-6 py-3 flex justify-between items-center bg-transparent">
@@ -126,13 +134,20 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
             </button>
 
             {/* Search bar */}
-            <div className="hidden md:flex items-center relative w-full max-w-xs lg:max-w-sm">
-              <MagnifyingGlass className="absolute left-3.5 h-4.5 w-4.5 text-zinc-400 dark:text-zinc-500" weight="bold" />
+            <div 
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="hidden md:flex items-center relative w-full max-w-xs lg:max-w-sm cursor-pointer group"
+            >
+              <MagnifyingGlass className="absolute left-3.5 h-4.5 w-4.5 text-zinc-400 dark:text-zinc-500 group-hover:text-[#E5C158] transition-colors" weight="bold" />
               <input
                 type="text"
-                placeholder="Search startups, investors..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-100/50 hover:bg-gray-100 dark:bg-zinc-900/50 dark:hover:bg-zinc-900 border border-transparent dark:border-zinc-850 rounded-full focus:outline-none focus:ring-1 focus:ring-[#E5C158] dark:text-white dark:placeholder-zinc-500 transition-all font-medium"
+                readOnly
+                placeholder="Search contracts, pages, docs..."
+                className="w-full pl-10 pr-12 py-2 text-xs bg-gray-100/60 hover:bg-gray-100 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 border border-gray-200/50 dark:border-zinc-800 rounded-full focus:outline-none dark:text-white dark:placeholder-zinc-500 transition-all font-medium cursor-pointer"
               />
+              <kbd className="absolute right-3 text-[10px] font-mono font-bold text-zinc-400 bg-gray-200/60 dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-gray-300/40 dark:border-zinc-700">
+                ⌘K
+              </kbd>
             </div>
           </div>
 
@@ -146,12 +161,14 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
             </Link>
 
             {/* Clock History Button */}
-            <button
-              className="p-2.5 rounded-full text-zinc-400 hover:text-zinc-650 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors cursor-pointer"
-              title="Activity History"
-            >
-              <ClockCounterClockwise className="h-5 w-5" weight="bold" />
-            </button>
+            <Link href="/dashboard/audit-logs">
+              <button
+                className="p-2.5 rounded-full text-zinc-400 hover:text-zinc-650 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors cursor-pointer"
+                title="Activity History"
+              >
+                <ClockCounterClockwise className="h-5 w-5" weight="bold" />
+              </button>
+            </Link>
 
             {/* Notification Button */}
             <div className="relative" ref={notificationsRef}>
@@ -546,6 +563,11 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
           </div>
         </div>
       )}
+      {/* Command Palette Search Overlay */}
+      <CommandPaletteModal
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+      />
     </header>
   );
 }

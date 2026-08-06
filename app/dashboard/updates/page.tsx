@@ -51,8 +51,10 @@ interface Document {
 }
 
 export default function InvestorUpdatesPage() {
-  const { token, activeStartupId } = useAuth();
+  const { token, activeStartupId, setActiveStartupId, startups: authStartups } = useAuth();
   const [updates, setUpdates] = useState<InvestorUpdateType[]>([]);
+  const [userStartups, setUserStartups] = useState<any[]>([]);
+  const [selectedStartupId, setSelectedStartupId] = useState<string>("");
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"history" | "compose">("history");
@@ -79,21 +81,34 @@ export default function InvestorUpdatesPage() {
 
   useEffect(() => {
     if (token) {
-      fetchUpdates();
+      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : undefined;
+      const activeId = activeStartupId || storedId || undefined;
+      fetchUpdates(activeId);
       fetchDocs();
     }
   }, [token, activeStartupId]);
 
-  const fetchUpdates = async () => {
-    if (!activeStartupId) return;
+  const fetchUpdates = async (targetStartupId?: string) => {
     setLoading(true);
+    const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+    const activeId = targetStartupId || activeStartupId || selectedStartupId || storedId || "";
     try {
-      const res = await fetch(`/api/updates?startup_id=${activeStartupId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const url = activeId ? `/api/updates?startup_id=${activeId}` : "/api/updates";
+      const res = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "x-startup-id": activeId,
+        },
       });
       if (res.ok) {
         const data = await res.json();
         setUpdates(data.updates || []);
+        if (data.userStartups && data.userStartups.length > 0) {
+          setUserStartups(data.userStartups.map((s: any) => ({ ...s, _id: String(s._id) })));
+        }
+        if (data.currentStartup?._id) {
+          setSelectedStartupId(String(data.currentStartup._id));
+        }
       }
     } catch (err) {
       console.error(err);
@@ -101,6 +116,17 @@ export default function InvestorUpdatesPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStartupSwitch = (newStartupId: string) => {
+    setSelectedStartupId(newStartupId);
+    if (setActiveStartupId) {
+      setActiveStartupId(newStartupId);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeStartupId", newStartupId);
+    }
+    fetchUpdates(newStartupId);
   };
 
   const fetchDocs = async () => {
@@ -111,7 +137,8 @@ export default function InvestorUpdatesPage() {
       });
       const data = await res.json();
       if (data.startups && data.startups.length > 0) {
-        const activeId = activeStartupId || localStorage.getItem("activeStartupId");
+        const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : null;
+        const activeId = activeStartupId || storedId;
         const currentStartup = data.startups.find((s: any) => s._id === activeId) || data.startups[0];
         setDocuments(currentStartup.documents || []);
       }
@@ -179,8 +206,10 @@ export default function InvestorUpdatesPage() {
     }
 
     setSaving(true);
+    const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : null;
+    const activeId = activeStartupId || selectedStartupId || storedId || userStartups[0]?._id;
     const payload = {
-      startup_id: activeStartupId,
+      startup_id: activeId,
       month,
       title,
       metrics: { mrr, cash_in_bank: cashInBank, runway_months: runwayMonths },
@@ -258,43 +287,74 @@ export default function InvestorUpdatesPage() {
       {/* Toast popup managed globally */}
       
       {/* Header Banner */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex flex-col sm:flex-row items-center justify-between sticky top-0 z-10 dark:bg-zinc-900 dark:border-zinc-800/80 gap-4">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Link
-            href="/dashboard"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
-          >
-            <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              Monthly Investor Updates
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Share structured progress reports, KPIs, and performance updates with your board and investors.
-            </p>
-          </div>
-        </div>
+      {(() => {
+        const displayStartups = (authStartups && authStartups.length > 0) ? authStartups : userStartups;
+        const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+        const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          {activeTab === "history" ? (
-            <button
-              onClick={() => { resetForm(); setActiveTab("compose"); }}
-              className="px-4 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-xl dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
-            >
-              <Plus className="w-4 h-4" />
-              Compose Update
-            </button>
-          ) : (
-            <button
-              onClick={() => { resetForm(); setActiveTab("history"); }}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-200 text-xs font-bold rounded-xl transition-all cursor-pointer"
-            >
-              Back to History
-            </button>
-          )}
-        </div>
-      </div>
+        return (
+          <div className="bg-white border-b border-gray-100 px-6 py-4 flex flex-col sm:flex-row items-center justify-between dark:bg-zinc-900 dark:border-zinc-800/80 gap-4">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <Link
+                href="/dashboard"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
+              >
+                <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
+              </Link>
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    Monthly Investor Updates
+                  </h1>
+                  {displayStartups.length > 1 ? (
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1 rounded-xl">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
+                      <select
+                        value={currentActiveId}
+                        onChange={(e) => handleStartupSwitch(e.target.value)}
+                        className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer"
+                      >
+                        {displayStartups.map((s: any) => (
+                          <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
+                            {s.company_name || s.name || "Startup"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : displayStartups.length === 1 ? (
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                      {displayStartups[0]?.company_name || displayStartups[0]?.name}
+                    </div>
+                  ) : null}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Share structured progress reports, KPIs, and performance updates with your board and investors.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              {activeTab === "history" ? (
+                <button
+                  onClick={() => { resetForm(); setActiveTab("compose"); }}
+                  className="px-4 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-xl dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Compose Update
+                </button>
+              ) : (
+                <button
+                  onClick={() => { resetForm(); setActiveTab("history"); }}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-200 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  Back to History
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="p-4 py-8 lg:p-8 max-w-7xl mx-auto w-full flex-1 flex flex-col">
         

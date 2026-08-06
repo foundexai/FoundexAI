@@ -20,6 +20,12 @@ import {
   Sliders,
   CaretDown,
   CaretUp,
+  NotePencil,
+  MagnifyingGlass,
+  CaretLeft,
+  CaretRight,
+  FileText,
+  ClockCounterClockwise,
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
@@ -57,15 +63,24 @@ interface SummaryData {
 }
 
 export default function CapTablePage() {
-  const { user, loading, token } = useAuth();
+  const { user, loading, token, activeStartupId, setActiveStartupId, startups: authStartups } = useAuth();
   const router = useRouter();
 
   const [shareholders, setShareholders] = useState<Shareholder[]>([]);
   const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingShareholder, setEditingShareholder] = useState<Shareholder | null>(null);
+  const [userStartups, setUserStartups] = useState<any[]>([]);
+  const [selectedStartupId, setSelectedStartupId] = useState<string>("");
+
+  // Search & Pagination States
+  const [shareholderSearchQuery, setShareholderSearchQuery] = useState("");
+  const [shareholderCurrentPage, setShareholderCurrentPage] = useState(1);
+  const shareholdersPerPage = 5;
 
   // Waterfall & Dilution Simulation States
   const [exitValuation, setExitValuation] = useState<number>(15000000); // Default $15M exit
@@ -99,23 +114,38 @@ export default function CapTablePage() {
       return;
     }
     if (user) {
-      loadCapTable();
+      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : undefined;
+      const activeId = activeStartupId || storedId || undefined;
+      loadCapTable(activeId);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, activeStartupId]);
 
-  async function loadCapTable() {
+  async function loadCapTable(targetStartupId?: string) {
     setIsLoading(true);
-    const authToken = token || localStorage.getItem("token");
+    const authToken = token || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
     if (!authToken) return;
 
     try {
-      const res = await fetch("/api/captable", {
-        headers: { Authorization: `Bearer ${authToken}` },
+      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+      const activeId = targetStartupId || activeStartupId || selectedStartupId || storedId || "";
+      const url = activeId ? `/api/captable?startup_id=${activeId}` : "/api/captable";
+      const res = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${authToken}`,
+          "x-startup-id": activeId,
+        },
       });
       if (res.ok) {
         const data = await res.json();
         setShareholders(data.shareholders || []);
         setSummary(data.summary || null);
+        setAuditLogs(data.auditLogs || []);
+        if (data.userStartups && data.userStartups.length > 0) {
+          setUserStartups(data.userStartups.map((s: any) => ({ ...s, _id: String(s._id) })));
+        }
+        if (data.currentStartup?._id) {
+          setSelectedStartupId(String(data.currentStartup._id));
+        }
       }
     } catch (err) {
       console.error("Failed to load cap table", err);
@@ -124,6 +154,17 @@ export default function CapTablePage() {
       setIsLoading(false);
     }
   }
+
+  const handleStartupSwitch = (newStartupId: string) => {
+    setSelectedStartupId(newStartupId);
+    if (setActiveStartupId) {
+      setActiveStartupId(newStartupId);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeStartupId", newStartupId);
+    }
+    loadCapTable(newStartupId);
+  };
 
   // Recalculate Waterfall Simulation whenever inputs or shareholders change
   useEffect(() => {
@@ -163,23 +204,32 @@ export default function CapTablePage() {
     const authToken = token || localStorage.getItem("token");
 
     try {
-      const res = await fetch("/api/captable", {
-        method: "POST",
+      const url = "/api/captable";
+      const method = editingShareholder ? "PUT" : "POST";
+      const bodyPayload = editingShareholder 
+        ? { id: editingShareholder._id, startupId: selectedStartupId, ...form }
+        : { startupId: selectedStartupId, ...form };
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add shareholder");
+      if (!res.ok) throw new Error(data.error || `Failed to ${editingShareholder ? "update" : "add"} shareholder`);
 
-      toast.success("Equity Grant Added!", {
-        description: `Successfully registered ${Number(form.shareCount).toLocaleString()} shares to ${form.shareholderName}.`,
+      toast.success(editingShareholder ? "Equity Grant Updated!" : "Equity Grant Added!", {
+        description: editingShareholder
+          ? `Successfully updated equity grant for ${form.shareholderName}.`
+          : `Successfully registered ${Number(form.shareCount).toLocaleString()} shares to ${form.shareholderName}.`,
       });
 
       setIsAddModalOpen(false);
+      setEditingShareholder(null);
       setForm({
         shareholderName: "",
         shareholderType: "investor",
@@ -197,7 +247,7 @@ export default function CapTablePage() {
 
       loadCapTable();
     } catch (err: any) {
-      toast.error(err.message || "Failed to issue equity.");
+      toast.error(err.message || "Failed to process equity request.");
     } finally {
       setIsSubmitting(false);
     }
@@ -222,6 +272,54 @@ export default function CapTablePage() {
       setDeleteId(null);
     }
   };
+
+  const handleEditClick = (s: Shareholder) => {
+    setEditingShareholder(s);
+    setForm({
+      shareholderName: s.shareholder_name,
+      shareholderType: s.shareholder_type,
+      email: s.email || "",
+      shareClass: s.share_class,
+      shareCount: s.share_count.toString(),
+      investmentAmount: (s.investment_amount || 0).toString(),
+      pricePerShare: (s.price_per_share || 0).toString(),
+      grantDate: s.grant_date ? new Date(s.grant_date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      isVesting: s.esop_vesting?.is_vesting || false,
+      totalMonths: (s.esop_vesting?.total_months || 48).toString(),
+      cliffMonths: (s.esop_vesting?.cliff_months || 12).toString(),
+      notes: s.notes || "",
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsAddModalOpen(false);
+    setEditingShareholder(null);
+    setForm({
+      shareholderName: "",
+      shareholderType: "investor",
+      email: "",
+      shareClass: "Common",
+      shareCount: "",
+      investmentAmount: "",
+      pricePerShare: "",
+      grantDate: new Date().toISOString().split("T")[0],
+      isVesting: false,
+      totalMonths: "48",
+      cliffMonths: "12",
+      notes: "",
+    });
+  };
+
+  const filteredShareholders = shareholders.filter(s =>
+    s.shareholder_name.toLowerCase().includes(shareholderSearchQuery.toLowerCase()) ||
+    s.share_class.toLowerCase().includes(shareholderSearchQuery.toLowerCase()) ||
+    s.shareholder_type.toLowerCase().includes(shareholderSearchQuery.toLowerCase())
+  );
+
+  const totalShareholdersPages = Math.ceil(filteredShareholders.length / shareholdersPerPage);
+  const startIndex = (shareholderCurrentPage - 1) * shareholdersPerPage;
+  const paginatedShareholders = filteredShareholders.slice(startIndex, startIndex + shareholdersPerPage);
 
   const getRoleBadgeStyle = (type: string) => {
     switch (type) {
@@ -259,25 +357,56 @@ export default function CapTablePage() {
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
-              <ChartPie className="w-7 h-7 text-yellow-500" weight="bold" />
-              Cap Table & Equity Ledger
-            </h1>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Manage shareholders, equity classes, SAFEs, and ESOP vesting schedules.
-            </p>
-          </div>
+        {(() => {
+          const displayStartups = (authStartups && authStartups.length > 0) ? authStartups : userStartups;
+          const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+          const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
 
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm cursor-pointer shrink-0"
-          >
-            <Plus className="w-4 h-4" weight="bold" />
-            Issue Equity / Add Shareholder
-          </button>
-        </div>
+          return (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
+                    <ChartPie className="w-7 h-7 text-yellow-500" weight="bold" />
+                    Cap Table & Equity Ledger
+                  </h1>
+                  {displayStartups.length > 1 ? (
+                    <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl shadow-2xs">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
+                      <select
+                        value={currentActiveId}
+                        onChange={(e) => handleStartupSwitch(e.target.value)}
+                        className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer"
+                      >
+                        {displayStartups.map((s: any) => (
+                          <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
+                            {s.company_name || s.name || "Startup"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : displayStartups.length === 1 ? (
+                    <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                      {displayStartups[0]?.company_name || displayStartups[0]?.name}
+                    </div>
+                  ) : null}
+                </div>
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Manage shareholders, equity classes, SAFEs, and ESOP vesting schedules.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm cursor-pointer shrink-0"
+              >
+                <Plus className="w-4 h-4" weight="bold" />
+                Issue Equity / Add Shareholder
+              </button>
+            </div>
+          );
+        })()}
 
         {/* Executive Summary Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -415,52 +544,104 @@ export default function CapTablePage() {
 
         {/* Shareholders Ledger Table */}
         <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-gray-200/80 dark:border-zinc-800 p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Shareholders Ledger
-            </h2>
-            <span className="text-xs text-gray-400 font-medium">
-              {shareholders.length} Registered Entries
-            </span>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                Shareholders Ledger
+              </h2>
+              <span className="text-xs text-gray-400 font-medium">
+                {filteredShareholders.length} Registered Entries
+              </span>
+            </div>
+            <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 px-3.5 py-2 rounded-xl text-xs max-w-sm w-full md:w-72 shrink-0">
+              <MagnifyingGlass className="w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search shareholders..."
+                value={shareholderSearchQuery}
+                onChange={(e) => {
+                  setShareholderSearchQuery(e.target.value);
+                  setShareholderCurrentPage(1);
+                }}
+                className="bg-transparent border-none focus:outline-none focus:ring-0 text-gray-800 dark:text-white w-full font-medium"
+              />
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full text-left text-xs min-w-[540px]">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-zinc-800 text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                  <th className="pb-3">Shareholder</th>
-                  <th className="pb-3">Role</th>
-                  <th className="pb-3">Share Class</th>
-                  <th className="pb-3">Shares</th>
-                  <th className="pb-3">Ownership %</th>
-                  <th className="pb-3">Investment</th>
-                  <th className="pb-3">Vesting Status</th>
-                  <th className="pb-3 text-right">Actions</th>
+                <tr className="border-b border-gray-100 dark:border-zinc-800 text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                  <th className="pb-3 px-1">Shareholder</th>
+                  <th className="pb-3 px-2 hidden sm:table-cell">Role</th>
+                  <th className="pb-3 px-2 hidden md:table-cell">Share Class</th>
+                  <th className="pb-3 px-2">Shares</th>
+                  <th className="pb-3 px-2 hidden sm:table-cell">Ownership %</th>
+                  <th className="pb-3 px-2 hidden lg:table-cell">Investment</th>
+                  <th className="pb-3 px-2 hidden sm:table-cell">Vesting Status</th>
+                  <th className="pb-3 px-1 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/60 font-medium text-gray-700 dark:text-gray-300">
-                {shareholders.map((s) => (
+                {paginatedShareholders.map((s) => (
                   <tr key={s._id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                     <td className="py-3.5 pr-3 font-bold text-gray-900 dark:text-white">
                       <div>
-                        <p>{s.shareholder_name}</p>
+                        <p className="text-xs sm:text-sm">{s.shareholder_name}</p>
                         {s.email && <p className="text-[10px] font-normal text-gray-400">{s.email}</p>}
+                        
+                        {/* Mobile Details Block */}
+                        <div className="mt-1 flex flex-wrap gap-1.5 items-center sm:hidden">
+                          <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold capitalize border ${getRoleBadgeStyle(s.shareholder_type)}`}>
+                            {s.shareholder_type}
+                          </span>
+                          <span className="text-[9px] bg-gray-100 dark:bg-zinc-850 px-1.5 py-0.5 rounded-md font-mono text-gray-500 dark:text-gray-400">
+                            {s.share_class}
+                          </span>
+                          {s.investment_amount > 0 && (
+                            <span className="text-[9px] bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded-md font-mono">
+                              ${s.investment_amount.toLocaleString()}
+                            </span>
+                          )}
+                          {s.esop_vesting?.is_vesting && (
+                            <span className="text-[9px] text-purple-600 dark:text-purple-400 font-mono">
+                              Vesting
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Tablet Details Block for Share Class and Investment */}
+                        <div className="mt-1 hidden sm:flex md:hidden flex-wrap gap-1.5 items-center">
+                          <span className="text-[9px] bg-gray-100 dark:bg-zinc-850 px-1.5 py-0.5 rounded-md font-mono text-gray-500 dark:text-gray-400">
+                            {s.share_class}
+                          </span>
+                          {s.investment_amount > 0 && (
+                            <span className="text-[9px] bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded-md font-mono">
+                              ${s.investment_amount.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
-                    <td className="py-3.5 pr-3">
+                    <td className="py-3.5 pr-3 hidden sm:table-cell">
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold capitalize border ${getRoleBadgeStyle(s.shareholder_type)}`}>
                         {s.shareholder_type}
                       </span>
                     </td>
-                    <td className="py-3.5 pr-3 font-bold">{s.share_class}</td>
-                    <td className="py-3.5 pr-3 font-mono font-bold">{s.share_count.toLocaleString()}</td>
-                    <td className="py-3.5 pr-3 font-mono font-bold text-yellow-600 dark:text-yellow-400">
+                    <td className="py-3.5 pr-3 font-bold hidden md:table-cell">{s.share_class}</td>
+                    <td className="py-3.5 pr-3 font-mono font-bold">
+                      <div>
+                        <p>{s.share_count.toLocaleString()}</p>
+                        <p className="text-[10px] text-yellow-600 dark:text-yellow-400 sm:hidden font-mono mt-0.5">{s.ownership_pct}%</p>
+                      </div>
+                    </td>
+                    <td className="py-3.5 pr-3 font-mono font-bold text-yellow-600 dark:text-yellow-400 hidden sm:table-cell">
                       {s.ownership_pct}%
                     </td>
-                    <td className="py-3.5 pr-3 font-mono">
+                    <td className="py-3.5 pr-3 font-mono hidden lg:table-cell">
                       {s.investment_amount > 0 ? `$${s.investment_amount.toLocaleString()}` : "—"}
                     </td>
-                    <td className="py-3.5 pr-3">
+                    <td className="py-3.5 pr-3 hidden sm:table-cell">
                       {s.esop_vesting?.is_vesting ? (
                         <div className="text-[10px]">
                           <span className="font-bold text-purple-600 dark:text-purple-400">
@@ -473,26 +654,64 @@ export default function CapTablePage() {
                       )}
                     </td>
                     <td className="py-3.5 text-right">
-                      <button
-                        onClick={() => setDeleteId(s._id)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
-                        title="Delete Shareholder"
-                      >
-                        <Trash className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => handleEditClick(s)}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors cursor-pointer"
+                          title="Edit Shareholder"
+                        >
+                          <NotePencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteId(s._id)}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
+                          title="Delete Shareholder"
+                        >
+                          <Trash className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
-                {shareholders.length === 0 && (
+                {filteredShareholders.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-gray-400 dark:text-gray-500">
-                      No equity grants or shareholders recorded yet. Click <strong>Issue Equity</strong> above to populate your Cap Table.
+                    <td colSpan={8} className="py-12 text-center text-gray-400 dark:text-gray-500 font-bold">
+                      {shareholderSearchQuery 
+                        ? "No shareholders matched your search criteria." 
+                        : "No equity grants or shareholders recorded yet. Click Add Shareholder above to populate your Cap Table."}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {totalShareholdersPages > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-zinc-800 pt-4 text-xs font-semibold">
+              <span className="text-gray-400">
+                Showing {startIndex + 1} to {Math.min(startIndex + shareholdersPerPage, filteredShareholders.length)} of {filteredShareholders.length} entries
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setShareholderCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={shareholderCurrentPage === 1}
+                  className="p-2 rounded-lg bg-gray-50 dark:bg-zinc-800 text-gray-500 hover:text-gray-700 dark:hover:text-white border border-gray-200 dark:border-zinc-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CaretLeft className="w-4 h-4" />
+                </button>
+                <span className="text-gray-600 dark:text-gray-300 font-bold px-2">
+                  Page {shareholderCurrentPage} of {totalShareholdersPages}
+                </span>
+                <button
+                  onClick={() => setShareholderCurrentPage(prev => Math.min(prev + 1, totalShareholdersPages))}
+                  disabled={shareholderCurrentPage === totalShareholdersPages}
+                  className="p-2 rounded-lg bg-gray-50 dark:bg-zinc-800 text-gray-500 hover:text-gray-700 dark:hover:text-white border border-gray-200 dark:border-zinc-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CaretRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Exit Waterfall & Dilution Simulator Section */}
@@ -695,41 +914,41 @@ export default function CapTablePage() {
 
             {/* Waterfall Shareholder Payout Table */}
             {waterfallResult && (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+              <div className="overflow-x-auto border border-gray-100 dark:border-zinc-800/80 rounded-2xl bg-gray-50/30 dark:bg-zinc-900/30 -mx-2 px-2 sm:mx-0 sm:px-0">
+                <table className="w-full text-left text-xs min-w-[720px]">
                   <thead>
-                    <tr className="border-b border-gray-100 dark:border-zinc-800 text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                      <th className="pb-3">Shareholder</th>
-                      <th className="pb-3">Share Class</th>
-                      <th className="pb-3">Initial Ownership</th>
-                      <th className="pb-3">Diluted Ownership</th>
-                      <th className="pb-3">Pref Payout</th>
-                      <th className="pb-3">Common Payout</th>
-                      <th className="pb-3">Total Exit Payout</th>
-                      <th className="pb-3 text-right">Return MOIC</th>
+                    <tr className="border-b border-gray-100 dark:border-zinc-800 text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                      <th className="py-3 px-3">Shareholder</th>
+                      <th className="py-3 px-3">Share Class</th>
+                      <th className="py-3 px-3">Initial %</th>
+                      <th className="py-3 px-3">Diluted %</th>
+                      <th className="py-3 px-3">Pref Payout</th>
+                      <th className="py-3 px-3">Common Payout</th>
+                      <th className="py-3 px-3">Total Exit Payout</th>
+                      <th className="py-3 px-3 text-right">Return MOIC</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/60 font-medium text-gray-700 dark:text-gray-300">
+                  <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/60 font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                     {waterfallResult.shareholders.map((res, idx) => (
                       <tr key={res._id || idx} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                        <td className="py-3.5 pr-3 font-bold text-gray-900 dark:text-white">
+                        <td className="py-3.5 px-3 font-bold text-gray-900 dark:text-white">
                           {res.shareholder_name}
                         </td>
-                        <td className="py-3.5 pr-3 font-bold">{res.share_class}</td>
-                        <td className="py-3.5 pr-3 font-mono">{res.initial_ownership_pct}%</td>
-                        <td className="py-3.5 pr-3 font-mono font-bold text-purple-600 dark:text-purple-400">
+                        <td className="py-3.5 px-3 font-bold">{res.share_class}</td>
+                        <td className="py-3.5 px-3 font-mono text-gray-500">{res.initial_ownership_pct}%</td>
+                        <td className="py-3.5 px-3 font-mono font-bold text-purple-600 dark:text-purple-400">
                           {res.effective_ownership_pct}%
                         </td>
-                        <td className="py-3.5 pr-3 font-mono text-gray-500">
+                        <td className="py-3.5 px-3 font-mono text-gray-500">
                           {res.preference_payout > 0 ? `$${res.preference_payout.toLocaleString()}` : "—"}
                         </td>
-                        <td className="py-3.5 pr-3 font-mono text-gray-500">
+                        <td className="py-3.5 px-3 font-mono text-gray-500">
                           {res.common_payout > 0 ? `$${res.common_payout.toLocaleString()}` : "—"}
                         </td>
-                        <td className="py-3.5 pr-3 font-mono font-extrabold text-green-600 dark:text-green-400">
+                        <td className="py-3.5 px-3 font-mono font-extrabold text-green-600 dark:text-green-400">
                           ${res.total_exit_payout.toLocaleString()}
                         </td>
-                        <td className="py-3.5 text-right font-mono font-black text-yellow-600 dark:text-yellow-400">
+                        <td className="py-3.5 px-3 text-right font-mono font-black text-yellow-600 dark:text-yellow-400">
                           {res.moic > 0 ? `${res.moic}x` : "—"}
                         </td>
                       </tr>
@@ -741,6 +960,34 @@ export default function CapTablePage() {
           </div>
         )}
 
+        {/* Dedicated Activity History & Audit Log Navigation Banner */}
+        <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-gray-200/80 dark:border-zinc-800 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#E5C158]/10 text-[#E5C158] flex items-center justify-center font-bold shrink-0">
+              <ClockCounterClockwise className="w-5 h-5" weight="bold" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                Cap Table Security Audit Log
+                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-mono font-bold rounded-md uppercase">
+                  System Active
+                </span>
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                View complete immutable history of equity issuances, modifications, and shareholder updates.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => router.push("/dashboard/audit-logs")}
+            className="px-4 py-2.5 bg-gray-900 hover:bg-black text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs"
+          >
+            <ClockCounterClockwise className="w-4 h-4" weight="bold" />
+            View Complete Activity History
+          </button>
+        </div>
+
       </div>
 
       {/* Add Shareholder Modal */}
@@ -751,14 +998,16 @@ export default function CapTablePage() {
               <div>
                 <h3 className="text-lg font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                   <ChartPie className="w-5 h-5 text-yellow-500" weight="bold" />
-                  Issue Equity / Add Shareholder
+                  {editingShareholder ? "Edit Shareholder / Equity Grant" : "Issue Equity / Add Shareholder"}
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Record new share issuances, investor holdings, or ESOP options.
+                  {editingShareholder 
+                    ? "Modify existing share allocations, class types, or vesting profiles." 
+                    : "Record new share issuances, investor holdings, or ESOP options."}
                 </p>
               </div>
               <button
-                onClick={() => setIsAddModalOpen(false)}
+                onClick={handleCloseModal}
                 className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full text-gray-500 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -912,7 +1161,7 @@ export default function CapTablePage() {
               <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={handleCloseModal}
                   className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-all cursor-pointer"
                 >
                   Cancel
@@ -923,10 +1172,75 @@ export default function CapTablePage() {
                   className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-                  Confirm Grant
+                  {editingShareholder ? "Save Changes" : "Confirm Grant"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cap Table Security Audit Log Section */}
+      {auditLogs.length > 0 && (
+        <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-gray-200/80 dark:border-zinc-800 p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 dark:border-zinc-800 pb-3">
+            <div>
+              <h2 className="text-md sm:text-lg font-bold text-gray-900 dark:text-white">
+                Cap Table Security Audit Log
+              </h2>
+            </div>
+            <span className="text-[10px] font-mono bg-gray-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md text-gray-500 font-bold uppercase tracking-wider w-fit">
+              System Active
+            </span>
+          </div>
+
+          <div className="divide-y divide-gray-100 dark:divide-zinc-800/60 text-xs">
+            {auditLogs.map((log) => {
+              const date = new Date(log.created_at).toLocaleString();
+              const userName = log.user_id?.name || log.user_id?.email || "Founder";
+              
+              let actionText = "";
+              let actionColor = "";
+              switch (log.action) {
+                case "create":
+                  actionText = "Issued Equity Grant";
+                  actionColor = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+                  break;
+                case "update":
+                  actionText = "Updated Equity Grant";
+                  actionColor = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+                  break;
+                case "delete":
+                  actionText = "Deleted Equity Grant";
+                  actionColor = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+                  break;
+                default:
+                  actionText = log.action;
+                  actionColor = "text-gray-600 bg-gray-50";
+              }
+
+              return (
+                <div key={log._id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${actionColor}`}>
+                      {actionText}
+                    </span>
+                    <div>
+                      <p className="font-bold text-gray-800 dark:text-gray-200">
+                        {log.details?.shareholder_name || log.details?.current?.shareholder_name || "Shareholder"} (
+                        {log.details?.share_class || log.details?.current?.share_class || "Common"} Class)
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        Action by {userName}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono text-gray-400 self-start sm:self-center">
+                    {date}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
