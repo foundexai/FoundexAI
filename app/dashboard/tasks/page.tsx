@@ -28,10 +28,12 @@ interface Task {
 }
 
 export default function TasksPage() {
-  const { user, loading, token } = useAuth();
+  const { user, loading, token, activeStartupId, setActiveStartupId, startups: authStartups } = useAuth();
   const router = useRouter();
 
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [userStartups, setUserStartups] = useState<any[]>([]);
+  const [selectedStartupId, setSelectedStartupId] = useState<string>("");
   const [newTask, setNewTask] = useState({ title: "", category: "Operations", description: "" });
   const [selectedStage, setSelectedStage] = useState("Seed");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -45,22 +47,36 @@ export default function TasksPage() {
       return;
     }
     if (user) {
-      loadTasks();
+      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : undefined;
+      const activeId = activeStartupId || storedId || undefined;
+      loadTasks(activeId);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, activeStartupId]);
 
-  async function loadTasks() {
+  async function loadTasks(targetStartupId?: string) {
     setIsLoading(true);
     const authToken = token || localStorage.getItem("token");
     if (!authToken) return;
+    const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+    const activeId = targetStartupId || activeStartupId || selectedStartupId || storedId || "";
 
     try {
-      const r = await fetch("/api/tasks", {
-        headers: { Authorization: `Bearer ${authToken}` },
+      const url = activeId ? `/api/tasks?startup_id=${activeId}` : "/api/tasks";
+      const r = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${authToken}`,
+          "x-startup-id": activeId,
+        },
       });
       if (r.ok) {
         const data = await r.json();
         setTasks(data.tasks || []);
+        if (data.userStartups && data.userStartups.length > 0) {
+          setUserStartups(data.userStartups.map((s: any) => ({ ...s, _id: String(s._id) })));
+        }
+        if (data.currentStartup?._id) {
+          setSelectedStartupId(String(data.currentStartup._id));
+        }
       }
     } catch (err) {
       console.error("Failed to load tasks", err);
@@ -68,6 +84,17 @@ export default function TasksPage() {
       setIsLoading(false);
     }
   }
+
+  const handleStartupSwitch = (newStartupId: string) => {
+    setSelectedStartupId(newStartupId);
+    if (setActiveStartupId) {
+      setActiveStartupId(newStartupId);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeStartupId", newStartupId);
+    }
+    loadTasks(newStartupId);
+  };
 
   async function addTask(e: React.FormEvent) {
     e.preventDefault();
@@ -190,17 +217,48 @@ export default function TasksPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
-              <CheckSquare className="w-7 h-7 text-yellow-500" weight="bold" />
-              Tasks & Due Diligence Checklists
-            </h1>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Track operational tasks and generate automated due diligence checklists for investors.
-            </p>
-          </div>
-        </div>
+        {(() => {
+          const displayStartups = (authStartups && authStartups.length > 0) ? authStartups : userStartups;
+          const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+          const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
+
+          return (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
+                    <CheckSquare className="w-7 h-7 text-yellow-500" weight="bold" />
+                    Tasks & Due Diligence Checklists
+                  </h1>
+                  {displayStartups.length > 1 ? (
+                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
+                      <select
+                        value={currentActiveId}
+                        onChange={(e) => handleStartupSwitch(e.target.value)}
+                        className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer"
+                      >
+                        {displayStartups.map((s: any) => (
+                          <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
+                            {s.company_name || s.name || "Startup"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : displayStartups.length === 1 ? (
+                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                      {displayStartups[0]?.company_name || displayStartups[0]?.name}
+                    </div>
+                  ) : null}
+                </div>
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Track operational tasks and generate automated due diligence checklists for investors.
+                </p>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Automatic Due Diligence Checklist Generator Banner */}
         <div className="bg-white dark:bg-zinc-900/60 border border-gray-200/80 dark:border-zinc-800 p-6 rounded-3xl shadow-xs space-y-4">

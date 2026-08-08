@@ -201,36 +201,32 @@ export default function NewDocumentPage() {
             </div>
 
             {activeTab === "upload" ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer relative grow dark:border-zinc-700 dark:hover:bg-zinc-800/50 min-h-[150px]">
+              <div className="border-2 border-dashed border-gray-300 dark:border-zinc-700/80 rounded-2xl p-8 flex flex-col items-center justify-center text-center hover:bg-yellow-500/5 hover:border-yellow-500/40 transition-all cursor-pointer relative grow min-h-[180px] group">
                 <input
                   type="file"
                   onChange={handleFileChange}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
                   accept=".pdf,.ppt,.pptx,.doc,.docx,.txt"
                 />
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 dark:bg-zinc-800">
-                  {file ? (
-                    <FileText className="w-8 h-8 text-blue-600" weight="bold" />
-                  ) : (
-                    <UploadSimple className="w-8 h-8 text-gray-400" weight="bold" />
-                  )}
+                <div className="w-14 h-14 rounded-2xl bg-[#E5C158]/10 border border-[#E5C158]/30 text-[#E5C158] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <UploadSimple className="w-7 h-7" weight="bold" />
                 </div>
                 {file ? (
                   <div>
-                    <p className="font-bold text-gray-900 dark:text-white">
+                    <p className="font-extrabold text-sm text-gray-900 dark:text-white">
                       {file.name}
                     </p>
-                    <p className="text-sm text-gray-500">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                    <p className="text-xs font-mono text-[#E5C158] mt-1 font-bold">
+                      {(file.size / 1024 / 1024).toFixed(2)} MB • Ready to Upload
                     </p>
                   </div>
                 ) : (
                   <div>
-                    <p className="font-bold text-gray-900 dark:text-white">
-                      Click to upload or drag and drop
+                    <p className="font-extrabold text-sm text-gray-900 dark:text-white">
+                      Click to choose or drag & drop pitch deck file
                     </p>
-                    <p className="text-sm text-gray-500">
-                      PDF, PPT, DOC up to 10MB
+                    <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1 font-mono">
+                      Supports PDF, PPTX, DOCX, or TXT (Max 50MB)
                     </p>
                   </div>
                 )}

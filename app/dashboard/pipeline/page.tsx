@@ -73,8 +73,10 @@ const STAGES = [
 ];
 
 export default function PipelinePage() {
-  const { user, token } = useAuth();
+  const { user, token, activeStartupId, setActiveStartupId, startups: authStartups } = useAuth();
   const [deals, setDeals] = useState<EnrichedDeal[]>([]);
+  const [userStartups, setUserStartups] = useState<any[]>([]);
+  const [selectedStartupId, setSelectedStartupId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeMobileStage, setActiveMobileStage] = useState("shortlisted");
@@ -91,17 +93,37 @@ export default function PipelinePage() {
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [activeCopilotDeal, setActiveCopilotDeal] = useState<EnrichedDeal | null>(null);
 
+  useEffect(() => {
+    if (token) {
+      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : undefined;
+      const activeId = activeStartupId || storedId || undefined;
+      fetchPipeline(true, activeId);
+    }
+  }, [token, activeStartupId]);
+
   // 1. Fetch Pipeline Deals
-  const fetchPipeline = async (showLoading = false) => {
+  const fetchPipeline = async (showLoading = false, targetStartupId?: string) => {
     if (!token) return;
     if (showLoading) setLoading(true);
+    const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+    const activeId = targetStartupId || activeStartupId || selectedStartupId || storedId || "";
     try {
-      const res = await fetch("/api/pipeline", {
-        headers: { Authorization: `Bearer ${token}` },
+      const url = activeId ? `/api/pipeline?startup_id=${activeId}` : "/api/pipeline";
+      const res = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "x-startup-id": activeId,
+        },
       });
       if (res.ok) {
         const data = await res.json();
         setDeals(data.deals || []);
+        if (data.userStartups && data.userStartups.length > 0) {
+          setUserStartups(data.userStartups.map((s: any) => ({ ...s, _id: String(s._id) })));
+        }
+        if (data.currentStartup?._id) {
+          setSelectedStartupId(String(data.currentStartup._id));
+        }
       }
     } catch (e) {
       console.error(e);
@@ -111,9 +133,16 @@ export default function PipelinePage() {
     }
   };
 
-  useEffect(() => {
-    fetchPipeline(true);
-  }, [token]);
+  const handleStartupSwitch = (newStartupId: string) => {
+    setSelectedStartupId(newStartupId);
+    if (setActiveStartupId) {
+      setActiveStartupId(newStartupId);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeStartupId", newStartupId);
+    }
+    fetchPipeline(true, newStartupId);
+  };
 
   // 2. Real-Time Sync with Pusher Client
   useEffect(() => {
@@ -358,36 +387,67 @@ export default function PipelinePage() {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors mb-2 dark:text-gray-400 dark:hover:text-white"
-          >
-            <ArrowLeft weight="bold" />
-            Back to Dashboard
-          </Link>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight dark:text-white">
-            Venture <span className="text-yellow-500">Pipeline</span>
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">
-            Manage your shortlist and track outreach progress using the Kanban board.
-          </p>
-        </div>
+      {(() => {
+        const displayStartups = (authStartups && authStartups.length > 0) ? authStartups : userStartups;
+        const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+        const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
 
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search leads..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all w-full md:w-64 dark:bg-zinc-900 dark:border-zinc-800 dark:text-white shadow-sm"
-            />
+        return (
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-1">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors mb-2 dark:text-gray-400 dark:hover:text-white"
+              >
+                <ArrowLeft weight="bold" />
+                Back to Dashboard
+              </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-4xl font-black text-gray-900 tracking-tight dark:text-white">
+                  Venture <span className="text-yellow-500">Pipeline</span>
+                </h1>
+                {displayStartups.length > 1 ? (
+                  <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
+                    <select
+                      value={currentActiveId}
+                      onChange={(e) => handleStartupSwitch(e.target.value)}
+                      className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer"
+                    >
+                      {displayStartups.map((s: any) => (
+                        <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
+                          {s.company_name || s.name || "Startup"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : displayStartups.length === 1 ? (
+                  <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    {displayStartups[0]?.company_name || displayStartups[0]?.name}
+                  </div>
+                ) : null}
+              </div>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">
+                Manage your shortlist and track outreach progress using the Kanban board.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search leads..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 outline-none transition-all w-full md:w-64 dark:bg-zinc-900 dark:border-zinc-800 dark:text-white shadow-sm"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Kanban Board View */}
       {loading ? (

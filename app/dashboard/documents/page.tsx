@@ -328,54 +328,52 @@ export default function DocumentsPage() {
                 <CircleNotch className="w-8 h-8 text-gray-400 animate-spin" weight="bold" />
               </div>
             ) : filteredDocs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredDocs.map((doc, i) => (
                   <div
                     key={i}
-                    className="group bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800/80 shadow-xs hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col h-full"
+                    className="group bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-gray-200/80 dark:border-zinc-800 shadow-2xs hover:shadow-md hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between"
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-50 border border-gray-150 text-gray-500 dark:bg-zinc-900 dark:border-zinc-850 dark:text-zinc-400">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-mono font-bold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                        {doc.type}
-                      </span>
-                    </div>
-
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm line-clamp-1">
-                      {doc.name}
-                    </h3>
-
-                    {/* Action Row */}
-                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-zinc-900/60 space-y-3">
-                      <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                        <span className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5" />
-                          {doc.date ? format(new Date(doc.date), "MMM d, yyyy") : "Recently"}
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[#E5C158]/10 text-[#E5C158] border border-[#E5C158]/20">
+                          <FileText className="w-6 h-6" weight="bold" />
+                        </div>
+                        <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold tracking-widest bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 border border-gray-200/60 dark:border-zinc-700/60 uppercase">
+                          {doc.type}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* 1. Create Protected Secure Link Button */}
-                        <button
-                          onClick={() => {
-                            setSelectedDocForSecureLink(doc);
-                            setIsSecureLinkModalOpen(true);
-                          }}
-                          className="py-2 px-3 border border-zinc-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-900 text-gray-800 dark:text-zinc-200 text-[10px] font-mono font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                        >
-                          <ShieldCheck className="w-3.5 h-3.5" weight="bold" /> Secure Link
-                        </button>
+                      <h3 className="font-extrabold text-gray-900 dark:text-white mb-1.5 text-base line-clamp-2 leading-snug">
+                        {doc.name}
+                      </h3>
 
-                        {/* 2. Direct Preview */}
-                        <Link
-                          href={`/dashboard/documents/view?url=${encodeURIComponent(doc.url)}&name=${encodeURIComponent(doc.name)}&type=${doc.type}`}
-                          className="py-2 px-3 bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:text-black dark:hover:bg-white text-[10px] font-mono font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all"
-                        >
-                          <Eye className="w-3.5 h-3.5" /> View Deck
-                        </Link>
-                      </div>
+                      <p className="text-xs text-gray-400 dark:text-zinc-500 font-mono mb-4 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {doc.date ? format(new Date(doc.date), "MMM d, yyyy") : "Recently Uploaded"}
+                      </p>
+                    </div>
+
+                    {/* High-Contrast Action Buttons */}
+                    <div className="pt-4 border-t border-gray-100 dark:border-zinc-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <button
+                        onClick={() => {
+                          setSelectedDocForSecureLink(doc);
+                          setIsSecureLinkModalOpen(true);
+                        }}
+                        className="w-full py-2.5 px-3 bg-yellow-500/10 hover:bg-yellow-500/20 text-[#E5C158] border border-yellow-500/30 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                      >
+                        <ShieldCheck className="w-4 h-4" weight="bold" />
+                        Secure Link
+                      </button>
+
+                      <Link
+                        href={`/dashboard/documents/view?url=${encodeURIComponent(doc.url)}&name=${encodeURIComponent(doc.name)}&type=${doc.type}`}
+                        className="w-full py-2.5 px-3 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all text-center shadow-2xs"
+                      >
+                        <Eye className="w-4 h-4" weight="bold" />
+                        View Deck
+                      </Link>
                     </div>
                   </div>
                 ))}

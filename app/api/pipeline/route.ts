@@ -22,11 +22,16 @@ export async function GET(req: NextRequest) {
 
     const userId = decoded.user._id;
 
-    // 1. Fetch user startup
-    const startup = await Startup.findOne({ user_id: userId });
-    if (!startup) {
-      return NextResponse.json({ error: "Startup profile not found" }, { status: 404 });
+    const requestedStartupId = req.nextUrl.searchParams.get("startup_id") || req.headers.get("x-startup-id");
+    const userStartups = await Startup.find({ user_id: userId }).sort({ created_at: 1 });
+
+    if (!userStartups || userStartups.length === 0) {
+      return NextResponse.json({ deals: [], userStartups: [], currentStartup: null });
     }
+
+    const startup =
+      (requestedStartupId && userStartups.find((s) => s._id.toString() === requestedStartupId)) ||
+      userStartups[0];
 
     // 2. Data Migration Sync: Import old ad-hoc saved investors & statuses to PipelineDeals
     const userDoc = await User.findById(userId);
@@ -75,8 +80,11 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 3. Fetch all current pipeline deals
-    const dealsDocs = await PipelineDeal.find({ user_id: userId }).sort({ updated_at: -1 });
+    // 3. Fetch deals scoped strictly by user_id AND target startup_id
+    const dealsDocs = await PipelineDeal.find({
+      user_id: userId,
+      startup_id: startup._id,
+    }).sort({ updated_at: -1 });
 
     // 4. Enrich deals with full investor card/profile details and fit scores
     const enrichedDeals = [];
@@ -145,7 +153,17 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ deals: enrichedDeals });
+    return NextResponse.json({
+      deals: enrichedDeals,
+      userStartups: userStartups.map((s) => ({
+        _id: s._id.toString(),
+        company_name: s.company_name,
+      })),
+      currentStartup: {
+        _id: startup._id.toString(),
+        company_name: startup.company_name,
+      },
+    });
   } catch (error) {
     console.error("GET pipeline deals error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
