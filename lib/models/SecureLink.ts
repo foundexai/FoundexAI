@@ -15,6 +15,31 @@ const OTPRequestSchema = new mongoose.Schema({
   verified: { type: Boolean, default: false }
 });
 
+const DealRoomMemberSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  name: { type: String },
+  role: {
+    type: String,
+    enum: ["founder", "co-founder", "counsel", "lead_investor", "lp", "investor"],
+    default: "investor"
+  },
+  status: {
+    type: String,
+    enum: ["invited", "active", "revoked"],
+    default: "invited"
+  },
+  invited_at: { type: Date, default: Date.now },
+  joined_at: { type: Date }
+});
+
+const NDASignatureSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  signer_name: { type: String },
+  signed_at: { type: Date, default: Date.now },
+  ip_address: { type: String, default: "127.0.0.1" },
+  nda_version: { type: String, default: "v1.0" }
+});
+
 const SecureLinkSchema = new mongoose.Schema({
   share_token: { type: String, required: true, unique: true, index: true },
   founder_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -23,10 +48,22 @@ const SecureLinkSchema = new mongoose.Schema({
   doc_url: { type: String, required: true },
   doc_type: { type: String, default: "deck" },
   
+  // Deal Room Multi-Party Extensions
+  is_deal_room: { type: Boolean, default: false },
+  deal_room_name: { type: String },
+  allowed_tiers: [{
+    type: String,
+    enum: ["founder", "co-founder", "counsel", "lead_investor", "lp", "investor"],
+  }],
+  deal_room_members: [DealRoomMemberSchema],
+  require_nda: { type: Boolean, default: false },
+  nda_text: { type: String },
+  nda_signatures: [NDASignatureSchema],
+
   // Security Gate Config
   access_type: {
     type: String,
-    enum: ["public", "passcode", "email_otp", "domain_restricted"],
+    enum: ["public", "passcode", "email_otp", "domain_restricted", "tier_restricted"],
     default: "public"
   },
   passcode: { type: String },
