@@ -45,7 +45,11 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
     title: "Overview",
     items: [
       { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
-      { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
+      {
+        name: "Deal Pipeline",
+        href: "/dashboard/pipeline",
+        icon: ChatCircleDots,
+      },
       { name: "Documents", href: "/dashboard/documents", icon: FileText },
       { name: "Cap Table", href: "/dashboard/captable", icon: ChartPie },
       { name: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
@@ -80,15 +84,17 @@ const INVESTOR_NAV_GROUPS: NavGroup[] = [
     title: "Overview",
     items: [
       { name: "Dashboard", href: "/dashboard", icon: SquaresFour, exact: true },
-      { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
+      {
+        name: "Deal Pipeline",
+        href: "/dashboard/pipeline",
+        icon: ChatCircleDots,
+      },
       { name: "Documents", href: "/dashboard/documents", icon: FileText },
     ],
   },
   {
     title: "Intelligence",
-    items: [
-      { name: "Reports", href: "/dashboard/reports", icon: ChartLineUp },
-    ],
+    items: [{ name: "Reports", href: "/dashboard/reports", icon: ChartLineUp }],
   },
   {
     title: "Discover",
@@ -172,6 +178,7 @@ export default function DashboardLayout({
       document.body.style.userSelect = "";
     };
   }, [isDragging]);
+  //trigger
   */
 
   const getLinkClass = (path: string, exact = false) => {
@@ -413,7 +420,7 @@ export default function DashboardLayout({
         >
           <NavContent />
         </aside>
- 
+
         {/* Desktop Sidebar */}
         <aside
           /* style={{
@@ -448,7 +455,7 @@ export default function DashboardLayout({
             />
           )} */}
         </aside>
- 
+
         <main
           className={cn(
             "min-w-0 flex-1 h-screen overflow-y-auto flex flex-col bg-gray-50/50 dark:bg-black transition-all duration-300 relative",
