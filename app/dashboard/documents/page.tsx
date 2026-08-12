@@ -1,6 +1,6 @@
 "use client";
-
-import { useEffect, useState } from "react";
+ 
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import {
   CaretLeft,
@@ -62,7 +62,7 @@ interface SecureLinkItem {
   createdAt: string;
 }
 
-export default function DocumentsPage() {
+function DocumentsPageContent() {
   const { token, activeStartupId } = useAuth();
   const searchParams = useSearchParams();
   const initialTabParam = searchParams.get("tab");
@@ -605,5 +605,17 @@ export default function DocumentsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DocumentsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center p-12">
+        <CircleNotch className="w-8 h-8 animate-spin text-yellow-500" />
+      </div>
+    }>
+      <DocumentsPageContent />
+    </Suspense>
   );
 }
