@@ -6,12 +6,25 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Bell, CaretDown, List, CircleNotch, MagnifyingGlass, ClockCounterClockwise } from "@phosphor-icons/react";
+import {
+  Sun,
+  Moon,
+  Bell,
+  CaretDown,
+  List,
+  CircleNotch,
+  MagnifyingGlass,
+  ClockCounterClockwise,
+} from "@phosphor-icons/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import CommandPaletteModal from "@/components/CommandPaletteModal";
 
-export default function Header({ variant = 'global' }: { variant?: 'global' | 'dashboard' }) {
+export default function Header({
+  variant = "global",
+}: {
+  variant?: "global" | "dashboard";
+}) {
   const { user, logout, loading, token } = useAuth();
   const { toggle } = useMobileMenu();
   const router = useRouter();
@@ -28,7 +41,8 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
   useEffect(() => {
     const handleOpenCommand = () => setIsCommandPaletteOpen(true);
     window.addEventListener("open-command-palette", handleOpenCommand);
-    return () => window.removeEventListener("open-command-palette", handleOpenCommand);
+    return () =>
+      window.removeEventListener("open-command-palette", handleOpenCommand);
   }, []);
 
   useEffect(() => {
@@ -50,7 +64,7 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
       return res.json();
     },
     enabled: !!token && !!user,
-    refetchInterval: 120000, 
+    refetchInterval: 120000,
     staleTime: 60000,
   });
 
@@ -80,7 +94,7 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
   const notificationsRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
-    setClickedItem('logout');
+    setClickedItem("logout");
     try {
       await logout();
     } catch (e) {
@@ -89,19 +103,31 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
     window.location.href = "/";
   };
 
-  const toggleDesktopDropdown = () => setIsDesktopDropdownOpen(!isDesktopDropdownOpen);
-  const toggleMobileDropdown = () => setIsMobileDropdownOpen(!isMobileDropdownOpen);
-  const toggleNotifications = () => setIsNotificationsOpen(!isNotificationsOpen);
+  const toggleDesktopDropdown = () =>
+    setIsDesktopDropdownOpen(!isDesktopDropdownOpen);
+  const toggleMobileDropdown = () =>
+    setIsMobileDropdownOpen(!isMobileDropdownOpen);
+  const toggleNotifications = () =>
+    setIsNotificationsOpen(!isNotificationsOpen);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (desktopDropdownRef.current && !desktopDropdownRef.current.contains(event.target as Node)) {
+      if (
+        desktopDropdownRef.current &&
+        !desktopDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDesktopDropdownOpen(false);
       }
-      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target as Node)) {
+      if (
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsMobileDropdownOpen(false);
       }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
         setIsNotificationsOpen(false);
       }
     }
@@ -109,18 +135,20 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (variant === 'global' && pathname?.startsWith('/dashboard')) {
+  if (variant === "global" && pathname?.startsWith("/dashboard")) {
     return null;
   }
 
   return (
-    <header className={cn(
+    <header
+      className={cn(
         "w-full z-50 transition-all duration-300",
-        variant === 'global' 
-            ? "sticky top-0 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10" 
-            : "sticky top-0 bg-white/90 backdrop-blur-md dark:bg-[#0B0B0C]/90 border-b border-gray-100 dark:border-zinc-900/60 shadow-2xs"
-    )}>
-      {variant === 'dashboard' ? (
+        variant === "global"
+          ? "sticky top-0 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:bg-black/60 dark:border-white/10"
+          : "sticky top-0 bg-white/90 backdrop-blur-md dark:bg-[#0B0B0C]/90 border-b border-gray-100 dark:border-zinc-900/60 shadow-2xs",
+      )}
+    >
+      {variant === "dashboard" ? (
         <div className="w-full px-6 py-3 flex justify-between items-center bg-transparent">
           {/* Left Section */}
           <div className="flex items-center gap-4 grow">
@@ -134,15 +162,18 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
             </button>
 
             {/* Search bar */}
-            <div 
+            <div
               onClick={() => setIsCommandPaletteOpen(true)}
               className="hidden md:flex items-center relative w-full max-w-xs lg:max-w-sm cursor-pointer group"
             >
-              <MagnifyingGlass className="absolute left-3.5 h-4.5 w-4.5 text-zinc-400 dark:text-zinc-500 group-hover:text-[#E5C158] transition-colors" weight="bold" />
+              <MagnifyingGlass
+                className="absolute left-3.5 h-4.5 w-4.5 text-zinc-400 dark:text-zinc-500 group-hover:text-[#E5C158] transition-colors"
+                weight="bold"
+              />
               <input
                 type="text"
                 readOnly
-                placeholder="Search contracts, pages, docs..."
+                placeholder="Search All pages, docs, investors..."
                 className="w-full pl-10 pr-12 py-2 text-xs bg-gray-100/60 hover:bg-gray-100 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 border border-gray-200/50 dark:border-zinc-800 rounded-full focus:outline-none dark:text-white dark:placeholder-zinc-500 transition-all font-medium cursor-pointer"
               />
               <kbd className="absolute right-3 text-[10px] font-mono font-bold text-zinc-400 bg-gray-200/60 dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-gray-300/40 dark:border-zinc-700">
@@ -172,74 +203,97 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
 
             {/* Notification Button */}
             <div className="relative" ref={notificationsRef}>
-              <button 
-                  onClick={toggleNotifications}
-                  className={`p-2.5 rounded-full border transition-all shadow-sm hover:shadow-md group relative cursor-pointer ${isNotificationsOpen ? 'bg-white border-yellow-250 dark:bg-zinc-900 dark:border-zinc-800' : 'bg-gray-100/50 border-white/50 dark:bg-white/10 dark:border-white/10 hover:bg-white dark:hover:bg-white/20'}`}
+              <button
+                onClick={toggleNotifications}
+                className={`p-2.5 rounded-full border transition-all shadow-sm hover:shadow-md group relative cursor-pointer ${isNotificationsOpen ? "bg-white border-yellow-250 dark:bg-zinc-900 dark:border-zinc-800" : "bg-gray-100/50 border-white/50 dark:bg-white/10 dark:border-white/10 hover:bg-white dark:hover:bg-white/20"}`}
               >
-                  <Bell className={`h-5 w-5 transition-colors ${isNotificationsOpen ? 'text-[#E5C158] dark:text-[#E5C158]' : 'text-gray-600 group-hover:text-[#E5C158] dark:text-gray-400 dark:group-hover:text-[#E5C158]'}`} weight="bold" />
-                  {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white items-center justify-center font-black">
-                              {unreadCount}
-                          </span>
-                      </span>
-                  )}
+                <Bell
+                  className={`h-5 w-5 transition-colors ${isNotificationsOpen ? "text-[#E5C158] dark:text-[#E5C158]" : "text-gray-600 group-hover:text-[#E5C158] dark:text-gray-400 dark:group-hover:text-[#E5C158]"}`}
+                  weight="bold"
+                />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white items-center justify-center font-black">
+                      {unreadCount}
+                    </span>
+                  </span>
+                )}
               </button>
-              
-              <div
-                  className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
-                      isNotificationsOpen
-                          ? "opacity-100 scale-100 translate-y-0"
-                          : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-                  }`}
-              >
-                  <div className="p-5 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                      <h3 className="font-black text-gray-900 dark:text-white tracking-tight">Notifications</h3>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">
-                          {unreadCount} New
-                      </span>
-                  </div>
-                  
-                  <div className="max-h-[400px] overflow-y-auto thin-scrollbar">
-                      {notifications.length > 0 ? (
-                          <div className="divide-y divide-gray-50 dark:divide-zinc-800">
-                              {notifications.map((n: any) => (
-                                  <div 
-                                      key={n._id}
-                                      onClick={() => !n.is_read && markReadMutation.mutate(n._id)}
-                                      className={`p-4 hover:bg-gray-50/50 transition-colors cursor-pointer dark:hover:bg-white/5 ${!n.is_read ? 'bg-yellow-50/10' : ''}`}
-                                  >
-                                      <div className="flex gap-3">
-                                          {!n.is_read && <span className="w-2 h-2 rounded-full bg-yellow-500 mt-1.5 shrink-0" />}
-                                          <div className="grow">
-                                              <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">{n.title}</p>
-                                              <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-0.5 line-clamp-2">{n.message}</p>
-                                              <p className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">{new Date(n.created_at).toLocaleDateString()}</p>
-                                          </div>
-                                      </div>
-                                  </div>
-                              ))}
-                          </div>
-                      ) : (
-                          <div className="p-8 text-center">
-                              <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 dark:bg-white/5">
-                                  <Bell className="w-6 h-6 text-gray-300 dark:text-zinc-600" weight="bold" />
-                              </div>
-                              <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">No notifications yet</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">Sophia will notify you here about updates to your startup profile.</p>
-                          </div>
-                      )}
-                  </div>
 
-                  <div className="p-3 bg-gray-50/50 border-t border-gray-100 rounded-b-3xl dark:bg-black/20 dark:border-zinc-800">
-                       <button 
-                          onClick={() => markReadMutation.mutate(undefined)}
-                          className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white cursor-pointer"
-                       >
-                          Mark all as read
-                       </button>
-                  </div>
+              <div
+                className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
+                  isNotificationsOpen
+                    ? "opacity-100 scale-100 translate-y-0"
+                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                }`}
+              >
+                <div className="p-5 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                  <h3 className="font-black text-gray-900 dark:text-white tracking-tight">
+                    Notifications
+                  </h3>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">
+                    {unreadCount} New
+                  </span>
+                </div>
+
+                <div className="max-h-[400px] overflow-y-auto thin-scrollbar">
+                  {notifications.length > 0 ? (
+                    <div className="divide-y divide-gray-50 dark:divide-zinc-800">
+                      {notifications.map((n: any) => (
+                        <div
+                          key={n._id}
+                          onClick={() =>
+                            !n.is_read && markReadMutation.mutate(n._id)
+                          }
+                          className={`p-4 hover:bg-gray-50/50 transition-colors cursor-pointer dark:hover:bg-white/5 ${!n.is_read ? "bg-yellow-50/10" : ""}`}
+                        >
+                          <div className="flex gap-3">
+                            {!n.is_read && (
+                              <span className="w-2 h-2 rounded-full bg-yellow-500 mt-1.5 shrink-0" />
+                            )}
+                            <div className="grow">
+                              <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">
+                                {n.title}
+                              </p>
+                              <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-0.5 line-clamp-2">
+                                {n.message}
+                              </p>
+                              <p className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">
+                                {new Date(n.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 dark:bg-white/5">
+                        <Bell
+                          className="w-6 h-6 text-gray-300 dark:text-zinc-600"
+                          weight="bold"
+                        />
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                        No notifications yet
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Sophia will notify you here about updates to your
+                        startup profile.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-3 bg-gray-50/50 border-t border-gray-100 rounded-b-3xl dark:bg-black/20 dark:border-zinc-800">
+                  <button
+                    onClick={() => markReadMutation.mutate(undefined)}
+                    className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white cursor-pointer"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -279,27 +333,33 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                 </div>
                 <Link
                   href="/dashboard/profile"
-                  onClick={() => setClickedItem('/dashboard/profile')}
+                  onClick={() => setClickedItem("/dashboard/profile")}
                   className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
                 >
                   <span>Profile</span>
-                  {clickedItem === '/dashboard/profile' && <CircleNotch className="w-4 h-4 animate-spin" />}
+                  {clickedItem === "/dashboard/profile" && (
+                    <CircleNotch className="w-4 h-4 animate-spin" />
+                  )}
                 </Link>
                 <Link
                   href="/dashboard/settings"
-                  onClick={() => setClickedItem('/dashboard/settings')}
+                  onClick={() => setClickedItem("/dashboard/settings")}
                   className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
                 >
                   <span>Settings</span>
-                  {clickedItem === '/dashboard/settings' && <CircleNotch className="w-4 h-4 animate-spin" />}
+                  {clickedItem === "/dashboard/settings" && (
+                    <CircleNotch className="w-4 h-4 animate-spin" />
+                  )}
                 </Link>
                 <button
                   onClick={handleLogout}
-                  disabled={clickedItem === 'logout'}
+                  disabled={clickedItem === "logout"}
                   className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 cursor-pointer disabled:opacity-50"
                 >
                   <span>Sign Out</span>
-                  {clickedItem === 'logout' && <CircleNotch className="w-4 h-4 animate-spin" />}
+                  {clickedItem === "logout" && (
+                    <CircleNotch className="w-4 h-4 animate-spin" />
+                  )}
                 </button>
               </div>
             </div>
@@ -317,7 +377,7 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
               />
             </div>
             <Link
-              href="/dashboard"
+              href="/dashboard/investors"
               className="text-xl md:text-2xl font-black text-gray-900 tracking-tighter hover:opacity-80 transition-opacity dark:text-white"
             >
               FoundexAI
@@ -335,81 +395,106 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
             <div className="flex items-center space-x-6">
               {loading ? (
                 <div className="flex items-center space-x-4">
-                   <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse dark:bg-white/10" />
-                   <div className="w-32 h-10 rounded-full bg-gray-200 animate-pulse hidden lg:block dark:bg-white/10" />
+                  <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse dark:bg-white/10" />
+                  <div className="w-32 h-10 rounded-full bg-gray-200 animate-pulse hidden lg:block dark:bg-white/10" />
                 </div>
               ) : user ? (
                 <>
                   <div className="relative" ref={notificationsRef}>
-                      <button 
-                          onClick={toggleNotifications}
-                          className={`p-2.5 rounded-full border transition-all shadow-sm hover:shadow-md group relative cursor-pointer ${isNotificationsOpen ? 'bg-white border-yellow-250 dark:bg-white/20' : 'bg-gray-100/50 border-white/50 dark:bg-white/10 dark:border-white/10 hover:bg-white dark:hover:bg-white/20'}`}
-                      >
-                          <Bell className={`h-5 w-5 transition-colors ${isNotificationsOpen ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-600 group-hover:text-yellow-600 dark:text-gray-400 dark:group-hover:text-yellow-400'}`} weight="bold" />
-                          {unreadCount > 0 && (
-                              <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white items-center justify-center font-black">
-                                      {unreadCount}
-                                  </span>
-                              </span>
-                          )}
-                      </button>
-                      
-                      <div
-                          className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
-                              isNotificationsOpen
-                                  ? "opacity-100 scale-100 translate-y-0"
-                                  : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-                          }`}
-                      >
-                          <div className="p-5 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                              <h3 className="font-black text-gray-900 dark:text-white tracking-tight">Notifications</h3>
-                              <span className="text-[10px] font-black uppercase tracking-widest text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">
-                                  {unreadCount} New
-                              </span>
-                          </div>
-                          
-                          <div className="max-h-[400px] overflow-y-auto thin-scrollbar">
-                              {notifications.length > 0 ? (
-                                  <div className="divide-y divide-gray-50 dark:divide-zinc-800">
-                                      {notifications.map((n: any) => (
-                                          <div 
-                                              key={n._id}
-                                              onClick={() => !n.is_read && markReadMutation.mutate(n._id)}
-                                              className={`p-4 hover:bg-gray-50/50 transition-colors cursor-pointer dark:hover:bg-white/5 ${!n.is_read ? 'bg-yellow-50/10' : ''}`}
-                                          >
-                                              <div className="flex gap-3">
-                                                  {!n.is_read && <span className="w-2 h-2 rounded-full bg-yellow-500 mt-1.5 shrink-0" />}
-                                                  <div className="grow">
-                                                      <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">{n.title}</p>
-                                                      <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-0.5 line-clamp-2">{n.message}</p>
-                                                      <p className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">{new Date(n.created_at).toLocaleDateString()}</p>
-                                                  </div>
-                                              </div>
-                                          </div>
-                                      ))}
-                                  </div>
-                              ) : (
-                                  <div className="p-8 text-center">
-                                      <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 dark:bg-white/5">
-                                          <Bell className="w-6 h-6 text-gray-300 dark:text-zinc-600" weight="bold" />
-                                      </div>
-                                      <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">No notifications yet</p>
-                                      <p className="text-xs text-gray-500 dark:text-gray-400">Sophia will notify you here about updates to your startup profile.</p>
-                                  </div>
-                              )}
-                          </div>
+                    <button
+                      onClick={toggleNotifications}
+                      className={`p-2.5 rounded-full border transition-all shadow-sm hover:shadow-md group relative cursor-pointer ${isNotificationsOpen ? "bg-white border-yellow-250 dark:bg-white/20" : "bg-gray-100/50 border-white/50 dark:bg-white/10 dark:border-white/10 hover:bg-white dark:hover:bg-white/20"}`}
+                    >
+                      <Bell
+                        className={`h-5 w-5 transition-colors ${isNotificationsOpen ? "text-yellow-600 dark:text-yellow-400" : "text-gray-600 group-hover:text-yellow-600 dark:text-gray-400 dark:group-hover:text-yellow-400"}`}
+                        weight="bold"
+                      />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white items-center justify-center font-black">
+                            {unreadCount}
+                          </span>
+                        </span>
+                      )}
+                    </button>
 
-                          <div className="p-3 bg-gray-50/50 border-t border-gray-100 rounded-b-3xl dark:bg-black/20 dark:border-zinc-800">
-                               <button 
-                                  onClick={() => markReadMutation.mutate(undefined)}
-                                  className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white cursor-pointer"
-                               >
-                                  Mark all as read
-                               </button>
-                          </div>
+                    <div
+                      className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 glass-card border border-white/50 rounded-3xl shadow-2xl z-50 transform origin-top-right transition-all duration-300 dark:bg-zinc-900/95 dark:border-zinc-800 ${
+                        isNotificationsOpen
+                          ? "opacity-100 scale-100 translate-y-0"
+                          : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                      }`}
+                    >
+                      <div className="p-5 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                        <h3 className="font-black text-gray-900 dark:text-white tracking-tight">
+                          Notifications
+                        </h3>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">
+                          {unreadCount} New
+                        </span>
                       </div>
+
+                      <div className="max-h-[400px] overflow-y-auto thin-scrollbar">
+                        {notifications.length > 0 ? (
+                          <div className="divide-y divide-gray-50 dark:divide-zinc-800">
+                            {notifications.map((n: any) => (
+                              <div
+                                key={n._id}
+                                onClick={() =>
+                                  !n.is_read && markReadMutation.mutate(n._id)
+                                }
+                                className={`p-4 hover:bg-gray-50/50 transition-colors cursor-pointer dark:hover:bg-white/5 ${!n.is_read ? "bg-yellow-50/10" : ""}`}
+                              >
+                                <div className="flex gap-3">
+                                  {!n.is_read && (
+                                    <span className="w-2 h-2 rounded-full bg-yellow-500 mt-1.5 shrink-0" />
+                                  )}
+                                  <div className="grow">
+                                    <p className="text-xs font-black text-gray-900 dark:text-white tracking-tight">
+                                      {n.title}
+                                    </p>
+                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-0.5 line-clamp-2">
+                                      {n.message}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">
+                                      {new Date(
+                                        n.created_at,
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-8 text-center">
+                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 dark:bg-white/5">
+                              <Bell
+                                className="w-6 h-6 text-gray-300 dark:text-zinc-600"
+                                weight="bold"
+                              />
+                            </div>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                              No notifications yet
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Sophia will notify you here about updates to your
+                              startup profile.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-3 bg-gray-50/50 border-t border-gray-100 rounded-b-3xl dark:bg-black/20 dark:border-zinc-800">
+                        <button
+                          onClick={() => markReadMutation.mutate(undefined)}
+                          className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest dark:hover:text-white cursor-pointer"
+                        >
+                          Mark all as read
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="relative" ref={desktopDropdownRef}>
@@ -433,7 +518,10 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                       <span className="hidden lg:block text-sm font-bold text-gray-800 dark:text-gray-200">
                         {user?.full_name}
                       </span>
-                      <CaretDown className="h-4 w-4 text-gray-500 lg:dark:text-gray-400" weight="bold" />
+                      <CaretDown
+                        className="h-4 w-4 text-gray-500 lg:dark:text-gray-400"
+                        weight="bold"
+                      />
                     </button>
                     <div
                       className={`absolute right-0 mt-2 w-56 glass-card border border-white/50 rounded-2xl shadow-xl py-2 z-50 transform origin-top-right transition-all duration-200 dark:bg-zinc-900/90 dark:border-zinc-800 ${
@@ -452,27 +540,33 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                       </div>
                       <Link
                         href="/dashboard/profile"
-                        onClick={() => setClickedItem('/dashboard/profile')}
+                        onClick={() => setClickedItem("/dashboard/profile")}
                         className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
                       >
                         <span>Profile</span>
-                        {clickedItem === '/dashboard/profile' && <CircleNotch className="w-4 h-4 animate-spin" />}
+                        {clickedItem === "/dashboard/profile" && (
+                          <CircleNotch className="w-4 h-4 animate-spin" />
+                        )}
                       </Link>
                       <Link
                         href="/dashboard/settings"
-                        onClick={() => setClickedItem('/dashboard/settings')}
+                        onClick={() => setClickedItem("/dashboard/settings")}
                         className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition-colors mx-2 rounded-xl dark:text-gray-300 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400"
                       >
                         <span>Settings</span>
-                        {clickedItem === '/dashboard/settings' && <CircleNotch className="w-4 h-4 animate-spin" />}
+                        {clickedItem === "/dashboard/settings" && (
+                          <CircleNotch className="w-4 h-4 animate-spin" />
+                        )}
                       </Link>
                       <button
                         onClick={handleLogout}
-                        disabled={clickedItem === 'logout'}
+                        disabled={clickedItem === "logout"}
                         className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors mx-2 rounded-xl mt-1 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 cursor-pointer disabled:opacity-50"
                       >
                         <span>Sign Out</span>
-                        {clickedItem === 'logout' && <CircleNotch className="w-4 h-4 animate-spin" />}
+                        {clickedItem === "logout" && (
+                          <CircleNotch className="w-4 h-4 animate-spin" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -496,19 +590,19 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                   onClick={toggleMobileDropdown}
                   className="flex items-center space-x-2"
                 >
-                    {user?.profile_image_url ? (
-                      <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 shadow-md border border-gray-200 dark:border-white/10">
-                        <img
-                          src={user.profile_image_url}
-                          alt={user.full_name || "Profile"}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-9 h-9 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold shadow-md shrink-0">
-                        {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
-                      </div>
-                    )}
+                  {user?.profile_image_url ? (
+                    <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 shadow-md border border-gray-200 dark:border-white/10">
+                      <img
+                        src={user.profile_image_url}
+                        alt={user.full_name || "Profile"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-9 h-9 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold shadow-md shrink-0">
+                      {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                  )}
                 </button>
                 <div
                   className={`absolute right-0 mt-3 w-56 glass-card border border-white/50 rounded-2xl shadow-xl py-2 z-50 transform origin-top-right transition-all duration-200 dark:bg-zinc-900/90 dark:border-zinc-800 ${
@@ -538,11 +632,13 @@ export default function Header({ variant = 'global' }: { variant?: 'global' | 'd
                   <div className="border-t border-gray-100 my-1 dark:border-zinc-800"></div>
                   <button
                     onClick={handleLogout}
-                    disabled={clickedItem === 'logout'}
+                    disabled={clickedItem === "logout"}
                     className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 mx-2 rounded-lg dark:text-red-400 dark:hover:bg-red-900/20 disabled:opacity-50"
                   >
                     <span>Sign Out</span>
-                    {clickedItem === 'logout' && <CircleNotch className="w-4 h-4 animate-spin" />}
+                    {clickedItem === "logout" && (
+                      <CircleNotch className="w-4 h-4 animate-spin" />
+                    )}
                   </button>
                 </div>
               </div>

@@ -25,7 +25,9 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 import CreateSecureLinkModal from "@/components/dashboard/CreateSecureLinkModal";
+import InvestorUpdatesSection from "@/components/dashboard/InvestorUpdatesSection";
 
 interface Document {
   name: string;
@@ -62,11 +64,18 @@ interface SecureLinkItem {
 
 export default function DocumentsPage() {
   const { token, activeStartupId } = useAuth();
+  const searchParams = useSearchParams();
+  const initialTabParam = searchParams.get("tab");
+  
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [activeTab, setActiveTab] = useState<"documents" | "secure_links">("documents");
+  const [activeTab, setActiveTab] = useState<"documents" | "investor_updates" | "secure_links">(
+    initialTabParam === "updates" || initialTabParam === "investor_updates"
+      ? "investor_updates"
+      : "documents"
+  );
 
   // Secure Links State
   const [secureLinks, setSecureLinks] = useState<SecureLinkItem[]>([]);
@@ -268,10 +277,10 @@ export default function DocumentsPage() {
 
       <div className="p-4 py-8 lg:p-8 max-w-7xl mx-auto w-full">
         {/* Navigation Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-zinc-800 mb-6">
+        <div className="flex border-b border-gray-200 dark:border-zinc-800 mb-6 gap-2">
           <button
             onClick={() => setActiveTab("documents")}
-            className={`py-3 px-6 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+            className={`py-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
               activeTab === "documents"
                 ? "border-black text-black dark:border-white dark:text-white"
                 : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -280,8 +289,18 @@ export default function DocumentsPage() {
             <FileText className="w-4 h-4" /> All Pitch Decks ({documents.length})
           </button>
           <button
+            onClick={() => setActiveTab("investor_updates")}
+            className={`py-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
+              activeTab === "investor_updates"
+                ? "border-black text-black dark:border-white dark:text-white"
+                : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            }`}
+          >
+            <EnvelopeSimple className="w-4 h-4 text-yellow-500" /> Investor Updates
+          </button>
+          <button
             onClick={() => setActiveTab("secure_links")}
-            className={`py-3 px-6 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+            className={`py-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
               activeTab === "secure_links"
                 ? "border-black text-black dark:border-white dark:text-white"
                 : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -386,6 +405,11 @@ export default function DocumentsPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* TAB 2: INVESTOR UPDATES */}
+        {activeTab === "investor_updates" && (
+          <InvestorUpdatesSection />
         )}
 
         {/* TAB 2: SECURE LINKS & AUDIT LOGS */}

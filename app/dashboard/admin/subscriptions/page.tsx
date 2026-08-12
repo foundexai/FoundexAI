@@ -8,7 +8,8 @@ import {
   Funnel, 
   ArrowClockwise,
   UserCircle,
-  Circle
+  Circle,
+  CircleNotch
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,21 @@ interface SubscriptionRecord {
 }
 
 export default function AdminSubscriptionsPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/dashboard/admin");
+  }, [router]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
+      <CircleNotch className="w-8 h-8 text-yellow-500 animate-spin" />
+    </div>
+  );
+}
+
+import { useRouter } from "next/navigation";
+
+function LegacyAdminSubscriptionsPage() {
   const { token } = useAuth();
   const { is_admin, loading: subLoading } = useSubscription();
   const [subscriptions, setSubscriptions] = useState<SubscriptionRecord[]>([]);

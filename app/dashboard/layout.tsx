@@ -48,22 +48,27 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
       { name: "Deal Pipeline", href: "/dashboard/pipeline", icon: ChatCircleDots },
       { name: "Documents", href: "/dashboard/documents", icon: FileText },
       { name: "Cap Table", href: "/dashboard/captable", icon: ChartPie },
-      { name: "Investor Updates", href: "/dashboard/updates", icon: EnvelopeSimple },
       { name: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
+    ],
+  },
+  {
+    title: "Intelligence",
+    items: [
+      { name: "Reports", href: "/dashboard/reports", icon: ChartLineUp },
+      { name: "Smart Capital", href: "/dashboard/grants", icon: ShieldCheck },
     ],
   },
   {
     title: "Discover",
     items: [
       { name: "Investors", href: "/dashboard/investors", icon: Compass },
-      { name: "Smart Grants", href: "/dashboard/grants", icon: ShieldCheck },
       { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
-      { name: "Reports", href: "/dashboard/reports", icon: ChartLineUp },
     ],
   },
   {
     title: "Account",
     items: [
+      { name: "Subscriptions", href: "/dashboard/pricing", icon: CreditCard },
       { name: "Profile", href: "/dashboard/profile", icon: UserCircle },
       { name: "Settings", href: "/dashboard/settings", icon: Gear },
     ],
@@ -80,21 +85,25 @@ const INVESTOR_NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    title: "Discover",
+    title: "Intelligence",
     items: [
-      { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
       { name: "Reports", href: "/dashboard/reports", icon: ChartLineUp },
     ],
   },
   {
-    title: "Network",
+    title: "Discover",
     items: [
-      { name: "Investors", href: "/dashboard/investors", icon: Compass },
+      { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
     ],
+  },
+  {
+    title: "Network",
+    items: [{ name: "Investors", href: "/dashboard/investors", icon: Compass }],
   },
   {
     title: "Account",
     items: [
+      { name: "Subscriptions", href: "/dashboard/pricing", icon: CreditCard },
       { name: "Profile", href: "/dashboard/profile", icon: UserCircle },
       { name: "Settings", href: "/dashboard/settings", icon: Gear },
     ],
@@ -200,7 +209,7 @@ export default function DashboardLayout({
       <div className="flex flex-col h-full">
         <div className="px-6 py-6 flex items-center gap-3 mt-2">
           <Link
-            href="/dashboard"
+            href="/dashboard/investors"
             className="relative w-8 h-8 md:w-10 md:h-10 shrink-0"
           >
             <Image
@@ -398,13 +407,13 @@ export default function DashboardLayout({
         {/* Mobile Sidebar */}
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-50 w-72 bg-white transform transition-transform duration-500 ease-spring lg:hidden dark:bg-[#0B0B0C]",
+            "fixed inset-y-0 left-0 z-50 w-[270px] bg-white transform transition-transform duration-500 ease-spring lg:hidden dark:bg-[#0B0B0C]",
             isSidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           <NavContent />
         </aside>
-
+ 
         {/* Desktop Sidebar */}
         <aside
           /* style={{
@@ -413,7 +422,7 @@ export default function DashboardLayout({
           }} */
           className={cn(
             "hidden lg:flex bg-white dark:bg-[#0B0B0C] border-r border-gray-100 dark:border-zinc-900/60 flex-col h-screen fixed top-0 left-0 z-50 transition-all duration-300",
-            isCollapsed ? "w-20" : "w-72",
+            isCollapsed ? "w-20" : "w-[270px]",
           )}
         >
           {/* Toggle Button */}
@@ -439,11 +448,11 @@ export default function DashboardLayout({
             />
           )} */}
         </aside>
-
+ 
         <main
           className={cn(
             "min-w-0 flex-1 h-screen overflow-y-auto flex flex-col bg-gray-50/50 dark:bg-black transition-all duration-300 relative",
-            isCollapsed ? "lg:ml-20" : "lg:ml-72",
+            isCollapsed ? "lg:ml-20" : "lg:ml-[270px]",
           )}
         >
           <Header variant="dashboard" />

@@ -62,7 +62,7 @@ const NAVIGATION_ITEMS: NavItem[] = [
   },
   {
     id: "grants",
-    title: "Smart Grants",
+    title: "Smart Capital",
     subtitle: "AI Grant Matching & Proposal Editor",
     href: "/dashboard/grants",
     icon: ShieldCheck,
@@ -90,7 +90,10 @@ const NAVIGATION_ITEMS: NavItem[] = [
   },
 ];
 
-export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteModalProps) {
+export default function CommandPaletteModal({
+  isOpen,
+  onClose,
+}: CommandPaletteModalProps) {
   const router = useRouter();
   const { token, activeStartupId } = useAuth();
 
@@ -131,13 +134,20 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
 
       setIsSearching(true);
       try {
-        const activeId = activeStartupId || (typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "");
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`, {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-            "x-startup-id": activeId || "",
+        const activeId =
+          activeStartupId ||
+          (typeof window !== "undefined"
+            ? localStorage.getItem("activeStartupId")
+            : "");
+        const res = await fetch(
+          `/api/search?q=${encodeURIComponent(searchQuery)}`,
+          {
+            headers: {
+              Authorization: token ? `Bearer ${token}` : "",
+              "x-startup-id": activeId || "",
+            },
           },
-        });
+        );
 
         if (res.ok) {
           const data = await res.json();
@@ -153,7 +163,8 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
               href: "/dashboard/startups",
               type: "Startup",
               matchScore: 96,
-              description: "AI-driven fintech SaaS startup matching query criteria.",
+              description:
+                "AI-driven fintech SaaS startup matching query criteria.",
             },
             {
               id: "res-2",
@@ -162,7 +173,8 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
               href: "/dashboard/investors",
               type: "Investor",
               matchScore: 91,
-              description: "Early-stage venture capital firm investing in AI & software.",
+              description:
+                "Early-stage venture capital firm investing in AI & software.",
             },
           ];
           setSearchResults(mockResults);
@@ -173,7 +185,7 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
         setIsSearching(false);
       }
     },
-    [token, activeStartupId]
+    [token, activeStartupId],
   );
 
   useEffect(() => {
@@ -198,7 +210,7 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
   const filteredNavItems = NAVIGATION_ITEMS.filter(
     (item) =>
       item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.subtitle.toLowerCase().includes(query.toLowerCase())
+      item.subtitle.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
@@ -210,16 +222,21 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
       <div className="relative w-full max-w-2xl bg-[#0D0E12] border border-zinc-800/90 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[80vh]">
         {/* Top Search Input Bar */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800/80 bg-zinc-900/50 shrink-0">
-          <MagnifyingGlass className="w-5 h-5 text-zinc-400 shrink-0" weight="bold" />
+          <MagnifyingGlass
+            className="w-5 h-5 text-zinc-400 shrink-0"
+            weight="bold"
+          />
           <input
             type="text"
             autoFocus
-            placeholder="Search contracts, pages, docs, startups, investors..."
+            placeholder="Search All pages, docs, investors..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm font-medium text-white placeholder-zinc-500 focus:outline-none"
           />
-          {isSearching && <CircleNotch className="w-4 h-4 text-[#E5C158] animate-spin shrink-0" />}
+          {isSearching && (
+            <CircleNotch className="w-4 h-4 text-[#E5C158] animate-spin shrink-0" />
+          )}
           <kbd className="px-2 py-0.5 text-[10px] font-mono font-bold text-zinc-400 bg-zinc-800/90 border border-zinc-700/80 rounded-md shrink-0">
             ESC
           </kbd>
@@ -244,7 +261,9 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
                       onClick={() => handleSelectNav(item.href)}
                       onMouseEnter={() => setSelectedIndex(idx)}
                       className={`w-full px-3 py-2.5 rounded-xl flex items-center justify-between text-left transition-all group cursor-pointer ${
-                        isHovered ? "bg-zinc-800/90 text-white" : "text-zinc-300 hover:bg-zinc-800/50"
+                        isHovered
+                          ? "bg-zinc-800/90 text-white"
+                          : "text-zinc-300 hover:bg-zinc-800/50"
                       }`}
                     >
                       <div className="flex items-center gap-3.5">
@@ -255,7 +274,9 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
                           <p className="text-xs font-bold text-white group-hover:text-[#E5C158] transition-colors">
                             {item.title}
                           </p>
-                          <p className="text-[11px] text-zinc-400">{item.subtitle}</p>
+                          <p className="text-[11px] text-zinc-400">
+                            {item.subtitle}
+                          </p>
                         </div>
                       </div>
 
@@ -300,7 +321,9 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
                             <p className="text-xs font-bold text-white group-hover:text-[#E5C158]">
                               {item.title}
                             </p>
-                            <p className="text-[11px] text-zinc-400">{item.subtitle}</p>
+                            <p className="text-[11px] text-zinc-400">
+                              {item.subtitle}
+                            </p>
                           </div>
                         </div>
                         <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-white" />
@@ -345,11 +368,15 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
                 </div>
               )}
 
-              {searchResults.length === 0 && filteredNavItems.length === 0 && !isSearching && (
-                <div className="py-12 text-center text-zinc-500 text-xs font-medium">
-                  No semantic vector matches found for "{query}". Try searching for startup names, investor stage, or document types.
-                </div>
-              )}
+              {searchResults.length === 0 &&
+                filteredNavItems.length === 0 &&
+                !isSearching && (
+                  <div className="py-12 text-center text-zinc-500 text-xs font-medium">
+                    No semantic vector matches found for "{query}". Try
+                    searching for startup names, investor stage, or document
+                    types.
+                  </div>
+                )}
             </div>
           )}
         </div>
@@ -358,15 +385,24 @@ export default function CommandPaletteModal({ isOpen, onClose }: CommandPaletteM
         <div className="px-4 py-2 bg-zinc-900/90 border-t border-zinc-800/80 text-[10px] text-zinc-400 flex items-center justify-between font-mono shrink-0">
           <div className="flex items-center gap-3">
             <span>
-              <kbd className="bg-zinc-800 text-zinc-300 px-1 py-0.5 rounded">↑</kbd>{" "}
-              <kbd className="bg-zinc-800 text-zinc-300 px-1 py-0.5 rounded">↓</kbd> Navigate
+              <kbd className="bg-zinc-800 text-zinc-300 px-1 py-0.5 rounded">
+                ↑
+              </kbd>{" "}
+              <kbd className="bg-zinc-800 text-zinc-300 px-1 py-0.5 rounded">
+                ↓
+              </kbd>{" "}
+              Navigate
             </span>
             <span>
-              <kbd className="bg-zinc-800 text-zinc-300 px-1 py-0.5 rounded">↵</kbd> Select
+              <kbd className="bg-zinc-800 text-zinc-300 px-1 py-0.5 rounded">
+                ↵
+              </kbd>{" "}
+              Select
             </span>
           </div>
           <span className="flex items-center gap-1 text-zinc-400">
-            <Sparkle className="w-3 h-3 text-[#E5C158]" /> Foundex Semantic Vector Index
+            <Sparkle className="w-3 h-3 text-[#E5C158]" /> Foundex Semantic
+            Vector Index
           </span>
         </div>
       </div>

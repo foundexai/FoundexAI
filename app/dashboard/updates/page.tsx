@@ -51,6 +51,21 @@ interface Document {
 }
 
 export default function InvestorUpdatesPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/dashboard/documents?tab=investor_updates");
+  }, [router]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
+      <CircleNotch className="w-8 h-8 text-yellow-500 animate-spin" />
+    </div>
+  );
+}
+
+import { useRouter } from "next/navigation";
+
+function LegacyInvestorUpdatesPage() {
   const { token, activeStartupId, setActiveStartupId, startups: authStartups } = useAuth();
   const [updates, setUpdates] = useState<InvestorUpdateType[]>([]);
   const [userStartups, setUserStartups] = useState<any[]>([]);
