@@ -96,7 +96,30 @@ class EventBus extends EventEmitter {
       }
     });
 
-    // 3. Vector Indexing Triggers for pgvector/Pinecone Search Infrastructure
+    // 3. Signature Request Completed Trigger
+    this.on("signature:completed", async (data) => {
+      try {
+        const { signatureRequest } = data;
+        if (!signatureRequest) return;
+
+        console.log(`[EventBus] Signature Request completed for: ${signatureRequest.doc_name}`);
+        
+        const { notifyUser } = await import("./notifications");
+        
+        // Notify the founder who initiated it
+        await notifyUser(
+          signatureRequest.founder_id.toString(),
+          "Document Signed & Completed",
+          `All signers have signed "${signatureRequest.doc_name}". The audit certificate has been appended.`,
+          "system",
+          `/dashboard/documents?tab=signatures`
+        );
+      } catch (err) {
+        console.error("[EventBus] Failed to process signature completed notifications:", err);
+      }
+    });
+
+    // 4. Vector Indexing Triggers for pgvector/Pinecone Search Infrastructure
     this.on("startup:changed", async (data) => {
       try {
         const { startup } = data;
