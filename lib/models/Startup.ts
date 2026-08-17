@@ -65,6 +65,24 @@ const StartupSchema = new mongoose.Schema({
       type: { type: String, required: true },
       url: { type: String, required: true },
       date: { type: Date, default: Date.now },
+      versions: [
+        {
+          version_number: { type: Number, required: true },
+          url: { type: String, required: true },
+          change_summary: { type: String },
+          uploaded_by: { type: String },
+          created_at: { type: Date, default: Date.now }
+        }
+      ],
+      redlines: [
+        {
+          author: { type: String, required: true },
+          section: { type: String },
+          comment: { type: String, required: true },
+          version_number: { type: Number, default: 1 },
+          created_at: { type: Date, default: Date.now }
+        }
+      ]
     },
   ],
 

@@ -33,6 +33,7 @@ export default function SecureSharePage({ params }: PageProps) {
   const [passcode, setPasscode] = useState("");
   const [email, setEmail] = useState("");
   const [otpCode, setOtpCode] = useState("");
+  const [activePageIndex, setActivePageIndex] = useState<number>(0);
   const [otpSent, setOtpSent] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -149,6 +150,56 @@ export default function SecureSharePage({ params }: PageProps) {
       setVerifying(false);
     }
   };
+
+  // 3.5. Page visibility tracking with IntersectionObserver & 5s Heartbeat loops
+  useEffect(() => {
+    if (!isVerified || pdfPages.length === 0) return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.5,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = parseInt(entry.target.getAttribute("data-page-index") || "0", 10);
+          setActivePageIndex(index);
+        }
+      });
+    }, observerOptions);
+
+    const elements = document.querySelectorAll("[data-page-index]");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements.forEach((el) => observer.unobserve(el));
+    };
+  }, [isVerified, pdfPages]);
+
+  useEffect(() => {
+    if (!isVerified || pdfPages.length === 0) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const viewerEmail = email || "Public Viewer";
+        await fetch(`/api/documents/share/${shareToken}/heatmap`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: viewerEmail,
+            pageIndex: activePageIndex,
+            durationSeconds: 5,
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to send heatmap heartbeat:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isVerified, pdfPages, activePageIndex, email, shareToken]);
 
   // 4. Dynamic PDF.js rendering to canvas to support overlay watermarks
   useEffect(() => {
@@ -467,13 +518,18 @@ export default function SecureSharePage({ params }: PageProps) {
               ) : pdfPages.length > 0 ? (
                 <div className="flex flex-col gap-6 items-center w-full max-w-3xl py-6 select-none pointer-events-none">
                   {pdfPages.map((pageUrl, idx) => (
-                    <img
+                    <div
                       key={idx}
-                      src={pageUrl}
-                      alt={`Page ${idx + 1}`}
-                      className="w-full shadow-2xl border border-zinc-800 rounded-xl"
-                      onContextMenu={(e) => e.preventDefault()}
-                    />
+                      data-page-index={idx}
+                      className="w-full relative"
+                    >
+                      <img
+                        src={pageUrl}
+                        alt={`Page ${idx + 1}`}
+                        className="w-full shadow-2xl border border-zinc-800 rounded-xl"
+                        onContextMenu={(e) => e.preventDefault()}
+                      />
+                    </div>
                   ))}
                 </div>
               ) : docContent?.docUrl?.endsWith(".txt") || docContent?.docUrl?.endsWith(".md") ? (
