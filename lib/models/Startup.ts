@@ -53,6 +53,9 @@ const StartupSchema = new mongoose.Schema({
 
   funding_amount: { type: Number },
   monthly_burn: { type: Number },
+  mrr: { type: Number, default: 0 },
+  arr: { type: Number, default: 0 },
+  cash_on_hand: { type: Number, default: 0 },
   cac: { type: Number },
   ltv: { type: Number },
 
