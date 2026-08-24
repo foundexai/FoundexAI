@@ -328,47 +328,51 @@ function DocumentsPageContent() {
       </div>
 
       <div className="p-4 py-8 lg:p-8 max-w-7xl mx-auto w-full">
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-zinc-800 mb-6 gap-2">
+        {/* Apple Segmented Navigation Bar */}
+        <div className="p-1.5 bg-zinc-200/60 dark:bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-black/[0.04] dark:border-white/[0.04] mb-8 flex flex-wrap gap-1">
           <button
             onClick={() => setActiveTab("documents")}
-            className={`py-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
               activeTab === "documents"
-                ? "border-black text-black dark:border-white dark:text-white"
-                : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
+                : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
-            <FileText className="w-4 h-4" /> All Pitch Decks ({documents.length})
+            <FileText className="w-4 h-4" />
+            <span>Documents ({documents.length})</span>
           </button>
           <button
             onClick={() => setActiveTab("investor_updates")}
-            className={`py-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
               activeTab === "investor_updates"
-                ? "border-black text-black dark:border-white dark:text-white"
-                : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
+                : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
-            <EnvelopeSimple className="w-4 h-4 text-yellow-500" /> Investor Updates
+            <EnvelopeSimple className="w-4 h-4 text-yellow-500" />
+            <span>Investor Updates</span>
           </button>
           <button
             onClick={() => setActiveTab("secure_links")}
-            className={`py-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
               activeTab === "secure_links"
-                ? "border-black text-black dark:border-white dark:text-white"
-                : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
+                : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
-            <ShieldCheck className="w-4 h-4 text-yellow-500" /> Secure Links & Viewer Audit Logs ({secureLinks.length})
+            <ShieldCheck className="w-4 h-4 text-yellow-500" />
+            <span>Secure Links ({secureLinks.length})</span>
           </button>
           <button
             onClick={() => setActiveTab("signatures")}
-            className={`py-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
               activeTab === "signatures"
-                ? "border-black text-black dark:border-white dark:text-white"
-                : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
+                : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
-            <Signature className="w-4 h-4 text-yellow-500" /> E-Sign Requests ({sentSignRequests.length + receivedSignRequests.length})
+            <Signature className="w-4 h-4 text-yellow-500" />
+            <span>E-Signatures ({sentSignRequests.length + receivedSignRequests.length})</span>
           </button>
         </div>
 

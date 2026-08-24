@@ -309,41 +309,41 @@ export default function SecureSharePage({ params }: PageProps) {
   }
 
   return (
-    <div className="h-screen bg-zinc-950 text-white flex flex-col selection:bg-none select-none overflow-hidden">
-      {/* Top Header */}
-      <header className="bg-zinc-900 border-b border-zinc-800 px-6 py-3.5 flex items-center justify-between z-20 sticky top-0 shrink-0">
+    <div className="h-screen bg-zinc-950 text-white flex flex-col selection:bg-none select-none overflow-hidden font-sans">
+      {/* Top Header with Translucent Material */}
+      <header className="backdrop-blur-xl bg-zinc-900/80 border-b border-white/[0.08] px-6 py-3.5 flex items-center justify-between z-20 sticky top-0 shrink-0 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-yellow-500 text-black flex items-center justify-center font-black text-sm shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-yellow-500 text-black flex items-center justify-center font-bold text-sm shrink-0 shadow-sm shadow-yellow-500/20">
             <ShieldCheck className="w-5 h-5" weight="bold" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-white flex items-center gap-2">
+            <h1 className="text-sm font-semibold text-white flex items-center gap-2">
               {linkInfo?.docName || "Protected Document"}
             </h1>
             <span className="text-[10px] text-zinc-400 flex items-center gap-1 font-mono">
-              <LockKey className="w-3 h-3 text-yellow-500" /> End-to-End Dynamic Watermarking Active
+              <LockKey className="w-3 h-3 text-yellow-500" weight="bold" /> Protected Deal Room Asset
             </span>
           </div>
         </div>
 
         {isVerified && docContent && (
           <div className="flex items-center gap-3">
-            {/* Zoom Controls */}
-            <div className="flex items-center bg-zinc-800 border border-zinc-700 rounded-xl px-2 py-1">
+            {/* Floating Zoom Controls Pill */}
+            <div className="flex items-center bg-zinc-800/80 border border-white/10 rounded-xl px-2 py-1 backdrop-blur-md">
               <button
                 onClick={() => setZoomLevel((z) => Math.max(70, z - 10))}
-                className="p-1 hover:bg-zinc-700 rounded text-zinc-300 transition-colors"
+                className="p-1 hover:bg-white/10 rounded-lg text-zinc-300 transition-all active:scale-95 cursor-pointer"
                 title="Zoom Out"
               >
-                <MagnifyingGlassMinus className="w-4 h-4" />
+                <MagnifyingGlassMinus className="w-3.5 h-3.5" />
               </button>
-              <span className="text-xs font-mono font-bold px-2 text-zinc-300">{zoomLevel}%</span>
+              <span className="text-xs font-mono font-semibold px-2 text-zinc-200">{zoomLevel}%</span>
               <button
                 onClick={() => setZoomLevel((z) => Math.min(150, z + 10))}
-                className="p-1 hover:bg-zinc-700 rounded text-zinc-300 transition-colors"
+                className="p-1 hover:bg-white/10 rounded-lg text-zinc-300 transition-all active:scale-95 cursor-pointer"
                 title="Zoom In"
               >
-                <MagnifyingGlassPlus className="w-4 h-4" />
+                <MagnifyingGlassPlus className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -353,10 +353,10 @@ export default function SecureSharePage({ params }: PageProps) {
                 href={docContent.docUrl}
                 download
                 target="_blank"
-                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm shadow-yellow-500/20"
               >
-                <DownloadSimple className="w-4 h-4" weight="bold" />
-                Download Original
+                <DownloadSimple className="w-3.5 h-3.5" weight="bold" />
+                <span>Download</span>
               </a>
             )}
           </div>
@@ -368,18 +368,18 @@ export default function SecureSharePage({ params }: PageProps) {
         {!isVerified ? (
           /* ================= ACCESS GATE SCREEN ================= */
           <div className="grow flex items-center justify-center p-6 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
-            <div className="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6 backdrop-blur-md">
+            <div className="bg-zinc-900/80 border border-white/10 rounded-[2rem] p-8 max-w-md w-full shadow-2xl space-y-6 backdrop-blur-2xl">
               <div className="text-center space-y-2">
-                <div className="w-14 h-14 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
                   {linkInfo?.accessType === "passcode" ? (
                     <LockKey className="w-7 h-7" weight="bold" />
                   ) : (
                     <EnvelopeSimple className="w-7 h-7" weight="bold" />
                   )}
                 </div>
-                <h2 className="text-xl font-black tracking-tight text-white">Security Access Gate</h2>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  This document is protected. Verification is required before viewing.
+                <h2 className="text-xl font-bold tracking-tight text-white">Security Verification Gate</h2>
+                <p className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
+                  This document is encrypted under role-based confidentiality. Verify your identity to unlock access.
                 </p>
               </div>
 
@@ -387,25 +387,25 @@ export default function SecureSharePage({ params }: PageProps) {
               {linkInfo?.accessType === "passcode" && (
                 <form onSubmit={handleVerifyAccess} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                      Enter Security Passcode
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+                      Security Passcode
                     </label>
                     <input
                       type="password"
-                      placeholder="Enter PIN / Passcode"
+                      placeholder="Enter Passcode"
                       value={passcode}
                       onChange={(e) => setPasscode(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-sm font-mono focus:ring-2 focus:ring-yellow-500 focus:outline-none text-white text-center tracking-widest"
+                      className="w-full px-4 py-3 bg-zinc-800/80 border border-white/10 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500/50 focus:outline-none text-white text-center tracking-widest"
                       required
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={verifying || !passcode}
-                    className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
                   >
-                    {verifying ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-                    Verify & Unlock Document
+                    {verifying ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" weight="bold" />}
+                    <span>Unlock & View Document</span>
                   </button>
                 </form>
               )}
@@ -416,44 +416,44 @@ export default function SecureSharePage({ params }: PageProps) {
                   {!otpSent ? (
                     <form onSubmit={handleSendOtp} className="space-y-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                          Work Email Address
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+                          Authorized Email Address
                         </label>
                         <input
                           type="email"
                           placeholder="e.g. partner@sequoiacap.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-sm focus:ring-2 focus:ring-yellow-500 focus:outline-none text-white"
+                          className="w-full px-4 py-3 bg-zinc-800/80 border border-white/10 rounded-2xl text-sm focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500/50 focus:outline-none text-white"
                           required
                         />
                       </div>
                       <button
                         type="submit"
                         disabled={sendingOtp || !email}
-                        className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
                       >
-                        {sendingOtp ? <CircleNotch className="w-4 h-4 animate-spin" /> : <EnvelopeSimple className="w-4 h-4" />}
-                        Send 6-Digit Verification Code
+                        {sendingOtp ? <CircleNotch className="w-4 h-4 animate-spin" /> : <EnvelopeSimple className="w-4 h-4" weight="bold" />}
+                        <span>Send 6-Digit Passcode</span>
                       </button>
                     </form>
                   ) : (
                     <form onSubmit={handleVerifyAccess} className="space-y-4">
-                      <div className="bg-zinc-800/60 p-3 rounded-xl border border-zinc-700/60 text-center">
+                      <div className="bg-zinc-800/60 p-3 rounded-2xl border border-white/10 text-center">
                         <p className="text-xs text-zinc-300">
-                          Code sent to <span className="font-bold text-yellow-400">{email}</span>
+                          Verification code sent to <span className="font-semibold text-yellow-400">{email}</span>
                         </p>
                         <button
                           type="button"
                           onClick={() => setOtpSent(false)}
-                          className="text-[10px] text-zinc-500 hover:underline mt-1 cursor-pointer"
+                          className="text-[10px] text-zinc-500 hover:text-zinc-300 underline mt-1 cursor-pointer transition-colors"
                         >
-                          Change Email Address
+                          Use a different email
                         </button>
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5 text-center">
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5 text-center">
                           Enter 6-Digit Code
                         </label>
                         <input
@@ -462,17 +462,17 @@ export default function SecureSharePage({ params }: PageProps) {
                           placeholder="123456"
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value)}
-                          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-lg font-mono font-bold focus:ring-2 focus:ring-yellow-500 focus:outline-none text-white text-center tracking-[0.5em]"
+                          className="w-full px-4 py-3 bg-zinc-800/80 border border-white/10 rounded-2xl text-lg font-mono font-bold focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500/50 focus:outline-none text-white text-center tracking-[0.4em]"
                           required
                         />
                       </div>
                       <button
                         type="submit"
                         disabled={verifying || otpCode.length < 6}
-                        className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
                       >
-                        {verifying ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-                        Verify & Access Document
+                        {verifying ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" weight="bold" />}
+                        <span>Verify & Unlock</span>
                       </button>
                     </form>
                   )}
@@ -482,9 +482,9 @@ export default function SecureSharePage({ params }: PageProps) {
           </div>
         ) : (
           /* ================= PROTECTED DOCUMENT VIEWER + WATERMARK ================= */
-          <div className="grow flex flex-col relative overflow-hidden bg-zinc-900 items-center justify-center">
+          <div className="grow flex flex-col relative overflow-hidden bg-zinc-950 items-center justify-center">
             
-            {/* 45-Degree Dynamic Tiled Watermark Overlay — fixed so it layers above the scrollable PDF canvas */}
+            {/* 45-Degree Dynamic Tiled Watermark Overlay */}
             {docContent?.watermarkEnabled && (
               <div
                 className="fixed inset-0 pointer-events-none z-50 overflow-hidden flex flex-wrap content-start justify-around gap-x-24 gap-y-20 p-10 select-none"
@@ -507,13 +507,13 @@ export default function SecureSharePage({ params }: PageProps) {
 
             {/* Document Content Frame */}
             <div
-              className="w-full h-full grow flex flex-col items-center overflow-y-auto transition-all p-4"
+              className="w-full h-full grow flex flex-col items-center overflow-y-auto transition-all p-4 thin-scrollbar"
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "top center" }}
             >
               {pdfLoading ? (
-                <div className="flex flex-col items-center justify-center text-zinc-400 p-12 my-auto">
-                  <CircleNotch className="w-8 h-8 animate-spin text-yellow-500 mb-3" />
-                  <p className="text-xs font-bold">Rendering high-resolution document pages...</p>
+                <div className="flex flex-col items-center justify-center text-zinc-400 p-12 my-auto gap-3">
+                  <CircleNotch className="w-8 h-8 animate-spin text-yellow-500" />
+                  <p className="text-xs font-semibold text-zinc-300">Rendering secure vector document pages...</p>
                 </div>
               ) : pdfPages.length > 0 ? (
                 <div className="flex flex-col gap-6 items-center w-full max-w-3xl py-6 select-none pointer-events-none">
@@ -521,25 +521,25 @@ export default function SecureSharePage({ params }: PageProps) {
                     <div
                       key={idx}
                       data-page-index={idx}
-                      className="w-full relative"
+                      className="w-full relative shadow-2xl rounded-2xl overflow-hidden border border-white/10"
                     >
                       <img
                         src={pageUrl}
                         alt={`Page ${idx + 1}`}
-                        className="w-full shadow-2xl border border-zinc-800 rounded-xl"
+                        className="w-full"
                         onContextMenu={(e) => e.preventDefault()}
                       />
                     </div>
                   ))}
                 </div>
               ) : docContent?.docUrl?.endsWith(".txt") || docContent?.docUrl?.endsWith(".md") ? (
-                <div className="bg-zinc-950 p-8 md:p-12 rounded-2xl border border-zinc-800 max-w-4xl w-full min-h-[600px] shadow-2xl text-zinc-200 font-sans text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                <div className="bg-zinc-900/90 backdrop-blur-xl p-8 md:p-12 rounded-3xl border border-white/10 max-w-4xl w-full min-h-[600px] shadow-2xl text-zinc-200 font-sans text-sm md:text-base leading-relaxed whitespace-pre-wrap">
                   {docContent.docUrl}
                 </div>
               ) : (
                 <iframe
                   src={docContent?.docUrl}
-                  className="w-full h-full border-none rounded-xl bg-zinc-950"
+                  className="w-full h-full border-none rounded-2xl bg-zinc-950"
                   title="Protected Document Viewer"
                 />
               )}
