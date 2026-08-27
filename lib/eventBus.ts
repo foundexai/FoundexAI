@@ -138,8 +138,38 @@ class EventBus extends EventEmitter {
         
         const embedding = getEmbedding(featureText);
         console.log(`[EventBus] Asynchronously indexed startup "${startup.company_name}" into search vector catalog (Size: ${embedding.length}).`);
+
+        // Day 3: Trigger runway and burn anomaly checks asynchronously
+        const { checkStartupAnomaly } = await import("./anomalyService");
+        await checkStartupAnomaly(startup._id.toString());
       } catch (err) {
         console.error("[EventBus] Failed to index startup search vector:", err);
+      }
+    });
+
+    // 5. Cash Runway & Burn Rate Anomaly Detected Warning Trigger
+    this.on("anomaly:surged", async (data) => {
+      try {
+        const { startupId, startupName, userId, burnLatest, burnPrev, runwayLatest, percentageIncrease, lowRunwayOnly } = data;
+        if (!userId) return;
+
+        console.log(`[EventBus] Burn rate anomaly surge event received for ${startupName}`);
+        
+        let message = `Alert: Implied monthly burn rate surged by ${percentageIncrease}% MoM (from $${Math.round(burnPrev).toLocaleString()} to $${Math.round(burnLatest).toLocaleString()}). Remaining runway is ${runwayLatest} months.`;
+        if (lowRunwayOnly) {
+          message = `Warning: Cash runway has dropped below 6 months critical threshold. Remaining runway is estimated at ${runwayLatest} months.`;
+        }
+
+        const { notifyUser } = await import("./notifications");
+        await notifyUser(
+          userId.toString(),
+          "⚠️ Cash Runway Anomaly Detected",
+          message,
+          "system",
+          "/dashboard"
+        );
+      } catch (err) {
+        console.error("[EventBus] Failed to process anomaly:surged notifications:", err);
       }
     });
 

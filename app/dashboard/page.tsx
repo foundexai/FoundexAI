@@ -32,6 +32,7 @@ import {
   Trash,
   Eye,
   ChatCircleDots,
+  WarningCircle,
 } from "@phosphor-icons/react";
 import { useSubscription } from "@/context/SubscriptionContext";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,48 @@ export default function Dashboard() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [anomalies, setAnomalies] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadNotifications() {
+      if (!token) return;
+      try {
+        const res = await fetch("/api/notifications", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Filter for active unread anomaly notifications
+          const list = (data.notifications || []).filter(
+            (n: any) => !n.is_read && n.title.includes("Anomaly Detected")
+          );
+          setAnomalies(list);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications for anomalies", err);
+      }
+    }
+    loadNotifications();
+  }, [token, activeStartupId]);
+
+  const dismissAnomaly = async (id: string) => {
+    try {
+      const res = await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) {
+        setAnomalies(prev => prev.filter(a => a._id !== id));
+        toast.success("Warning dismissed.");
+      }
+    } catch (err) {
+      toast.error("Failed to dismiss alert.");
+    }
+  };
 
   const handleOnboardingComplete = useCallback(
     async (name: string, idea: string) => {
@@ -125,6 +168,29 @@ export default function Dashboard() {
         </div>
       ) : currentStartup ? (
         <div className="space-y-8 animate-in fade-in duration-700">
+          {anomalies.map((anomaly) => (
+            <div
+              key={anomaly._id}
+              className="bg-red-500/10 border border-red-500/20 text-red-705 dark:text-red-400 p-5 rounded-3xl flex items-center justify-between gap-4 shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-500/20 flex items-center justify-center shrink-0">
+                  <WarningCircle className="w-5 h-5 text-red-650 dark:text-red-400" weight="bold" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold">{anomaly.title}</h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">{anomaly.message}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => dismissAnomaly(anomaly._id)}
+                className="px-3.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+              >
+                Dismiss Warning
+              </button>
+            </div>
+          ))}
+
           <div className="glass-card rounded-3xl p-8 md:p-10 border border-white/50 relative z-30 dark:bg-zinc-900/60 dark:border-zinc-800">
             {/* Background Blurs - in a contained absolute container */}
             <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">

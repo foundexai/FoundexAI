@@ -102,6 +102,11 @@ export async function POST(req: Request) {
     });
 
     await newUpdate.save();
+
+    // Trigger runway anomaly check
+    const { checkStartupAnomaly } = await import("@/lib/anomalyService");
+    await checkStartupAnomaly(startup._id.toString());
+
     return NextResponse.json({ success: true, update: newUpdate });
   } catch (err) {
     console.error("POST /api/updates error:", err);
