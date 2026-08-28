@@ -1,6 +1,8 @@
-import { MapPin, TrendUp, Check, PencilSimple } from "@phosphor-icons/react";
+import { MapPin, TrendUp, Check, PencilSimple, ArrowRight, CircleNotch, Heart, Star } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "./BrandLogo";
 
 export interface Startup {
   id: string;
@@ -14,31 +16,49 @@ export interface Startup {
   website?: string;
   traction?: string;
   logo_url?: string;
+  isFeatured?: boolean;
 }
 
 interface StartupCardProps {
   startup: Startup;
   isSaved?: boolean;
   onToggleSave?: (id: string) => void;
+  isSaving?: boolean;
   onSelect?: (id: string) => void;
   isSelected?: boolean;
   onEdit?: (startup: Startup) => void;
+  variant?: "default" | "mini";
 }
 
 export function StartupCard({
   startup,
-  isSaved,
+  isSaved = false,
   onToggleSave,
+  isSaving = false,
   onSelect,
   isSelected = false,
   onEdit,
+  variant = "default",
 }: StartupCardProps) {
+  const router = useRouter();
+
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onToggleSave) {
+      onToggleSave(startup.id);
+    }
+  };
+
   const cardContent = (
-    <div className={cn(
-      "glass-card h-full p-6 rounded-3xl border border-white/50 hover:border-yellow-400/50 transition-all duration-300 relative overflow-hidden dark:bg-zinc-900/60 dark:border-zinc-800 dark:hover:border-yellow-500/30",
-      isSelected && "ring-2 ring-yellow-500 border-transparent",
-      !onEdit && "hover:shadow-xl hover:-translate-y-1 cursor-pointer"
-    )}>
+    <div 
+      className={cn(
+        "glass-card group flex flex-col rounded-3xl border border-white/60 bg-white/40 hover:bg-white/60 transition-all duration-300 relative overflow-hidden h-full dark:bg-zinc-900/60 dark:border-white/10 dark:hover:bg-white/10",
+        variant === "mini" ? "p-4" : "p-6",
+        isSelected && "ring-2 ring-yellow-500 border-transparent",
+        !onEdit && "hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+      )}
+    >
       {/* Checkbox for Select */}
       {onSelect && (
         <button
@@ -58,88 +78,153 @@ export function StartupCard({
         </button>
       )}
 
-      {onEdit && (
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onEdit(startup);
-          }}
-          className="absolute top-4 right-4 z-20 p-2 rounded-xl bg-white/50 border border-white/50 hover:bg-white transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 cursor-pointer text-gray-400 hover:text-gray-900"
+      {/* Decorative gradient blur */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500 dark:from-white/5 pointer-events-none"></div>
+
+      {/* Header: Logo & Badges */}
+      <div className={cn("flex justify-between items-start z-10", variant === "mini" ? "mb-3" : "mb-4")}>
+        <div
+          className={cn(
+            "rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden bg-yellow-455 border border-gray-100 dark:border-white/5",
+            variant === "mini" ? "w-10 h-10" : "w-14 h-14"
+          )}
         >
-          <PencilSimple weight="bold" className="w-4 h-4" />
-        </button>
-      )}
-
-      <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-gray-100 to-gray-200 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500 dark:from-zinc-800 dark:to-zinc-900 dark:opacity-20 pointer-events-none"></div>
-
-      <div className="relative z-10 pt-4">
-          <div className="flex justify-between items-start mb-6">
-            <div
-              className={cn(
-                "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative",
-                !startup.logo_url && "bg-yellow-400"
-              )}
+          <BrandLogo 
+            name={startup.name}
+            website={startup.website}
+            logo_url={startup.logo_url}
+            initial={startup.logoInitial}
+          />
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          {onToggleSave && (
+            <button
+              onClick={handleSaveClick}
+              disabled={isSaving}
+              className="p-2 rounded-full bg-white/50 border border-white/50 hover:bg-white transition-all shadow-sm hover:shadow-md dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20 disabled:opacity-50 cursor-pointer"
             >
-              {startup.logo_url ? (
-                <img
-                  src={startup.logo_url}
-                  alt={startup.name}
-                  className="w-full h-full object-cover"
-                />
+              {isSaving ? (
+                <CircleNotch className="w-5 h-5 animate-spin text-yellow-500" weight="bold" />
               ) : (
-                <span className="font-black text-2xl text-black">
-                  {startup.logoInitial || startup.name.charAt(0)}
-                </span>
+                <Heart
+                  weight={isSaved ? "fill" : "bold"}
+                  className={cn(
+                    "w-5 h-5 transition-colors",
+                    isSaved
+                      ? "text-red-500"
+                      : "text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400",
+                  )}
+                />
               )}
-            </div>
-            <div className="flex gap-2">
-              {/* Save button could go here if we implement saving for startups later */}
-            </div>
+            </button>
+          )}
+          <div className="px-3 py-1 rounded-full bg-white/50 border border-white/50 text-[10px] font-bold uppercase tracking-wider text-gray-600 shadow-sm backdrop-blur-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
+            {startup.stage}
           </div>
-
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-yellow-600 transition-colors dark:text-white dark:group-hover:text-yellow-500">
-              {startup.name}
-            </h3>
-            <div className="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">
-              <span className="bg-gray-100 px-2 py-1 rounded-md dark:bg-white/10 dark:text-gray-300">
-                {startup.sector}
-              </span>
-              <span className="mx-2">•</span>
-              <span className="text-yellow-600 dark:text-yellow-500">
-                {startup.stage}
-              </span>
+          {startup.isFeatured && (
+            <div className="px-3 py-1 rounded-full bg-yellow-400 text-black text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
+              <Star weight="fill" className="w-3 h-3" />
+              Featured
             </div>
-            <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed mb-4 dark:text-gray-400">
-              {startup.description}
-            </p>
-          </div>
-
-          <div className="pt-4 flex flex-col gap-2 dark:border-zinc-800">
-            <div className="flex items-center text-gray-500 text-sm font-medium dark:text-gray-400">
-              <MapPin className="w-4 h-4 mr-2 text-gray-400" weight="bold" />
-              {startup.location}
-            </div>
-            {startup.traction && (
-              <div className="flex items-center text-gray-500 text-sm font-medium dark:text-gray-400">
-                <TrendUp className="w-4 h-4 mr-2 text-green-500" weight="bold" />
-                {startup.traction}
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
+
+      {/* Content: Name & Desc */}
+      <div className={cn("z-10 grow", variant === "mini" ? "mb-3" : "mb-4")}>
+        <h3 className={cn(
+          "font-bold text-gray-900 leading-tight mb-1 group-hover:text-black transition-colors dark:text-white dark:group-hover:text-white",
+          variant === "mini" ? "text-base" : "text-xl"
+        )}>
+          {startup.name}
+        </h3>
+        <div className="flex items-center text-xs text-gray-500 mb-3 font-medium dark:text-gray-400">
+          <MapPin className="w-3.5 h-3.5 mr-1" weight="bold" />
+          {startup.location}
+        </div>
+        <p className={cn(
+          "text-sm text-gray-600 leading-relaxed dark:text-gray-300",
+          variant === "mini" ? "line-clamp-2" : "line-clamp-3"
+        )}>
+          {startup.description}
+        </p>
+      </div>
+
+      {/* Tags / Sector & Traction */}
+      <div className={cn("flex flex-wrap gap-2 z-10", variant === "mini" ? "mb-4" : "mb-6")}>
+        <span
+          className="px-2.5 py-1 rounded-lg bg-gray-100/50 text-[10px] sm:text-xs font-semibold text-gray-600 border border-gray-100/50 group-hover:bg-white/80 transition-colors dark:bg-white/5 dark:text-gray-300 dark:border-white/10 dark:group-hover:bg-white/10"
+        >
+          {startup.sector}
+        </span>
+        {startup.traction && (
+          <span
+            className="px-2.5 py-1 rounded-lg bg-green-50/50 text-[10px] sm:text-xs font-semibold text-green-700 border border-green-100/30 dark:bg-green-500/10 dark:text-green-400 dark:border-green-550/20 flex items-center gap-1"
+          >
+            <TrendUp className="w-3.5 h-3.5" weight="bold" />
+            {startup.traction}
+          </span>
+        )}
+      </div>
+
+      {/* Footer: Action */}
+      <div className={cn("mt-auto flex justify-between items-center z-10", variant !== "mini" && "pt-4 border-t border-gray-100/50 dark:border-white/10")}>
+        <div className="text-xs font-medium text-gray-500">
+          {/* Space reserved for extra footer metadata */}
+        </div>
+
+        <div className="flex gap-2">
+          {onEdit ? (
+            <>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(startup);
+                }}
+                type="button"
+                className={cn(
+                  "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-900 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white dark:hover:text-black cursor-pointer",
+                  variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+                )}
+                title="Edit Profile"
+              >
+                <PencilSimple className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
+              </button>
+
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/startups/${startup.id}`);
+                }}
+                type="button"
+                className={cn(
+                  "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-yellow-500 hover:text-white hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:hover:bg-yellow-500 dark:hover:text-black cursor-pointer",
+                  variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+                )}
+                title="View Profile"
+              >
+                <ArrowRight className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
+              </button>
+            </>
+          ) : (
+            <div className={cn(
+              "rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white group-hover:border-transparent transition-all shadow-sm dark:bg-white/10 dark:border-white/10 dark:text-gray-300 dark:group-hover:bg-white dark:group-hover:text-black",
+              variant === "mini" ? "w-8 h-8" : "w-10 h-10"
+            )}>
+              <ArrowRight className={variant === "mini" ? "w-3 h-3" : "w-4 h-4"} weight="bold" />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
+
   if (onEdit) {
     return cardContent;
   }
 
   return (
-    <Link
-      href={`/dashboard/startups/${startup.id}`}
-      className="group block h-full"
-    >
+    <Link href={`/dashboard/startups/${startup.id}`} className="block h-full">
       {cardContent}
     </Link>
   );

@@ -19,6 +19,7 @@ import {
   PlusCircle,
   Info,
   CheckCircle,
+  FilePdf,
 } from "@phosphor-icons/react";
 
 interface InvestorUpdateType {
@@ -74,6 +75,11 @@ export default function InvestorUpdatesSection() {
 
   // Modal / Preview state
   const [previewUpdate, setPreviewUpdate] = useState<InvestorUpdateType | null>(null);
+
+  const handleExportPDF = (updateId: string) => {
+    if (!token) return;
+    window.open(`/api/updates/generate-pdf?id=${updateId}&token=${token}`, "_blank");
+  };
 
   useEffect(() => {
     if (token) {
@@ -364,6 +370,13 @@ export default function InvestorUpdatesSection() {
 
                     <div className="flex items-center gap-1">
                       <button
+                        onClick={() => handleExportPDF(up._id)}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 text-yellow-600 dark:text-yellow-400 rounded-xl transition-all cursor-pointer active:scale-95"
+                        title="Export PDF Report"
+                      >
+                        <FilePdf className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => handleEdit(up)}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-gray-400 rounded-xl transition-all cursor-pointer active:scale-95"
                         title="Edit Update"
@@ -585,6 +598,17 @@ export default function InvestorUpdatesSection() {
               Cancel
             </button>
 
+            {selectedId && (
+              <button
+                type="button"
+                onClick={() => handleExportPDF(selectedId)}
+                className="px-5 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm shadow-yellow-500/20"
+              >
+                <FilePdf className="w-4.5 h-4.5" weight="bold" />
+                Export Professional PDF Report
+              </button>
+            )}
+
             <button
               type="submit"
               disabled={saving}
@@ -615,12 +639,22 @@ export default function InvestorUpdatesSection() {
                 </h2>
               </div>
 
-              <button
-                onClick={() => setPreviewUpdate(null)}
-                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-zinc-800 dark:text-gray-300 rounded-xl text-xs font-bold transition-all"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleExportPDF(previewUpdate._id)}
+                  className="px-3.5 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm shadow-yellow-500/20"
+                >
+                  <FilePdf className="w-4 h-4" weight="bold" />
+                  Export Professional PDF Report
+                </button>
+                <button
+                  onClick={() => setPreviewUpdate(null)}
+                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-zinc-800 dark:text-gray-300 rounded-xl text-xs font-bold transition-all"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
             {/* Metrics */}

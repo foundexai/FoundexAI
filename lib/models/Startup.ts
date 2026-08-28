@@ -53,6 +53,9 @@ const StartupSchema = new mongoose.Schema({
 
   funding_amount: { type: Number },
   monthly_burn: { type: Number },
+  mrr: { type: Number, default: 0 },
+  arr: { type: Number, default: 0 },
+  cash_on_hand: { type: Number, default: 0 },
   cac: { type: Number },
   ltv: { type: Number },
 
@@ -65,6 +68,24 @@ const StartupSchema = new mongoose.Schema({
       type: { type: String, required: true },
       url: { type: String, required: true },
       date: { type: Date, default: Date.now },
+      versions: [
+        {
+          version_number: { type: Number, required: true },
+          url: { type: String, required: true },
+          change_summary: { type: String },
+          uploaded_by: { type: String },
+          created_at: { type: Date, default: Date.now }
+        }
+      ],
+      redlines: [
+        {
+          author: { type: String, required: true },
+          section: { type: String },
+          comment: { type: String, required: true },
+          version_number: { type: Number, default: 1 },
+          created_at: { type: Date, default: Date.now }
+        }
+      ]
     },
   ],
 

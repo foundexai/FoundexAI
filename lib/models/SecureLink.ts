@@ -1,11 +1,17 @@
 import mongoose from "mongoose";
 
+const PageViewSchema = new mongoose.Schema({
+  page_number: { type: Number, required: true },
+  duration_seconds: { type: Number, default: 0 }
+});
+
 const AccessLogSchema = new mongoose.Schema({
   viewer_email: { type: String, required: true },
   viewer_ip: { type: String, default: "127.0.0.1" },
   user_agent: { type: String },
   viewed_at: { type: Date, default: Date.now },
-  duration_seconds: { type: Number, default: 0 }
+  duration_seconds: { type: Number, default: 0 },
+  page_views: [PageViewSchema]
 });
 
 const OTPRequestSchema = new mongoose.Schema({
