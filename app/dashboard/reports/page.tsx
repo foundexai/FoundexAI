@@ -184,9 +184,19 @@ export default function ReportsPage() {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-1.5 pr-4 rounded-2xl hover:bg-zinc-800 transition-colors"
           >
-            <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center font-black text-black">
-              {user?.full_name?.[0].toUpperCase() || "U"}
-            </div>
+            {user?.profile_image_url ? (
+              <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-zinc-800">
+                <img
+                  src={user.profile_image_url}
+                  alt={user.full_name || "Profile"}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center font-black text-black shrink-0">
+                {user?.full_name?.[0].toUpperCase() || "U"}
+              </div>
+            )}
             <div className="hidden sm:block text-left">
               <p className="text-sm font-black tracking-tight leading-none text-zinc-100">{user?.full_name || "User"}</p>
               <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{user?.plan_type || "Starter"}</p>
@@ -195,10 +205,10 @@ export default function ReportsPage() {
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
+            <div className="absolute top-full left-0 xl:left-auto xl:right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
                <div className="p-4 border-b border-zinc-800">
-                  <p className="text-xs font-bold text-zinc-100">{user?.full_name}</p>
-                  <p className="text-[10px] text-zinc-500">{user?.email}</p>
+                  <p className="text-xs font-bold text-zinc-100 truncate">{user?.full_name}</p>
+                  <p className="text-[10px] text-zinc-500 truncate">{user?.email}</p>
                </div>
                <Link href="/dashboard/profile" className="flex items-center gap-3 px-4 py-3 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all">
                   <Users size={14} /> Profile Settings

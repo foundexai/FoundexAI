@@ -238,6 +238,7 @@ export default function DashboardLayout({
           )}
         </div>
         <div
+          id="sidebar-nav"
           className={cn(
             "flex-1 px-4 space-y-8 pt-4",
             isCollapsed ? "overflow-visible" : "overflow-y-auto thin-scrollbar",

@@ -28,13 +28,24 @@ interface Task {
 }
 
 export default function TasksPage() {
-  const { user, loading, token, activeStartupId, setActiveStartupId, startups: authStartups } = useAuth();
+  const {
+    user,
+    loading,
+    token,
+    activeStartupId,
+    setActiveStartupId,
+    startups: authStartups,
+  } = useAuth();
   const router = useRouter();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [userStartups, setUserStartups] = useState<any[]>([]);
   const [selectedStartupId, setSelectedStartupId] = useState<string>("");
-  const [newTask, setNewTask] = useState({ title: "", category: "Operations", description: "" });
+  const [newTask, setNewTask] = useState({
+    title: "",
+    category: "Operations",
+    description: "",
+  });
   const [selectedStage, setSelectedStage] = useState("Seed");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +58,10 @@ export default function TasksPage() {
       return;
     }
     if (user) {
-      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : undefined;
+      const storedId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("activeStartupId")
+          : undefined;
       const activeId = activeStartupId || storedId || undefined;
       loadTasks(activeId);
     }
@@ -57,13 +71,17 @@ export default function TasksPage() {
     setIsLoading(true);
     const authToken = token || localStorage.getItem("token");
     if (!authToken) return;
-    const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
-    const activeId = targetStartupId || activeStartupId || selectedStartupId || storedId || "";
+    const storedId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("activeStartupId")
+        : "";
+    const activeId =
+      targetStartupId || activeStartupId || selectedStartupId || storedId || "";
 
     try {
       const url = activeId ? `/api/tasks?startup_id=${activeId}` : "/api/tasks";
       const r = await fetch(url, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${authToken}`,
           "x-startup-id": activeId,
         },
@@ -72,7 +90,9 @@ export default function TasksPage() {
         const data = await r.json();
         setTasks(data.tasks || []);
         if (data.userStartups && data.userStartups.length > 0) {
-          setUserStartups(data.userStartups.map((s: any) => ({ ...s, _id: String(s._id) })));
+          setUserStartups(
+            data.userStartups.map((s: any) => ({ ...s, _id: String(s._id) })),
+          );
         }
         if (data.currentStartup?._id) {
           setSelectedStartupId(String(data.currentStartup._id));
@@ -135,10 +155,13 @@ export default function TasksPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to generate checklist");
+      if (!res.ok)
+        throw new Error(data.error || "Failed to generate checklist");
 
       toast.success("Due Diligence Checklist Generated!", {
-        description: data.message || `Loaded ${selectedStage} stage due diligence checklist.`,
+        description:
+          data.message ||
+          `Loaded ${selectedStage} stage due diligence checklist.`,
       });
 
       loadTasks();
@@ -193,7 +216,8 @@ export default function TasksPage() {
 
   const completedCount = tasks.filter((t) => t.status === "completed").length;
   const totalCount = tasks.length;
-  const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const progressPct =
+    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   const filteredTasks = tasks.filter((t) => {
     if (selectedCategory === "All") return true;
@@ -215,76 +239,97 @@ export default function TasksPage() {
   return (
     <main className="w-full flex-1 p-6 md:p-8 bg-gray-50 dark:bg-transparent">
       <div className="max-w-4xl mx-auto space-y-8">
-        
         {/* Top Header */}
         {(() => {
-          const displayStartups = (authStartups && authStartups.length > 0) ? authStartups : userStartups;
-          const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
-          const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
+          const displayStartups =
+            authStartups && authStartups.length > 0
+              ? authStartups
+              : userStartups;
+          const storedId =
+            typeof window !== "undefined"
+              ? localStorage.getItem("activeStartupId")
+              : "";
+          const currentActiveId =
+            activeStartupId ||
+            selectedStartupId ||
+            storedId ||
+            (displayStartups[0] ? String(displayStartups[0]._id) : "");
 
           return (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
-                    <CheckSquare className="w-7 h-7 text-yellow-500" weight="bold" />
-                    Tasks & Due Diligence Checklists
-                  </h1>
-                  {displayStartups.length > 1 ? (
-                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
-                      <select
-                        value={currentActiveId}
-                        onChange={(e) => handleStartupSwitch(e.target.value)}
-                        className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer"
-                      >
-                        {displayStartups.map((s: any) => (
-                          <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
-                            {s.company_name || s.name || "Startup"}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : displayStartups.length === 1 ? (
-                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
-                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                      {displayStartups[0]?.company_name || displayStartups[0]?.name}
-                    </div>
-                  ) : null}
-                </div>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Track operational tasks and generate automated due diligence checklists for investors.
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-200/50 dark:border-zinc-800/50 pb-6">
+              <div className="space-y-1">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
+                  <CheckSquare
+                    className="w-7 h-7 text-yellow-500 shrink-0"
+                    weight="bold"
+                  />
+                  <span>Tasks & Due Diligence Checklists</span>
+                </h1>
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                  Track operational tasks and generate automated due diligence
+                  checklists for investors.
                 </p>
               </div>
+
+              {displayStartups.length > 1 ? (
+                <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3.5 py-2 rounded-2xl w-full md:w-auto shrink-0 shadow-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    Company:
+                  </span>
+                  <select
+                    value={currentActiveId}
+                    onChange={(e) => handleStartupSwitch(e.target.value)}
+                    className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer w-full md:w-auto"
+                  >
+                    {displayStartups.map((s: any) => (
+                      <option
+                        key={String(s._id)}
+                        value={String(s._id)}
+                        className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold"
+                      >
+                        {s.company_name || s.name || "Startup"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : displayStartups.length === 1 ? (
+                <div className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3.5 py-2 rounded-2xl text-xs font-extrabold text-gray-700 dark:text-gray-300 w-fit shrink-0 shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  <span>
+                    {displayStartups[0]?.company_name || displayStartups[0]?.name}
+                  </span>
+                </div>
+              ) : null}
             </div>
           );
         })()}
 
         {/* Automatic Due Diligence Checklist Generator Banner */}
         <div className="bg-white dark:bg-zinc-900/60 border border-gray-200/80 dark:border-zinc-800 p-6 rounded-3xl shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-zinc-800/80 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold shrink-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 dark:border-zinc-800/80 pb-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold shrink-0 mt-0.5">
                 <ListChecks className="w-5 h-5" weight="bold" />
               </div>
-              <div>
-                <h3 className="text-sm font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-                  Automatic Due Diligence Checklist
+              <div className="space-y-1">
+                <h3 className="text-sm font-extrabold text-gray-900 dark:text-white flex flex-wrap items-center gap-2">
+                  <span>Automatic Due Diligence Checklist</span>
                   <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-mono font-bold rounded-md">
                     AI Checklist Engine
                   </span>
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Generate structured financial, legal, IP, and corporate governance audit lists based on your fundraising stage.
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Generate structured financial, legal, IP, and corporate
+                  governance audit lists based on your fundraising stage.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
               <select
                 value={selectedStage}
                 onChange={(e) => setSelectedStage(e.target.value)}
-                className="px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-gray-800 dark:text-white"
+                className="flex-1 md:flex-initial px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-gray-800 dark:text-white"
               >
                 <option value="Pre-Seed">Pre-Seed Stage</option>
                 <option value="Seed">Seed Stage</option>
@@ -294,10 +339,12 @@ export default function TasksPage() {
               <button
                 onClick={handleGenerateDueDiligence}
                 disabled={isGenerating}
-                className="px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="flex-1 md:flex-initial px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 whitespace-nowrap"
               >
-                {isGenerating ? <CircleNotch className="w-4 h-4 animate-spin" /> : <Sparkle className="w-4 h-4" weight="bold" />}
-                Generate Checklist
+                {isGenerating && (
+                  <CircleNotch className="w-4 h-4 animate-spin" />
+                )}
+                <span>Generate Checklist</span>
               </button>
             </div>
           </div>
@@ -334,13 +381,17 @@ export default function TasksPage() {
                 className="grow px-4 py-2.5 border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 rounded-xl text-xs font-medium text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                 placeholder="Task title (e.g. Upload Audited P&L Statement)"
                 value={newTask.title}
-                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                onChange={(e) =>
+                  setNewTask({ ...newTask, title: e.target.value })
+                }
                 required
               />
               <select
-                className="px-3.5 py-2.5 border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 rounded-xl text-xs font-bold text-gray-800 dark:text-white"
+                className="w-full sm:w-auto px-3.5 py-2.5 border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 rounded-xl text-xs font-bold text-gray-800 dark:text-white cursor-pointer"
                 value={newTask.category}
-                onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
+                onChange={(e) =>
+                  setNewTask({ ...newTask, category: e.target.value })
+                }
               >
                 <option value="Operations">Operations</option>
                 <option value="Finance">Finance</option>
@@ -350,7 +401,7 @@ export default function TasksPage() {
 
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                className="w-full sm:w-auto px-5 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" weight="bold" />
                 Add Task
@@ -368,19 +419,21 @@ export default function TasksPage() {
 
             {/* Category Filter Tabs */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              {["All", "Finance", "Legal", "Operations", "Market"].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    selectedCategory === cat
-                      ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-300"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+              {["All", "Finance", "Legal", "Operations", "Market"].map(
+                (cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedCategory === cat
+                        ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-300"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ),
+              )}
             </div>
           </div>
 
@@ -433,8 +486,8 @@ export default function TasksPage() {
                             task.priority === "high"
                               ? "text-red-500"
                               : task.priority === "medium"
-                              ? "text-amber-500"
-                              : "text-gray-400"
+                                ? "text-amber-500"
+                                : "text-gray-400"
                           }`}
                         >
                           {task.priority} Priority
@@ -456,12 +509,13 @@ export default function TasksPage() {
 
             {filteredTasks.length === 0 && (
               <div className="text-center py-12 text-gray-400 dark:text-gray-500 text-xs">
-                No tasks found for category &ldquo;{selectedCategory}&rdquo;. Click <strong>Generate Checklist</strong> above to load due diligence items.
+                No tasks found for category &ldquo;{selectedCategory}&rdquo;.
+                Click <strong>Generate Checklist</strong> above to load due
+                diligence items.
               </div>
             )}
           </ul>
         </div>
-
       </div>
 
       <ConfirmationModal

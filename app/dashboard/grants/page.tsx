@@ -243,21 +243,21 @@ export default function SmartGrantsPage() {
         const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
 
         return (
-          <div className="bg-white border-b border-gray-100 px-6 py-4 flex flex-col sm:flex-row items-center justify-between dark:bg-zinc-900 dark:border-zinc-800/80 gap-4">
-            <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="bg-white border-b border-gray-100 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between dark:bg-zinc-900 dark:border-zinc-800/80 gap-4 rounded-3xl">
+            <div className="flex items-start gap-3 w-full md:w-auto">
               <Link
                 href="/dashboard"
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors dark:hover:bg-zinc-800 shrink-0 mt-0.5"
               >
                 <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
               </Link>
-              <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <div className="space-y-1.5 grow min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <h1 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                     Smart Grant Matching
                   </h1>
                   {displayStartups.length > 1 ? (
-                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1 rounded-xl">
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl w-fit shrink-0">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
                       <select
                         value={currentActiveId}
@@ -272,23 +272,23 @@ export default function SmartGrantsPage() {
                       </select>
                     </div>
                   ) : displayStartups.length === 1 ? (
-                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300 w-fit shrink-0">
                       <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                      {displayStartups[0]?.company_name || displayStartups[0]?.name}
+                      <span>{displayStartups[0]?.company_name || displayStartups[0]?.name}</span>
                     </div>
                   ) : null}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                   AI-evaluated grant eligibility matching tailored to your startup's sector, stage, and R&D scope.
                 </p>
               </div>
             </div>
 
             {/* Grid / Table Toggle */}
-            <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-xl border border-gray-200/50 dark:border-zinc-800">
+            <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-xl border border-gray-200/50 dark:border-zinc-800 w-full md:w-auto shrink-0 justify-center">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
                   viewMode === "grid"
                     ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
                     : "text-gray-500 hover:text-gray-800 dark:text-gray-400"
@@ -298,7 +298,7 @@ export default function SmartGrantsPage() {
               </button>
               <button
                 onClick={() => setViewMode("table")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
                   viewMode === "table"
                     ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
                     : "text-gray-500 hover:text-gray-800 dark:text-gray-400"

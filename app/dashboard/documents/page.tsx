@@ -282,47 +282,47 @@ function DocumentsPageContent() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col dark:bg-black">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row items-center justify-between dark:bg-zinc-900 dark:border-zinc-800 gap-4">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between dark:bg-zinc-900 dark:border-zinc-800 gap-4 rounded-3xl">
+        <div className="flex items-start gap-3 w-full md:w-auto">
           <Link
             href="/dashboard"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors dark:hover:bg-zinc-800"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors dark:hover:bg-zinc-800 shrink-0 mt-0.5"
           >
             <CaretLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" weight="bold" />
           </Link>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <div className="space-y-1">
+            <h1 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
               Document Control & Security
             </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
               Manage pitch decks, generate secure links, and track viewer analytics.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto shrink-0">
           <button
             onClick={() => setIsWatermarkDefaultsOpen(true)}
-            className="px-3 py-2 bg-yellow-50 dark:bg-yellow-950/40 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900/60 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2.5 bg-yellow-50 dark:bg-yellow-950/40 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900/60 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Sliders className="w-4 h-4" />
-            Watermark Defaults
+            <span>Watermark Defaults</span>
           </button>
 
           <button
             onClick={() => setIsSignRequestModalOpen(true)}
-            className="px-3 py-2 bg-yellow-50 dark:bg-yellow-950/40 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900/60 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2.5 bg-yellow-50 dark:bg-yellow-950/40 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900/60 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Signature className="w-4 h-4" />
-            Request E-Signature
+            <span>Request E-Signature</span>
           </button>
 
           <Link
             href="/dashboard/documents/new"
-            className="px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+            className="w-full sm:w-auto px-4 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center justify-center gap-2 dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Upload Document
+            <span>Upload Document</span>
           </Link>
         </div>
       </div>
