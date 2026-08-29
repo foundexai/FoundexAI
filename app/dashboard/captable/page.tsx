@@ -363,47 +363,48 @@ export default function CapTablePage() {
           const currentActiveId = activeStartupId || selectedStartupId || storedId || (displayStartups[0] ? String(displayStartups[0]._id) : "");
 
           return (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
-                    <ChartPie className="w-7 h-7 text-yellow-500" weight="bold" />
-                    Cap Table & Equity Ledger
-                  </h1>
-                  {displayStartups.length > 1 ? (
-                    <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl shadow-2xs">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
-                      <select
-                        value={currentActiveId}
-                        onChange={(e) => handleStartupSwitch(e.target.value)}
-                        className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer"
-                      >
-                        {displayStartups.map((s: any) => (
-                          <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
-                            {s.company_name || s.name || "Startup"}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : displayStartups.length === 1 ? (
-                    <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
-                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                      {displayStartups[0]?.company_name || displayStartups[0]?.name}
-                    </div>
-                  ) : null}
-                </div>
-                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-200/50 dark:border-zinc-800/50 pb-6">
+              <div className="space-y-1">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
+                  <ChartPie className="w-7 h-7 text-yellow-500 shrink-0" weight="bold" />
+                  <span>Cap Table & Equity Ledger</span>
+                </h1>
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
                   Manage shareholders, equity classes, SAFEs, and ESOP vesting schedules.
                 </p>
               </div>
 
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4" weight="bold" />
-                Issue Equity / Add Shareholder
-              </button>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto shrink-0">
+                {displayStartups.length > 1 ? (
+                  <div className="flex items-center gap-2 bg-gray-150 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3.5 py-2 rounded-2xl w-full sm:w-auto shadow-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Company:</span>
+                    <select
+                      value={currentActiveId}
+                      onChange={(e) => handleStartupSwitch(e.target.value)}
+                      className="bg-transparent text-xs font-black text-gray-900 dark:text-white focus:outline-none cursor-pointer w-full"
+                    >
+                      {displayStartups.map((s: any) => (
+                        <option key={String(s._id)} value={String(s._id)} className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-white font-bold">
+                          {s.company_name || s.name || "Startup"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : displayStartups.length === 1 ? (
+                  <div className="flex items-center gap-2 bg-gray-150 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3.5 py-2 rounded-2xl text-xs font-extrabold text-gray-700 dark:text-gray-300 w-fit shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span>{displayStartups[0]?.company_name || displayStartups[0]?.name}</span>
+                  </div>
+                ) : null}
+
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer w-full sm:w-auto"
+                >
+                  <Plus className="w-4 h-4" weight="bold" />
+                  <span>Issue Equity / Add Shareholder</span>
+                </button>
+              </div>
             </div>
           );
         })()}

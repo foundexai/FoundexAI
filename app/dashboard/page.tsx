@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Onboarding from "@/components/Onboarding";
+import OnboardingTour from "@/components/OnboardingTour";
 import TasksList from "@/components/TasksList";
 import NotesList from "@/components/NotesList";
 import { useAuth, Startup } from "@/context/AuthContext";
@@ -237,7 +238,7 @@ export default function Dashboard() {
           <SelectedInvestors />
 
           {/* Main Dashboard Grid - Balanced 3 Column Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          <div id="dashboard-core" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
             {/* Column 1: Foundation */}
             <div className="space-y-6">
               <LegalStructureCard
@@ -247,7 +248,9 @@ export default function Dashboard() {
                 details={currentStartup.legal_structure_details}
                 onUpdate={() => router.refresh()}
               />
-              <DocumentsSection documents={currentStartup.documents} />
+              <div id="investor-updates">
+                <DocumentsSection documents={currentStartup.documents} />
+              </div>
             </div>
 
             {/* Column 2: Strategy */}
@@ -281,6 +284,8 @@ export default function Dashboard() {
           onClose={() => setShowOnboarding(false)}
         />
       )}
+
+      {currentStartup && <OnboardingTour />}
     </>
   );
 }
