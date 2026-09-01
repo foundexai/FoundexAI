@@ -15,6 +15,7 @@ import DocumentsSection from "@/components/dashboard/DocumentsSection";
 import SelectedInvestors from "@/components/dashboard/SelectedInvestors";
 import ReadinessScore from "@/components/ReadinessScore";
 import StartupSwitcher from "@/components/dashboard/StartupSwitcher";
+import GenerateBoardDeckDrawer from "@/components/dashboard/GenerateBoardDeckDrawer";
 import {
   NotePencil,
   FloppyDiskBack,
@@ -34,6 +35,7 @@ import {
   Eye,
   ChatCircleDots,
   WarningCircle,
+  Presentation,
 } from "@phosphor-icons/react";
 import { useSubscription } from "@/context/SubscriptionContext";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [anomalies, setAnomalies] = useState<any[]>([]);
+  const [isBoardDeckOpen, setIsBoardDeckOpen] = useState(false);
 
   useEffect(() => {
     async function loadNotifications() {
@@ -207,12 +210,21 @@ export default function Dashboard() {
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-tight dark:text-white wrap-break-word">
                   {currentStartup.company_name}
                 </h1>
-                <Link
-                  href="/dashboard/pricing"
-                  className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg dark:bg-white dark:text-black"
-                >
-                  Get connected with investors
-                </Link>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => setIsBoardDeckOpen(true)}
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-black text-xs transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95"
+                  >
+                    <Presentation className="w-4 h-4" weight="bold" />
+                    <span>Generate AI Board Deck</span>
+                  </button>
+                  <Link
+                    href="/dashboard/pricing"
+                    className="hidden md:inline-flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg dark:bg-white dark:text-black"
+                  >
+                    Get connected with investors
+                  </Link>
+                </div>
               </div>
               <div>
                 <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/80 border border-white/50 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-300 dark:border-white/10">
@@ -248,7 +260,7 @@ export default function Dashboard() {
                 details={currentStartup.legal_structure_details}
                 onUpdate={() => router.refresh()}
               />
-              <div id="investor-updates">
+              <div id="investor-updates" data-tour="documents">
                 <DocumentsSection documents={currentStartup.documents} />
               </div>
             </div>
@@ -266,13 +278,17 @@ export default function Dashboard() {
 
             {/* Column 3: Intelligence & Execution */}
             <div className="space-y-6">
-              <ReadinessScore
-                score={currentStartup.readiness_score || 0}
-                startupId={currentStartup._id}
-                feedback={currentStartup.readiness_feedback}
-                onUpdate={() => router.refresh()}
-              />
-              <TasksList startupId={currentStartup._id} />
+              <div data-tour="readiness-score">
+                <ReadinessScore
+                  score={currentStartup.readiness_score || 0}
+                  startupId={currentStartup._id}
+                  feedback={currentStartup.readiness_feedback}
+                  onUpdate={() => router.refresh()}
+                />
+              </div>
+              <div data-tour="tasks">
+                <TasksList startupId={currentStartup._id} />
+              </div>
             </div>
           </div>
         </div>
@@ -286,6 +302,14 @@ export default function Dashboard() {
       )}
 
       {currentStartup && <OnboardingTour />}
+
+      {currentStartup && (
+        <GenerateBoardDeckDrawer
+          isOpen={isBoardDeckOpen}
+          onClose={() => setIsBoardDeckOpen(false)}
+          activeStartupId={currentStartup._id}
+        />
+      )}
     </>
   );
 }

@@ -164,6 +164,7 @@ export default function Header({
             {/* Search bar */}
             <div
               onClick={() => setIsCommandPaletteOpen(true)}
+              data-tour="global-search"
               className="hidden md:flex items-center relative w-full max-w-xs lg:max-w-sm cursor-pointer group"
             >
               <MagnifyingGlass
