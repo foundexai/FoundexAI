@@ -26,7 +26,12 @@ export default function StartupSwitcher() {
   if (!activeStartup) return null;
 
   return (
-    <div className="relative" ref={dropdownRef} id="startup-switcher">
+    <div
+      className="relative"
+      ref={dropdownRef}
+      id="startup-switcher"
+      data-tour="startup-switcher"
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 p-2 pr-4 rounded-2xl bg-white/40 border border-white/50 backdrop-blur-md hover:bg-white/60 hover:shadow-lg transition-all duration-300 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 group"

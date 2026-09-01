@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   User,
@@ -11,10 +12,15 @@ import {
   ArrowUpRight,
   CircleNotch,
   RocketLaunch,
+  Compass,
+  Sparkle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { startOnboardingTour } from "@/components/OnboardingTour";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { user, token, logout, refreshUser } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [dealFlowAlerts, setDealFlowAlerts] = useState(
@@ -90,6 +96,29 @@ export default function SettingsPage() {
             <span className="text-sm text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200">
               Update
             </span>
+          </button>
+        </div>
+
+        {/* Workspace Walkthrough & Onboarding */}
+        <div className="glass-card p-8 rounded-3xl border border-white/60 bg-white/40 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+            <Compass className="w-5 h-5 text-gray-400" weight="bold" />
+            Product Walkthrough & Guides
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+            Replay the interactive guided tour across your dashboard navigation, startup switcher, and intelligence hubs.
+          </p>
+
+          <button
+            onClick={() => {
+              startOnboardingTour();
+              toast.success("Restarting onboarding tour...");
+              router.push("/dashboard");
+            }}
+            className="px-5 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
+          >
+            <Sparkle className="w-4 h-4 text-yellow-500" weight="fill" />
+            <span>Replay Workspace Walkthrough</span>
           </button>
         </div>
 

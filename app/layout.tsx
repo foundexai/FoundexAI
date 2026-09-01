@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
@@ -10,8 +9,6 @@ import Header from "@/components/Header";
 import { TrialBanner } from "@/components/TrialBanner";
 import QueryProvider from "@/components/providers/QueryProvider";
 import GlobalNotificationListener from "@/components/GlobalNotificationListener";
-
-const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "FoundexAI - Investor-Ready Starts Here",
@@ -29,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${manrope.className} w-full `}>
+      <body className="w-full font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
