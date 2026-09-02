@@ -22,6 +22,10 @@ import {
   Waveform,
   FileText,
   CaretDown,
+  SpeakerHigh,
+  SpeakerSlash,
+  Play,
+  Stop,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -119,6 +123,8 @@ export default function PitchStudioPage() {
   const [isScoring, setIsScoring] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoVoice, setAutoVoice] = useState(true);
 
   const recognitionRef = useRef<any>(null);
 
@@ -157,10 +163,67 @@ export default function PitchStudioPage() {
     }
   }, []);
 
+  const stopSpeaking = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  const vocalizeQuestion = (text: string, personaId: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.info("Speech synthesis is not supported on this browser.");
+      return;
+    }
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      const voices = window.speechSynthesis.getVoices();
+      const englishVoices = voices.filter((v) => v.lang.startsWith("en"));
+
+      // Configure timbre, rate, pitch per persona
+      if (personaId === "tier1_vc") {
+        utterance.rate = 1.05;
+        utterance.pitch = 0.95;
+        const v = englishVoices.find((v) => v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("david") || v.name.toLowerCase().includes("alex"));
+        if (v) utterance.voice = v;
+      } else if (personaId === "quant_hawk") {
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+        const v = englishVoices.find((v) => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("samantha") || v.name.toLowerCase().includes("victoria"));
+        if (v) utterance.voice = v;
+      } else if (personaId === "angel_visionary") {
+        utterance.rate = 1.08;
+        utterance.pitch = 1.1;
+        const v = englishVoices.find((v) => v.name.toLowerCase().includes("daniel") || v.name.toLowerCase().includes("guy"));
+        if (v) utterance.voice = v;
+      } else if (personaId === "corporate_vc") {
+        utterance.rate = 0.92;
+        utterance.pitch = 0.95;
+        const v = englishVoices.find((v) => v.name.toLowerCase().includes("karen") || v.name.toLowerCase().includes("serena"));
+        if (v) utterance.voice = v;
+      }
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.warn("Speech synthesis error:", err);
+      setIsSpeaking(false);
+    }
+  };
+
   const toggleListening = () => {
     if (!speechSupported || !recognitionRef.current) {
       toast.error("Speech recognition is not supported in this browser. Please type your response.");
       return;
+    }
+
+    if (isSpeaking) {
+      stopSpeaking();
     }
 
     if (isListening) {
@@ -216,6 +279,10 @@ export default function PitchStudioPage() {
 
       setCurrentTurn(newTurn);
       setFounderAnswer("");
+
+      if (autoVoice) {
+        setTimeout(() => vocalizeQuestion(data.question, selectedPersona), 350);
+      }
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Failed to contact VC Pitch Simulator");
@@ -422,7 +489,7 @@ export default function PitchStudioPage() {
           {/* Active VC Question Card */}
           <div className="bg-white dark:bg-zinc-900/80 p-6 sm:p-8 rounded-[2.5rem] border border-gray-200/80 dark:border-zinc-800 shadow-md space-y-6 relative overflow-hidden backdrop-blur-xl">
             {/* Top VC Meta */}
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800/80 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-zinc-800/80 pb-4">
               <div className="flex items-center gap-3">
                 <div className={cn("w-10 h-10 rounded-full bg-gradient-to-tr text-white flex items-center justify-center text-sm font-black shadow-xs shrink-0", activePersonaObj.gradient)}>
                   {activePersonaObj.name.charAt(0)}
@@ -442,9 +509,59 @@ export default function PitchStudioPage() {
                 </div>
               </div>
 
-              <span className="text-[10px] font-mono font-bold text-gray-400">
-                {currentTurn?.timestamp}
-              </span>
+              {/* Audio Controls */}
+              <div className="flex items-center gap-2 self-end sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isSpeaking) {
+                      stopSpeaking();
+                    } else if (currentTurn?.question) {
+                      vocalizeQuestion(currentTurn.question, selectedPersona);
+                    }
+                  }}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border",
+                    isSpeaking
+                      ? "bg-yellow-500 text-black border-yellow-400 animate-pulse shadow-md"
+                      : "bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-zinc-700"
+                  )}
+                >
+                  {isSpeaking ? (
+                    <>
+                      <SpeakerHigh className="w-4 h-4" weight="fill" />
+                      <span>Speaking VC...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-3.5 h-3.5" weight="fill" />
+                      <span>Listen to Voice</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAutoVoice(!autoVoice)}
+                  title={autoVoice ? "Auto-play voice is ON" : "Auto-play voice is OFF"}
+                  className={cn(
+                    "p-2 rounded-xl text-xs font-bold transition-all border cursor-pointer",
+                    autoVoice
+                      ? "bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400 border-yellow-300/60 dark:border-yellow-900/50"
+                      : "bg-gray-100 dark:bg-zinc-800 text-gray-400 border-gray-200 dark:border-zinc-700"
+                  )}
+                >
+                  {autoVoice ? (
+                    <SpeakerHigh className="w-4 h-4" />
+                  ) : (
+                    <SpeakerSlash className="w-4 h-4" />
+                  )}
+                </button>
+
+                <span className="text-[10px] font-mono font-bold text-gray-400 ml-1">
+                  {currentTurn?.timestamp}
+                </span>
+              </div>
             </div>
 
             {/* Question Text */}

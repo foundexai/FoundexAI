@@ -22,6 +22,9 @@ const CapTableSchema = new mongoose.Schema({
   },
   share_count: { type: Number, required: true, default: 0 },
   investment_amount: { type: Number, default: 0 },
+  currency: { type: String, default: "USD", uppercase: true },
+  investment_amount_usd: { type: Number, default: 0 },
+  exchange_rate_applied: { type: Number, default: 1 },
   price_per_share: { type: Number, default: 0 },
   grant_date: { type: Date, default: Date.now },
   esop_vesting: {

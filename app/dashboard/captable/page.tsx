@@ -26,9 +26,13 @@ import {
   CaretRight,
   FileText,
   ClockCounterClockwise,
+  Scales,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
+import TermSheetAdvisorDrawer from "@/components/captable/TermSheetAdvisorDrawer";
+import { SUPPORTED_CURRENCIES, formatMoney } from "@/lib/currencyService";
 import { toast } from "sonner";
 import { runWaterfallSimulation, WaterfallSimulationOutput } from "@/lib/waterfall";
 
@@ -41,6 +45,9 @@ interface Shareholder {
   share_count: number;
   ownership_pct: number;
   investment_amount: number;
+  currency?: string;
+  investment_amount_usd?: number;
+  exchange_rate_applied?: number;
   price_per_share: number;
   grant_date: string;
   esop_vesting?: {
@@ -91,6 +98,7 @@ export default function CapTablePage() {
   const [newOptionPoolPct, setNewOptionPoolPct] = useState<number>(0);
 
   const [waterfallResult, setWaterfallResult] = useState<WaterfallSimulationOutput | null>(null);
+  const [isTermSheetDrawerOpen, setIsTermSheetDrawerOpen] = useState(false);
 
   // Modal Form State
   const [form, setForm] = useState({
@@ -100,6 +108,7 @@ export default function CapTablePage() {
     shareClass: "Common",
     shareCount: "",
     investmentAmount: "",
+    currency: "USD",
     pricePerShare: "",
     grantDate: new Date().toISOString().split("T")[0],
     isVesting: false,
@@ -237,6 +246,7 @@ export default function CapTablePage() {
         shareClass: "Common",
         shareCount: "",
         investmentAmount: "",
+        currency: "USD",
         pricePerShare: "",
         grantDate: new Date().toISOString().split("T")[0],
         isVesting: false,
@@ -282,6 +292,7 @@ export default function CapTablePage() {
       shareClass: s.share_class,
       shareCount: s.share_count.toString(),
       investmentAmount: (s.investment_amount || 0).toString(),
+      currency: s.currency || "USD",
       pricePerShare: (s.price_per_share || 0).toString(),
       grantDate: s.grant_date ? new Date(s.grant_date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
       isVesting: s.esop_vesting?.is_vesting || false,
@@ -302,6 +313,7 @@ export default function CapTablePage() {
       shareClass: "Common",
       shareCount: "",
       investmentAmount: "",
+      currency: "USD",
       pricePerShare: "",
       grantDate: new Date().toISOString().split("T")[0],
       isVesting: false,
@@ -396,6 +408,14 @@ export default function CapTablePage() {
                     <span>{displayStartups[0]?.company_name || displayStartups[0]?.name}</span>
                   </div>
                 ) : null}
+
+                <button
+                  onClick={() => setIsTermSheetDrawerOpen(true)}
+                  className="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer w-full sm:w-auto hover:scale-105 active:scale-95"
+                >
+                  <Scales className="w-4 h-4" weight="bold" />
+                  <span>AI Term Sheet Advisor</span>
+                </button>
 
                 <button
                   onClick={() => setIsAddModalOpen(true)}
@@ -1088,8 +1108,8 @@ export default function CapTablePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-1">
                   <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
                     Number of Shares *
                   </label>
@@ -1103,9 +1123,9 @@ export default function CapTablePage() {
                   />
                 </div>
 
-                <div>
+                <div className="sm:col-span-1">
                   <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    Investment Amount ($)
+                    Investment Amount
                   </label>
                   <input
                     type="number"
@@ -1114,6 +1134,23 @@ export default function CapTablePage() {
                     onChange={(e) => setForm({ ...form, investmentAmount: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-mono focus:outline-none dark:text-white"
                   />
+                </div>
+
+                <div className="sm:col-span-1">
+                  <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Currency
+                  </label>
+                  <select
+                    value={form.currency || "USD"}
+                    onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl font-bold dark:text-white cursor-pointer"
+                  >
+                    {Object.keys(SUPPORTED_CURRENCIES).map((c) => (
+                      <option key={c} value={c}>
+                        {c} ({SUPPORTED_CURRENCIES[c].symbol})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -1254,6 +1291,12 @@ export default function CapTablePage() {
         message="Are you sure you want to delete this shareholder grant from the Cap Table?"
         confirmLabel="Delete"
         isDestructive
+      />
+
+      <TermSheetAdvisorDrawer
+        isOpen={isTermSheetDrawerOpen}
+        onClose={() => setIsTermSheetDrawerOpen(false)}
+        activeStartupId={activeStartupId || selectedStartupId}
       />
     </main>
   );
