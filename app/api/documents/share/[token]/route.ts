@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import SecureLink from "@/lib/models/SecureLink";
+import { extractClientIp, extractClientCountry, isIpAllowed, isCountryAllowed } from "@/lib/networkSecurity";
 
 export async function GET(
   req: Request,
@@ -20,7 +21,32 @@ export async function GET(
       return NextResponse.json({ error: "Link not found or invalid" }, { status: 404 });
     }
 
-    // Check Revocation Status
+    const clientIp = extractClientIp(req);
+    const clientCountry = extractClientCountry(req);
+
+    // 1. IP Whitelisting Check
+    if (link.ip_restriction_enabled && link.allowed_ips && link.allowed_ips.length > 0) {
+      if (!isIpAllowed(clientIp, link.allowed_ips)) {
+        return NextResponse.json({
+          status: "ip_blocked",
+          error: `Access denied. Your IP address (${clientIp}) is not authorized to access this document.`,
+          docName: link.doc_name
+        }, { status: 403 });
+      }
+    }
+
+    // 2. Geo-Fencing Check
+    if (link.geofencing_enabled && link.allowed_countries && link.allowed_countries.length > 0) {
+      if (!isCountryAllowed(clientCountry, link.allowed_countries)) {
+        return NextResponse.json({
+          status: "geo_blocked",
+          error: `Access denied. Document access is restricted in your location (${clientCountry}).`,
+          docName: link.doc_name
+        }, { status: 403 });
+      }
+    }
+
+    // 3. Check Revocation Status
     if (link.is_revoked) {
       return NextResponse.json({
         status: "revoked",

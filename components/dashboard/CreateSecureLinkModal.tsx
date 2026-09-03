@@ -15,6 +15,9 @@ import {
   Check,
   CircleNotch,
   Sparkle,
+  GlobeHemisphereWest,
+  MapPin,
+  HardDrives,
 } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -50,6 +53,13 @@ export default function CreateSecureLinkModal({
   const [watermarkOpacity, setWatermarkOpacity] = useState(0.18);
   const [watermarkStyle, setWatermarkStyle] = useState<"diagonal" | "center" | "banner">("diagonal");
 
+  // Enterprise Network & Geo-Fencing Settings
+  const [ipRestrictionEnabled, setIpRestrictionEnabled] = useState(false);
+  const [allowedIps, setAllowedIps] = useState("");
+  const [geofencingEnabled, setGeofencingEnabled] = useState(false);
+  const [allowedCountries, setAllowedCountries] = useState("US, GB, DE, CA, NG");
+  const [soc2RetentionDays, setSoc2RetentionDays] = useState(90);
+
   const [loading, setLoading] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -77,6 +87,16 @@ export default function CreateSecureLinkModal({
         .map((e) => e.trim().toLowerCase())
         .filter((e) => e.includes("@"));
 
+      const ipsArray = allowedIps
+        .split(",")
+        .map((ip) => ip.trim())
+        .filter((ip) => ip.length > 0);
+
+      const countriesArray = allowedCountries
+        .split(",")
+        .map((c) => c.trim().toUpperCase())
+        .filter((c) => c.length === 2);
+
       const res = await fetch("/api/documents/secure-link", {
         method: "POST",
         headers: {
@@ -90,6 +110,11 @@ export default function CreateSecureLinkModal({
           accessType,
           passcode: accessType === "passcode" ? passcode : undefined,
           allowedEmails: accessType === "email_otp" ? emailsArray : undefined,
+          ipRestrictionEnabled,
+          allowedIps: ipRestrictionEnabled ? ipsArray : undefined,
+          geofencingEnabled,
+          allowedCountries: geofencingEnabled ? countriesArray : undefined,
+          soc2RetentionDays,
           expiresAt,
           allowDownload,
           watermarkEnabled,
@@ -412,7 +437,90 @@ export default function CreateSecureLinkModal({
                 )}
               </div>
 
-              {/* 4. Download Toggle */}
+              {/* 4. Enterprise Compliance: IP & Geo-Fencing */}
+              <div className="bg-gray-50 dark:bg-zinc-800/40 border border-gray-200 dark:border-zinc-800 p-4 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                    <GlobeHemisphereWest className="w-4 h-4 text-blue-500" weight="bold" /> IP Whitelisting & Geo-Fencing
+                  </label>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    SOC2 Enterprise
+                  </span>
+                </div>
+
+                <div className="space-y-3 pt-1">
+                  {/* IP Restriction Toggle & Input */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                        <ShieldCheck className="w-3.5 h-3.5 text-gray-400" /> Restrict by Client IP / Subnet
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={ipRestrictionEnabled}
+                        onChange={(e) => setIpRestrictionEnabled(e.target.checked)}
+                        className="w-4 h-4 accent-black cursor-pointer"
+                      />
+                    </div>
+                    {ipRestrictionEnabled && (
+                      <input
+                        type="text"
+                        placeholder="e.g. 192.168.1.1, 10.0.0.0/16, 203.0.113.50"
+                        value={allowedIps}
+                        onChange={(e) => setAllowedIps(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono focus:outline-none dark:text-white"
+                      />
+                    )}
+                  </div>
+
+                  {/* Geo-Fencing Toggle & Input */}
+                  <div className="space-y-1.5 pt-1 border-t border-gray-200/60 dark:border-zinc-700/60">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-gray-400" /> Geo-Fence Allowed Countries
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={geofencingEnabled}
+                        onChange={(e) => setGeofencingEnabled(e.target.checked)}
+                        className="w-4 h-4 accent-black cursor-pointer"
+                      />
+                    </div>
+                    {geofencingEnabled && (
+                      <input
+                        type="text"
+                        placeholder="e.g. US, GB, DE, CA, NG, FR (ISO Alpha-2)"
+                        value={allowedCountries}
+                        onChange={(e) => setAllowedCountries(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono uppercase focus:outline-none dark:text-white"
+                      />
+                    )}
+                  </div>
+
+                  {/* SOC2 Retention Sizing */}
+                  <div className="pt-1 border-t border-gray-200/60 dark:border-zinc-700/60 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <HardDrives className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300">
+                        SOC2 Data Retention
+                      </span>
+                    </div>
+                    <select
+                      value={soc2RetentionDays}
+                      onChange={(e) => setSoc2RetentionDays(Number(e.target.value))}
+                      className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs font-bold dark:text-white cursor-pointer"
+                    >
+                      <option value={30}>30 Days</option>
+                      <option value={60}>60 Days</option>
+                      <option value={90}>90 Days (Standard)</option>
+                      <option value={180}>180 Days</option>
+                      <option value={365}>365 Days (1 Year)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Download Toggle */}
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800/30 rounded-xl border border-gray-200 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
                   <DownloadSimple className="w-4 h-4 text-gray-500" />

@@ -3,45 +3,53 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  ArrowsLeftRight,
   CaretLeft,
   CaretRight,
   Check,
+  CheckSquare,
   Compass,
   FolderOpen,
   Gauge,
   MagnifyingGlass,
   RocketLaunch,
-  ArrowsLeftRight,
-  CheckSquare,
   X,
 } from "@phosphor-icons/react";
 import { useMobileMenu } from "@/context/MobileMenuContext";
 import { cn } from "@/lib/utils";
 import {
+  Anchored,
   MARGIN,
   Placement,
   SHEET_BREAKPOINT,
   TourRect,
   anchorCard,
   delay,
+  nextFrame,
   prefersReducedMotion,
-  rectsEqual,
+  prefersReducedTransparency,
+  readSafeAreaBottom,
   resolveTarget,
   scrollTargetIntoView,
   toRect,
   waitForSettle,
   waitForTarget,
 } from "@/lib/tour";
+import {
+  SPRING,
+  Spring,
+  VelocityTracker,
+  projectMomentum,
+  rubberband,
+} from "@/lib/spring";
 
 const STORAGE_KEY = "foundex_tour_completed_v2";
+const LEGACY_STORAGE_KEY = "foundex_tour_completed";
 const START_EVENT = "foundex:start-tour";
 
 /** Restarts the walkthrough from anywhere in the app. */
 export function startOnboardingTour() {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {}
   window.dispatchEvent(new Event(START_EVENT));
 }
 
@@ -49,7 +57,10 @@ export function startOnboardingTour() {
 export function hasCompletedOnboardingTour() {
   if (typeof window === "undefined") return true;
   try {
-    return Boolean(localStorage.getItem(STORAGE_KEY));
+    return Boolean(
+      localStorage.getItem(STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_STORAGE_KEY),
+    );
   } catch {
     return false;
   }
@@ -152,17 +163,31 @@ const STEPS: Step[] = [
   },
 ];
 
-type Phase = "initial" | "moving" | "ready";
+type Mode = "centered" | "anchored" | "sheet";
 
 interface Viewport {
   width: number;
   height: number;
 }
 
-const FALLBACK_CARD_HEIGHT = 260;
 /** Kept constant across placements so measuring can't flip the layout mode. */
 const CARD_WIDTH = 400;
 const ARROW_SIZE = 14;
+const SCRIM_ALPHA = 0.72;
+const CARD_BLUR = 24;
+/** Scale the card materialises from, so it arrives rather than just fading. */
+const ENTER_SCALE = 0.94;
+/** Movement before a sheet drag commits, so a tap is never stolen. */
+const DRAG_THRESHOLD = 10;
+/** Fraction of the card the projected release must clear to dismiss. */
+const DISMISS_RATIO = 0.4;
+/**
+ * Deceleration used to project where a release is heading. Lower than the 0.998
+ * of scroll momentum, because a sheet must not fly away on a nudge: tuned so a
+ * deliberate ~450px/s flick clears the threshold from a standing start, while a
+ * 250px/s drift settles back.
+ */
+const DISMISS_DECELERATION = 0.9953;
 
 function readViewport(): Viewport {
   if (typeof window === "undefined") return { width: 1280, height: 800 };
@@ -180,62 +205,167 @@ function inflate(rect: TourRect, step: Step): TourRect {
   };
 }
 
+/**
+ * Every animated value the frame loop owns. Keeping these out of React state is
+ * the point: the loop writes transforms straight to the DOM, so travelling
+ * between steps costs zero re-renders and stays interruptible mid-flight.
+ */
+function createSprings() {
+  return {
+    spotX: new Spring(0, SPRING.move),
+    spotY: new Spring(0, SPRING.move),
+    spotW: new Spring(0, SPRING.move),
+    spotH: new Spring(0, SPRING.move),
+    cardX: new Spring(0, SPRING.move),
+    cardY: new Spring(0, SPRING.move),
+    /** Drives opacity, scale and backdrop blur together as one material. */
+    material: new Spring(0, SPRING.material),
+    ring: new Spring(0, SPRING.material),
+    placed: false,
+  };
+}
+
+type Springs = ReturnType<typeof createSprings>;
+
+/** The notch stays glued to the card edge, so it is placed from the live card. */
+function arrowPoint(
+  anchor: Anchored,
+  cardW: number,
+  cardH: number,
+  x: number,
+  y: number,
+) {
+  const half = ARROW_SIZE / 2;
+  switch (anchor.placement) {
+    case "right":
+      return { x: x - half, y: y + anchor.arrow - half };
+    case "left":
+      return { x: x + cardW - half, y: y + anchor.arrow - half };
+    case "bottom":
+      return { x: x + anchor.arrow - half, y: y - half };
+    case "top":
+    default:
+      return { x: x + anchor.arrow - half, y: y + cardH - half };
+  }
+}
+
 export default function OnboardingTour() {
-  const { isOpen: isMenuOpen, toggle: toggleMenu, close: closeMenu } = useMobileMenu();
+  const {
+    isOpen: isMenuOpen,
+    toggle: toggleMenu,
+    close: closeMenu,
+  } = useMobileMenu();
 
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-  const [phase, setPhase] = useState<Phase>("initial");
-  const [targetRect, setTargetRect] = useState<TourRect | null>(null);
-  const [cardSize, setCardSize] = useState({
-    width: CARD_WIDTH,
-    height: FALLBACK_CARD_HEIGHT,
-  });
+  const [mode, setMode] = useState<Mode>("centered");
   const [viewport, setViewport] = useState<Viewport>(readViewport);
   const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
+  const [reducedTransparency, setReducedTransparency] = useState(
+    prefersReducedTransparency,
+  );
   /** Bumped to replay the current step (breakpoint changes, target swaps). */
   const [revision, setRevision] = useState(0);
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const spotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLSpanElement>(null);
+
   const targetElRef = useRef<HTMLElement | null>(null);
+  const springsRef = useRef<Springs | null>(null);
   const runIdRef = useRef(0);
   const directionRef = useRef<1 | -1>(1);
+  const placementRef = useRef<Placement | undefined>(undefined);
+  const modeRef = useRef<Mode>("centered");
+  const safeBottomRef = useRef(0);
   const menuOpenedByTourRef = useRef(false);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
-  const activeRef = useRef(false);
+  const exitRef = useRef({ active: false, fly: false });
+  const dragRef = useRef({
+    pointerId: -1,
+    startY: 0,
+    offset: 0,
+    dragging: false,
+  });
+  const velocityRef = useRef(new VelocityTracker());
 
-  // The context recreates these on every render; mirroring them into a ref stops
-  // the step flow from restarting each time the drawer animates.
+  // Mirrors of render state the frame loop and gesture handlers read. Kept in
+  // refs so neither is torn down and restarted on every step change.
+  const stepIndexRef = useRef(0);
+  const activeRef = useRef(false);
+  const reducedMotionRef = useRef(false);
+  const reducedTransparencyRef = useRef(false);
+  const completeRef = useRef<() => void>(() => {});
   const menuRef = useRef({
     isOpen: isMenuOpen,
     toggle: toggleMenu,
     close: closeMenu,
   });
-  useEffect(() => {
-    menuRef.current = { isOpen: isMenuOpen, toggle: toggleMenu, close: closeMenu };
-    activeRef.current = active;
-  });
 
   const step = STEPS[stepIndex];
   const isLast = stepIndex === STEPS.length - 1;
 
-  /* ------------------------------------------------------------------ mount */
+  const getSprings = useCallback((): Springs => {
+    if (!springsRef.current) springsRef.current = createSprings();
+    return springsRef.current;
+  }, []);
+
+  /* ------------------------------------------------------------- mirroring  */
+
+  const teardown = useCallback(() => {
+    targetElRef.current = null;
+    springsRef.current = null;
+    exitRef.current = { active: false, fly: false };
+    dragRef.current = { pointerId: -1, startY: 0, offset: 0, dragging: false };
+    setActive(false);
+    lastFocusedRef.current?.focus?.();
+  }, []);
+
+  useEffect(() => {
+    menuRef.current = {
+      isOpen: isMenuOpen,
+      toggle: toggleMenu,
+      close: closeMenu,
+    };
+    stepIndexRef.current = stepIndex;
+    activeRef.current = active;
+    reducedMotionRef.current = reducedMotion;
+    reducedTransparencyRef.current = reducedTransparency;
+    completeRef.current = teardown;
+  });
+
+  /* -------------------------------------------------------- user preferences */
 
   useEffect(() => {
     if (!window.matchMedia) return;
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onChange = () => setReducedMotion(query.matches);
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const transparency = window.matchMedia(
+      "(prefers-reduced-transparency: reduce)",
+    );
+    const onMotion = () => setReducedMotion(motion.matches);
+    const onTransparency = () => setReducedTransparency(transparency.matches);
+    motion.addEventListener("change", onMotion);
+    transparency.addEventListener("change", onTransparency);
+    return () => {
+      motion.removeEventListener("change", onMotion);
+      transparency.removeEventListener("change", onTransparency);
+    };
   }, []);
 
   /* ------------------------------------------------------- start / restart  */
 
   const begin = useCallback(() => {
+    springsRef.current = null;
+    exitRef.current = { active: false, fly: false };
+    dragRef.current = { pointerId: -1, startY: 0, offset: 0, dragging: false };
+    targetElRef.current = null;
+    placementRef.current = STEPS[0].placement;
+    modeRef.current = "centered";
     directionRef.current = 1;
+    safeBottomRef.current = readSafeAreaBottom();
+    setMode("centered");
     setStepIndex(0);
-    setTargetRect(null);
-    setPhase("initial");
     setActive(true);
   }, []);
 
@@ -254,33 +384,38 @@ export default function OnboardingTour() {
 
   /* -------------------------------------------------------------- teardown  */
 
-  const finish = useCallback(() => {
+  /**
+   * Starts the exit. The card leaves along the path it arrived on (scale and
+   * fade), or continues downward when a swipe threw it there.
+   */
+  const beginExit = useCallback((fly = false) => {
+    if (exitRef.current.active) return;
     try {
       localStorage.setItem(STORAGE_KEY, "true");
     } catch {
       /* private mode — the tour simply runs again next visit */
     }
     runIdRef.current += 1;
+    exitRef.current = { active: true, fly };
     if (menuOpenedByTourRef.current) {
       menuRef.current.close();
       menuOpenedByTourRef.current = false;
     }
-    targetElRef.current = null;
-    setTargetRect(null);
-    setActive(false);
-    lastFocusedRef.current?.focus?.();
   }, []);
 
   const goTo = useCallback((next: number, direction: 1 | -1) => {
     directionRef.current = direction;
-    setPhase("moving");
+    placementRef.current = STEPS[next].placement;
+    // A step change is not a momentum gesture: back to the graceful spring.
+    springsRef.current?.cardX.configure(SPRING.move);
+    springsRef.current?.cardY.configure(SPRING.move);
     setStepIndex(next);
   }, []);
 
   const handleNext = useCallback(() => {
-    if (stepIndex >= STEPS.length - 1) finish();
+    if (stepIndex >= STEPS.length - 1) beginExit();
     else goTo(stepIndex + 1, 1);
-  }, [stepIndex, finish, goTo]);
+  }, [stepIndex, beginExit, goTo]);
 
   const handlePrev = useCallback(() => {
     if (stepIndex > 0) goTo(stepIndex - 1, -1);
@@ -295,15 +430,17 @@ export default function OnboardingTour() {
     const onResize = () => {
       setViewport(readViewport());
 
-      // Height-only changes are the mobile URL bar collapsing — repositioning
-      // the card is enough. A width change means the layout itself moved, so
-      // replay the step once the resize settles to re-scroll and re-anchor.
+      // Height-only changes are the mobile URL bar collapsing — the frame loop
+      // already repositions for that. A width change moved the layout itself,
+      // so replay the step once the resize settles to re-scroll and re-anchor.
       if (window.innerWidth === lastWidth) return;
       lastWidth = window.innerWidth;
       clearTimeout(settleTimer);
       settleTimer = setTimeout(() => {
+        // Measuring the safe area touches the DOM, so it waits for the settle
+        // rather than running on every resize event of a drag.
+        safeBottomRef.current = readSafeAreaBottom();
         if (!activeRef.current) return;
-        setPhase("moving");
         setRevision((r) => r + 1);
       }, 220);
     };
@@ -317,29 +454,6 @@ export default function OnboardingTour() {
     };
   }, []);
 
-  /* ---------------------------------------------------------- card measuring */
-
-  useEffect(() => {
-    if (!active) return;
-    const el = cardRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-
-    const measure = () => {
-      const rect = el.getBoundingClientRect();
-      setCardSize((prev) =>
-        Math.abs(prev.width - rect.width) < 0.5 &&
-        Math.abs(prev.height - rect.height) < 0.5
-          ? prev
-          : { width: rect.width, height: rect.height },
-      );
-    };
-
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [active, stepIndex]);
-
   /* ------------------------------------------------------------- step flow  */
 
   useEffect(() => {
@@ -350,22 +464,10 @@ export default function OnboardingTour() {
     const current = STEPS[stepIndex];
     const smooth = !reducedMotion;
 
-    /**
-     * Space the card will cover at the bottom of the viewport. Measured from
-     * the live card, which already holds this step's copy because effects run
-     * after commit.
-     */
-    const reservedBottomFor = (rect: TourRect): number => {
-      const box = cardRef.current?.getBoundingClientRect();
-      const card = {
-        width: box?.width || CARD_WIDTH,
-        height: box?.height || FALLBACK_CARD_HEIGHT,
-      };
-      const vp = { width: window.innerWidth, height: window.innerHeight };
-      const anchorable =
-        vp.width >= SHEET_BREAKPOINT &&
-        anchorCard(inflate(rect, current), card, vp, current.placement) !== null;
-      return anchorable ? 0 : card.height + 32;
+    /** Space the card covers at the bottom, measured from the live card. */
+    const reservedBottom = (): number => {
+      if (modeRef.current !== "sheet") return 0;
+      return (cardRef.current?.offsetHeight ?? 260) + 32;
     };
 
     (async () => {
@@ -376,14 +478,12 @@ export default function OnboardingTour() {
           menuOpenedByTourRef.current = false;
         }
         targetElRef.current = null;
-        if (stale()) return;
-        setTargetRect(null);
-        setPhase("ready");
         return;
       }
 
       // The sidebar only exists on screen behind the drawer below `lg`.
-      const needsDrawer = Boolean(current.openMobileMenu) && window.innerWidth < 1024;
+      const needsDrawer =
+        Boolean(current.openMobileMenu) && window.innerWidth < 1024;
 
       if (needsDrawer && !menuRef.current.isOpen) {
         menuOpenedByTourRef.current = true;
@@ -409,28 +509,22 @@ export default function OnboardingTour() {
           }
         }
         targetElRef.current = null;
-        setTargetRect(null);
-        setPhase("ready");
         return;
       }
 
+      // Handing the loop the element is enough: the spotlight and card spring
+      // toward it and keep tracking it through the scroll that follows.
       targetElRef.current = el;
-      const initial = toRect(el);
-      setTargetRect(initial);
+      await nextFrame();
+      if (stale()) return;
 
-      scrollTargetIntoView(el, reservedBottomFor(initial), smooth);
+      scrollTargetIntoView(el, reservedBottom(), smooth);
       await waitForSettle(el, smooth ? 900 : 120);
       if (stale()) return;
 
       // A second pass catches lazily-loaded content that shifted the target
       // while the first scroll was still animating.
-      const settled = toRect(el);
-      scrollTargetIntoView(el, reservedBottomFor(settled), smooth);
-      await waitForSettle(el, smooth ? 500 : 60);
-      if (stale()) return;
-
-      setTargetRect(toRect(el));
-      setPhase("ready");
+      scrollTargetIntoView(el, reservedBottom(), smooth);
     })();
 
     return () => {
@@ -439,34 +533,281 @@ export default function OnboardingTour() {
     };
   }, [active, stepIndex, revision, reducedMotion]);
 
-  /* ------------------------------------------------- follow the target live */
+  /* ------------------------------------------------------------ frame loop  */
 
   useEffect(() => {
     if (!active) return;
     let frame = 0;
+    let last = performance.now();
 
-    const selector = STEPS[stepIndex].target;
+    const tick = (now: number) => {
+      frame = requestAnimationFrame(tick);
+      const dt = (now - last) / 1000;
+      last = now;
 
-    const tick = () => {
-      const el = targetElRef.current;
-      if (el) {
-        const next = toRect(el);
-        // A collapsed box means the node was hidden or swapped out (a breakpoint
-        // change re-renders the sidebar into the other <aside>); re-resolve.
-        if (!el.isConnected || (next.width < 2 && next.height < 2)) {
-          const replacement = selector ? resolveTarget(selector) : null;
-          targetElRef.current = replacement;
-          setTargetRect(replacement ? toRect(replacement) : null);
-        } else {
-          setTargetRect((prev) => (rectsEqual(prev, next) ? prev : next));
+      const card = cardRef.current;
+      const spot = spotRef.current;
+      if (!card || !spot) return;
+
+      const springs = getSprings();
+      const still = reducedMotionRef.current;
+      const exiting = exitRef.current.active;
+      const current = STEPS[stepIndexRef.current];
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const cardW = card.offsetWidth;
+      const cardH = card.offsetHeight;
+
+      /* 1. Where is the target right now? */
+      let box: TourRect | null = null;
+      let el = targetElRef.current;
+
+      if (el && current.target) {
+        const rect = toRect(el);
+        // React can swap the node out from under us — a breakpoint change
+        // re-renders the sidebar into the other <aside>. Re-resolve rather
+        // than losing the spotlight until the next replay.
+        if (!el.isConnected || (rect.width < 2 && rect.height < 2)) {
+          el = resolveTarget(current.target);
+          targetElRef.current = el;
         }
       }
-      frame = requestAnimationFrame(tick);
+
+      if (el && el.isConnected) {
+        const rect = toRect(el);
+        if (rect.width >= 2 || rect.height >= 2) box = inflate(rect, current);
+      }
+
+      /* 2. Layout mode and the card's destination. */
+      let nextMode: Mode;
+      let anchor: Anchored | null = null;
+      let destX: number;
+      let destY: number;
+
+      if (!box) {
+        nextMode = "centered";
+        destX = (vw - cardW) / 2;
+        destY = (vh - cardH) / 2;
+      } else {
+        // Passing the current placement back in gives hysteresis: it only
+        // flips when it genuinely stops fitting, never mid-flight.
+        anchor =
+          vw >= SHEET_BREAKPOINT
+            ? anchorCard(
+                box,
+                { width: cardW, height: cardH },
+                { width: vw, height: vh },
+                placementRef.current,
+              )
+            : null;
+
+        if (anchor) {
+          nextMode = "anchored";
+          placementRef.current = anchor.placement;
+          destX = anchor.left;
+          destY = anchor.top;
+        } else {
+          nextMode = "sheet";
+          destX = Math.max(MARGIN, (vw - cardW) / 2);
+          destY = vh - cardH - MARGIN - safeBottomRef.current;
+        }
+      }
+
+      if (nextMode !== modeRef.current) {
+        modeRef.current = nextMode;
+        setMode(nextMode);
+      }
+
+      /* 3. Targets. With no target the spotlight closes where it stands, so
+            the scrim never cuts abruptly between steps. */
+      const spotBox = box ?? {
+        left: springs.spotX.value + springs.spotW.value / 2,
+        top: springs.spotY.value + springs.spotH.value / 2,
+        width: 0,
+        height: 0,
+      };
+
+      springs.spotX.setTarget(spotBox.left);
+      springs.spotY.setTarget(spotBox.top);
+      springs.spotW.setTarget(spotBox.width);
+      springs.spotH.setTarget(spotBox.height);
+      springs.cardX.setTarget(destX);
+      springs.cardY.setTarget(exitRef.current.fly ? vh + cardH : destY);
+      springs.ring.setTarget(box ? 1 : 0);
+      springs.material.setTarget(exiting ? 0 : 1);
+
+      /* 4. First frame places without flying in from the origin. */
+      if (!springs.placed) {
+        springs.placed = true;
+        springs.spotX.snap(spotBox.left);
+        springs.spotY.snap(spotBox.top);
+        springs.spotW.snap(spotBox.width);
+        springs.spotH.snap(spotBox.height);
+        springs.cardX.snap(destX);
+        springs.cardY.snap(destY);
+        springs.ring.snap(box ? 1 : 0);
+        // material is deliberately left at 0 so the card materialises in.
+      }
+
+      /* 5. Advance. Reduced motion keeps the cross-fade but drops the travel. */
+      if (still) {
+        springs.spotX.snap(spotBox.left);
+        springs.spotY.snap(spotBox.top);
+        springs.spotW.snap(spotBox.width);
+        springs.spotH.snap(spotBox.height);
+        springs.cardX.snap(destX);
+        springs.cardY.snap(exitRef.current.fly ? vh + cardH : destY);
+        springs.ring.snap(box ? 1 : 0);
+        springs.material.setTarget(exiting ? 0 : 1);
+        springs.material.step(dt);
+      } else {
+        springs.spotX.step(dt);
+        springs.spotY.step(dt);
+        springs.spotW.step(dt);
+        springs.spotH.step(dt);
+        springs.cardX.step(dt);
+        springs.cardY.step(dt);
+        springs.ring.step(dt);
+        springs.material.step(dt);
+      }
+
+      /* 6. Write the frame. Position is transform-only so it stays on the
+            compositor; the spotlight's box is what carries the scrim. */
+      const m = springs.material.value;
+      const drag = dragRef.current.offset;
+      const scale = ENTER_SCALE + (1 - ENTER_SCALE) * m;
+
+      card.style.transform = `translate3d(${springs.cardX.value.toFixed(2)}px, ${(
+        springs.cardY.value + drag
+      ).toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+      card.style.opacity = m.toFixed(3);
+
+      if (!reducedTransparencyRef.current) {
+        // Blur and scale move together, so the surface reads as a real
+        // material arriving rather than a flat rectangle fading up.
+        const blur = `saturate(180%) blur(${(m * CARD_BLUR).toFixed(1)}px)`;
+        card.style.backdropFilter = blur;
+        card.style.setProperty("-webkit-backdrop-filter", blur);
+      }
+
+      const spotTransform = `translate3d(${springs.spotX.value.toFixed(2)}px, ${springs.spotY.value.toFixed(2)}px, 0)`;
+      const spotW = `${Math.max(0, springs.spotW.value).toFixed(2)}px`;
+      const spotH = `${Math.max(0, springs.spotH.value).toFixed(2)}px`;
+
+      spot.style.transform = spotTransform;
+      spot.style.width = spotW;
+      spot.style.height = spotH;
+      spot.style.boxShadow = `0 0 0 9999px rgba(9, 9, 11, ${(SCRIM_ALPHA * m).toFixed(3)})`;
+
+      const ring = ringRef.current;
+      if (ring) {
+        ring.style.transform = spotTransform;
+        ring.style.width = spotW;
+        ring.style.height = spotH;
+        ring.style.opacity = (springs.ring.value * m).toFixed(3);
+      }
+
+      const arrow = arrowRef.current;
+      if (arrow) {
+        if (anchor) {
+          const point = arrowPoint(
+            anchor,
+            cardW,
+            cardH,
+            springs.cardX.value,
+            springs.cardY.value + drag,
+          );
+          arrow.style.transform = `translate3d(${point.x.toFixed(2)}px, ${point.y.toFixed(2)}px, 0) rotate(45deg)`;
+          arrow.style.opacity = m.toFixed(3);
+        } else {
+          arrow.style.opacity = "0";
+        }
+      }
+
+      /* 7. The exit owns its own completion. */
+      if (exiting && m < 0.01) {
+        cancelAnimationFrame(frame);
+        completeRef.current();
+      }
     };
 
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [active, stepIndex]);
+  }, [active, getSprings]);
+
+  /* --------------------------------------------------- swipe-to-dismiss     */
+
+  const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (modeRef.current !== "sheet" || exitRef.current.active) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    const card = cardRef.current;
+    if (!card) return;
+    // Controls keep working, and the card's own scroll wins while it has room.
+    if ((event.target as HTMLElement).closest("button")) return;
+    if (card.scrollTop > 0) return;
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      offset: 0,
+      dragging: false,
+    };
+    velocityRef.current.reset();
+    velocityRef.current.add(event.clientY, event.timeStamp);
+  }, []);
+
+  const onPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (drag.pointerId !== event.pointerId) return;
+
+    const delta = event.clientY - drag.startY;
+    if (!drag.dragging) {
+      // Hysteresis, so a tap on the card is never mistaken for a drag.
+      if (Math.abs(delta) < DRAG_THRESHOLD) return;
+      drag.dragging = true;
+      cardRef.current?.setPointerCapture(event.pointerId);
+    }
+
+    velocityRef.current.add(event.clientY, event.timeStamp);
+    // Downward tracks the finger exactly; upward resists instead of stopping.
+    drag.offset = delta >= 0 ? delta : -rubberband(-delta, window.innerHeight);
+  }, []);
+
+  const onPointerEnd = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const drag = dragRef.current;
+      if (drag.pointerId !== event.pointerId) return;
+
+      const { dragging, offset } = drag;
+      dragRef.current = {
+        pointerId: -1,
+        startY: 0,
+        offset: 0,
+        dragging: false,
+      };
+      if (!dragging) return;
+
+      const springs = springsRef.current;
+      if (!springs) return;
+
+      const velocity = velocityRef.current.get();
+      const cardH = cardRef.current?.offsetHeight ?? 0;
+
+      // Fold the live drag into the spring and hand it the release velocity, so
+      // there is no seam between the finger and the animation that follows.
+      springs.cardY.value += offset;
+      springs.cardY.velocity = velocity;
+      springs.cardY.configure(SPRING.momentum);
+
+      // Land where the flick is going, not where the finger happened to stop.
+      const projected =
+        offset + projectMomentum(velocity, DISMISS_DECELERATION);
+      if (projected > cardH * DISMISS_RATIO) beginExit(true);
+    },
+    [beginExit],
+  );
 
   /* ------------------------------------------------------ keyboard + focus  */
 
@@ -483,7 +824,7 @@ export default function OnboardingTour() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        finish();
+        beginExit();
         return;
       }
       if (event.key === "ArrowRight") {
@@ -520,143 +861,58 @@ export default function OnboardingTour() {
 
     document.addEventListener("keydown", onKeyDown, true);
     return () => document.removeEventListener("keydown", onKeyDown, true);
-  }, [active, finish, handleNext, handlePrev]);
+  }, [active, beginExit, handleNext, handlePrev]);
 
-  /* --------------------------------------------------------------- geometry */
+  /* --------------------------------------------------------------- render   */
 
-  const spotlight = useMemo(
-    () => (targetRect ? inflate(targetRect, step) : null),
-    [targetRect, step],
+  const cardWidth = useMemo(
+    () => Math.min(CARD_WIDTH, viewport.width - MARGIN * 2),
+    [viewport.width],
   );
-
-  const anchored = useMemo(() => {
-    if (!spotlight || viewport.width < SHEET_BREAKPOINT) return null;
-    return anchorCard(spotlight, cardSize, viewport, step.placement);
-  }, [spotlight, cardSize, viewport, step.placement]);
-
-  const mode: "centered" | "sheet" | "anchored" = !targetRect
-    ? "centered"
-    : anchored
-      ? "anchored"
-      : "sheet";
-
-  const cardStyle = useMemo<React.CSSProperties>(() => {
-    const width = Math.min(CARD_WIDTH, viewport.width - MARGIN * 2);
-    const maxHeight = viewport.height - MARGIN * 2;
-    const centeredLeft = Math.max(MARGIN, (viewport.width - width) / 2);
-
-    if (mode === "anchored" && anchored) {
-      return { top: anchored.top, left: anchored.left, width, maxHeight };
-    }
-
-    if (mode === "sheet") {
-      return {
-        left: centeredLeft,
-        bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
-        width,
-        maxHeight,
-      };
-    }
-
-    return {
-      left: centeredLeft,
-      top: Math.max(MARGIN, (viewport.height - Math.min(cardSize.height, maxHeight)) / 2),
-      width,
-      maxHeight,
-    };
-  }, [mode, anchored, viewport, cardSize.height]);
-
-  const arrowStyle = useMemo<React.CSSProperties | null>(() => {
-    if (mode !== "anchored" || !anchored) return null;
-    const half = ARROW_SIZE / 2;
-    const along = anchored.arrow - half;
-
-    switch (anchored.placement) {
-      case "right":
-        return { left: anchored.left - half, top: anchored.top + along };
-      case "left":
-        return {
-          left: anchored.left + cardSize.width - half,
-          top: anchored.top + along,
-        };
-      case "bottom":
-        return { left: anchored.left + along, top: anchored.top - half };
-      case "top":
-      default:
-        return {
-          left: anchored.left + along,
-          top: anchored.top + cardSize.height - half,
-        };
-    }
-  }, [mode, anchored, cardSize.width, cardSize.height]);
 
   if (!active || typeof document === "undefined") return null;
 
   const Icon = step.icon;
-  const motion = reducedMotion
-    ? "none"
-    : "top 420ms cubic-bezier(0.32,0.72,0,1), left 420ms cubic-bezier(0.32,0.72,0,1), width 420ms cubic-bezier(0.32,0.72,0,1), height 420ms cubic-bezier(0.32,0.72,0,1)";
+  const isSheet = mode === "sheet";
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[2147483000] overscroll-contain"
-      role="presentation"
-    >
-      {/* Scrim: a spotlight cut-out when we have a target, flat otherwise. */}
-      {spotlight ? (
-        <>
-          <div
-            className="pointer-events-none fixed"
-            style={{
-              top: spotlight.top,
-              left: spotlight.left,
-              width: spotlight.width,
-              height: spotlight.height,
-              borderRadius: step.radius ?? 20,
-              boxShadow: "0 0 0 9999px rgba(9, 9, 11, 0.72)",
-              transition: motion,
-            }}
-          />
-          <div
-            className="pointer-events-none fixed"
-            style={{
-              top: spotlight.top,
-              left: spotlight.left,
-              width: spotlight.width,
-              height: spotlight.height,
-              borderRadius: step.radius ?? 20,
-              border: "2px solid rgba(229, 193, 88, 0.9)",
-              boxShadow:
-                "0 0 0 4px rgba(229, 193, 88, 0.18), 0 12px 40px -8px rgba(0,0,0,0.6)",
-              transition: motion,
-              opacity: phase === "ready" ? 1 : 0.55,
-            }}
-          />
-        </>
-      ) : (
-        <div
-          className="pointer-events-auto fixed inset-0 backdrop-blur-[2px]"
-          style={{ backgroundColor: "rgba(9, 9, 11, 0.72)" }}
-        />
-      )}
+    <div className="fixed inset-0 z-[2147483000]" role="presentation">
+      {/* Spotlight: the element's own box is the hole, its shadow is the scrim */}
+      <div
+        ref={spotRef}
+        className="pointer-events-none fixed left-0 top-0"
+        style={{
+          borderRadius: step.radius ?? 20,
+          transition: "border-radius 300ms ease",
+          willChange: "transform, width, height",
+          boxShadow: "0 0 0 9999px rgba(9, 9, 11, 0)",
+        }}
+      />
+      <div
+        ref={ringRef}
+        className="pointer-events-none fixed left-0 top-0 opacity-0"
+        style={{
+          borderRadius: step.radius ?? 20,
+          transition: "border-radius 300ms ease",
+          willChange: "transform, width, height, opacity",
+          border: "2px solid rgba(229, 193, 88, 0.9)",
+          boxShadow:
+            "0 0 0 4px rgba(229, 193, 88, 0.16), 0 12px 40px -8px rgba(0, 0, 0, 0.6)",
+        }}
+      />
 
-      {/* Notch pointing at the highlighted element (painted under the card) */}
-      {arrowStyle && (
-        <span
-          aria-hidden
-          className="pointer-events-none fixed rotate-45 border border-gray-200 bg-white dark:border-white/10 dark:bg-[#0B0B0C]"
-          style={{
-            ...arrowStyle,
-            width: ARROW_SIZE,
-            height: ARROW_SIZE,
-            borderRadius: 3,
-            transition: reducedMotion
-              ? "opacity 120ms linear"
-              : `${motion}, opacity 260ms ease`,
-            opacity: phase === "initial" ? 0 : 1,
-          }}
-        />
-      )}
+      {/* Notch, painted before the card so the card's edge hides its inner half */}
+      <span
+        ref={arrowRef}
+        aria-hidden
+        className="tour-surface pointer-events-none fixed left-0 top-0 border border-gray-200/80 opacity-0 dark:border-white/10"
+        style={{
+          width: ARROW_SIZE,
+          height: ARROW_SIZE,
+          borderRadius: 3,
+          willChange: "transform, opacity",
+        }}
+      />
 
       {/* Tour card */}
       <div
@@ -666,31 +922,48 @@ export default function OnboardingTour() {
         aria-labelledby="tour-title"
         aria-describedby="tour-description"
         tabIndex={-1}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerEnd}
+        onPointerCancel={onPointerEnd}
         className={cn(
-          "pointer-events-auto fixed overflow-y-auto overscroll-contain rounded-3xl",
-          "border border-gray-200 bg-white p-5 shadow-2xl outline-none",
-          "dark:border-white/10 dark:bg-[#0B0B0C] sm:p-6",
+          "tour-surface pointer-events-auto fixed left-0 top-0 overflow-y-auto",
+          "overscroll-contain rounded-[26px] border border-gray-200/80 p-5",
+          "shadow-[0_24px_70px_-16px_rgba(0,0,0,0.45)] outline-none",
+          "dark:border-white/10 sm:p-6",
         )}
         style={{
-          ...cardStyle,
-          transition: reducedMotion
-            ? "opacity 120ms linear"
-            : `${motion}, opacity 260ms ease`,
-          opacity: phase === "initial" ? 0 : 1,
+          width: cardWidth,
+          maxHeight: viewport.height - MARGIN * 2,
+          opacity: 0,
+          touchAction: isSheet ? "none" : undefined,
+          willChange: "transform, opacity",
         }}
       >
+        {/* Grabber: the affordance that says this sheet can be thrown away */}
+        {isSheet && (
+          <div
+            aria-hidden
+            className="mx-auto mb-4 h-1 w-9 rounded-full bg-black/15 dark:bg-white/25"
+          />
+        )}
+
         <div className="flex items-start gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-yellow-500/10 text-yellow-600 dark:text-[#E5C158]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-yellow-500/12 text-yellow-600 dark:text-[#E5C158]">
             <Icon className="h-5.5 w-5.5" weight="bold" />
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 dark:text-zinc-500">
+            <p
+              className="text-[10px] font-bold uppercase text-gray-500 dark:text-zinc-400"
+              style={{ letterSpacing: "0.16em" }}
+            >
               Step {stepIndex + 1} of {STEPS.length}
             </p>
             <h3
               id="tour-title"
-              className="mt-1 text-base font-black leading-snug tracking-tight text-gray-900 dark:text-white sm:text-lg"
+              className="mt-1 text-[17px] font-black text-gray-900 dark:text-white sm:text-[19px]"
+              style={{ letterSpacing: "-0.015em", lineHeight: 1.25 }}
             >
               {step.title}
             </h3>
@@ -698,9 +971,9 @@ export default function OnboardingTour() {
 
           <button
             type="button"
-            onClick={finish}
+            onClick={() => beginExit()}
             aria-label="Skip the walkthrough"
-            className="-mr-1 -mt-1 shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-white"
+            className="-mr-1 -mt-1 shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-[transform,color,background-color] duration-100 ease-out hover:bg-gray-100 hover:text-gray-700 active:scale-90 dark:hover:bg-white/10 dark:hover:text-white"
           >
             <X className="h-4 w-4" weight="bold" />
           </button>
@@ -708,12 +981,13 @@ export default function OnboardingTour() {
 
         <p
           id="tour-description"
-          className="mt-3 text-xs font-medium leading-relaxed text-gray-500 dark:text-zinc-400 sm:text-[13px]"
+          className="mt-3 text-[13px] font-medium text-gray-600 dark:text-zinc-300"
+          style={{ lineHeight: 1.62 }}
         >
           {step.description}
         </p>
 
-        <div className="mt-5 flex items-center justify-between gap-4 border-t border-gray-100 pt-4 dark:border-zinc-800/70">
+        <div className="mt-5 flex items-center justify-between gap-4 border-t border-gray-200/70 pt-4 dark:border-white/10">
           <div className="flex items-center gap-1.5">
             {STEPS.map((s, idx) => (
               <button
@@ -724,12 +998,12 @@ export default function OnboardingTour() {
                 aria-label={`Go to step ${idx + 1}: ${s.title}`}
                 aria-current={idx === stepIndex ? "step" : undefined}
                 className={cn(
-                  "h-1.5 cursor-pointer rounded-full transition-all duration-300",
+                  "h-1.5 cursor-pointer rounded-full transition-[width,background-color] duration-300 ease-out",
                   idx === stepIndex
                     ? "w-5 bg-yellow-500 dark:bg-[#E5C158]"
                     : idx < stepIndex
-                      ? "w-1.5 bg-yellow-500/40 dark:bg-[#E5C158]/40"
-                      : "w-1.5 bg-gray-200 dark:bg-zinc-800",
+                      ? "w-1.5 bg-yellow-500/45 dark:bg-[#E5C158]/45"
+                      : "w-1.5 bg-gray-300 dark:bg-white/20",
                 )}
               />
             ))}
@@ -738,8 +1012,8 @@ export default function OnboardingTour() {
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
-              onClick={finish}
-              className="hidden cursor-pointer px-2 text-[11px] font-bold text-gray-400 transition-colors hover:text-gray-700 dark:hover:text-white sm:block"
+              onClick={() => beginExit()}
+              className="hidden cursor-pointer px-2 text-[11px] font-bold text-gray-500 transition-[transform,color] duration-100 ease-out hover:text-gray-900 active:scale-95 dark:text-zinc-400 dark:hover:text-white sm:block"
             >
               Skip
             </button>
@@ -749,7 +1023,7 @@ export default function OnboardingTour() {
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous step"
-                className="cursor-pointer rounded-xl bg-gray-100 p-2 text-gray-700 transition-all hover:bg-gray-200 active:scale-95 dark:bg-zinc-900 dark:text-gray-300 dark:hover:bg-zinc-800"
+                className="cursor-pointer rounded-xl bg-gray-100 p-2 text-gray-700 transition-[transform,background-color] duration-100 ease-out hover:bg-gray-200 active:scale-[0.94] dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/15"
               >
                 <CaretLeft className="h-4 w-4" weight="bold" />
               </button>
@@ -758,7 +1032,7 @@ export default function OnboardingTour() {
             <button
               type="button"
               onClick={handleNext}
-              className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-xs font-black text-white shadow-md transition-all hover:bg-zinc-800 active:scale-95 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-xs font-black text-white shadow-md transition-[transform,background-color] duration-100 ease-out hover:bg-zinc-800 active:scale-[0.96] dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             >
               <span>{isLast ? "Get started" : "Continue"}</span>
               <CaretRight className="h-3.5 w-3.5" weight="bold" />

@@ -80,6 +80,17 @@ const SecureLinkSchema = new mongoose.Schema({
   view_count: { type: Number, default: 0 },
   allow_download: { type: Boolean, default: false },
   
+  // IP Whitelisting & Geo-Fencing (Enterprise Security)
+  ip_restriction_enabled: { type: Boolean, default: false },
+  allowed_ips: [{ type: String }],
+  geofencing_enabled: { type: Boolean, default: false },
+  allowed_countries: [{ type: String }], // ISO-3166-1 alpha-2 codes (US, GB, CA, etc.)
+
+  // SOC2 Retention & Auto-Purge
+  soc2_retention_days: { type: Number, default: 90 },
+  auto_delete_expired: { type: Boolean, default: true },
+  deleted_at: { type: Date },
+
   // Watermarking Config
   watermark_enabled: { type: Boolean, default: true },
   watermark_text: { type: String, default: "CONFIDENTIAL • {email} • {date}" },

@@ -45,6 +45,45 @@ body {
     @apply bg-white/60 backdrop-blur-md border-b border-gray-100/50 sticky top-0 z-50 dark:bg-black/60 dark:border-zinc-800;
   }
 
+  /* Onboarding tour surface: a translucent material that floats over the
+     dimmed dashboard. The blur radius is animated by the tour's frame loop, so
+     only the background and fallbacks live here. */
+  .tour-surface {
+    background: rgba(255, 255, 255, 0.78);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+  }
+
+  .dark .tour-surface {
+    background: rgba(15, 15, 17, 0.72);
+  }
+
+  /* Frostier, not see-through, when the user asks for less transparency. The
+     tour skips its inline blur writes under the same query. */
+  @media (prefers-reduced-transparency: reduce) {
+    .tour-surface {
+      background: #ffffff;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .dark .tour-surface {
+      background: #0b0b0c;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .tour-surface {
+      background: #ffffff;
+      border-color: #000000;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .dark .tour-surface {
+      background: #000000;
+      border-color: #ffffff;
+    }
+  }
+
   .thin-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(0,0,0,0.1) transparent;
