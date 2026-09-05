@@ -14,6 +14,9 @@ import {
   RocketLaunch,
   Compass,
   Sparkle,
+  DownloadSimple,
+  FileArchive,
+  ShieldCheck,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -23,6 +26,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user, token, logout, refreshUser } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [downloadingArchive, setDownloadingArchive] = useState(false);
   const [dealFlowAlerts, setDealFlowAlerts] = useState(
     user?.preferences?.dealFlowAlerts !== false,
   );
@@ -46,6 +50,38 @@ export default function SettingsPage() {
       if (refreshUser) refreshUser();
     } catch (e) {
       console.error("Failed to save preference:", e);
+    }
+  };
+
+  const handleDownloadArchive = async () => {
+    setDownloadingArchive(true);
+    try {
+      const res = await fetch("/api/user/data-archive", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to export data archive");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `foundex_data_archive_${user?.email?.replace(/[@.]/g, "_") || "user"}_${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("GDPR Data Archive downloaded successfully!");
+    } catch (error: any) {
+      console.error("Archive download error:", error);
+      toast.error("Failed to download data archive. Please try again.");
+    } finally {
+      setDownloadingArchive(false);
     }
   };
 
@@ -326,31 +362,69 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Privacy Section */}
+        {/* Privacy & GDPR Compliance Section */}
         <div className="glass-card p-8 rounded-3xl border border-white/60 bg-white/40 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-gray-400" weight="bold" />
-            Privacy & Data Policy
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-emerald-500" weight="bold" />
+            Privacy & GDPR Compliance
           </h2>
-          <div className="space-y-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+            Under GDPR (EU 2016/679) Article 15 & 20, you have the right to request a complete, machine-readable export of all your personal data, ventures, cap table records, pipeline interactions, and audit logs.
+          </p>
+
+          <div className="p-6 rounded-2xl border border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/10 dark:border-emerald-500/30 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
+                <FileArchive className="w-6 h-6" weight="duotone" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm">
+                  Download My Data Archive (GDPR / CCPA)
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 max-w-lg">
+                  Generate an immutable JSON bundle with HMAC-SHA256 cryptographic verification containing your user profile, startups, cap tables, pipeline deals, updates, secure links, and audit history.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleDownloadArchive}
+              disabled={downloadingArchive}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95 disabled:opacity-50 shrink-0"
+            >
+              {downloadingArchive ? (
+                <>
+                  <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
+                  <span>Compiling Archive...</span>
+                </>
+              ) : (
+                <>
+                  <DownloadSimple className="w-4 h-4" weight="bold" />
+                  <span>Download Data Archive</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="space-y-3 pt-2">
             <Link href="/dashboard/privacy">
               <button className="text-left w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
+                <span className="font-medium text-gray-700 dark:text-gray-300 text-sm">
                   Privacy Policy
                 </span>
                 <ArrowUpRight
-                  className="w-4 h-4 text-gray-400 group-hover:text-gray-600"
+                  className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200"
                   weight="bold"
                 />
               </button>
             </Link>
             <Link href="/dashboard/privacy">
               <button className="text-left w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors group">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Data Terms & Usage
+                <span className="font-medium text-gray-700 dark:text-gray-300 text-sm">
+                  Data Terms & SOC2 Compliance Controls
                 </span>
                 <ArrowUpRight
-                  className="w-4 h-4 text-gray-400 group-hover:text-gray-600"
+                  className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200"
                   weight="bold"
                 />
               </button>

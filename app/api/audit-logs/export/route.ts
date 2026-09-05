@@ -60,11 +60,14 @@ export async function GET(req: Request) {
       if (endDate) query.created_at.$lte = new Date(endDate);
     }
 
+    const rawLimit = url.searchParams.get("limit");
+    const limit = rawLimit ? Math.min(Math.max(parseInt(rawLimit, 10), 1), 20000) : 5000;
+
     // Fetch logs with populated user details
     const logs = await AuditLog.find(query)
       .populate("user_id", "email full_name name")
       .sort({ created_at: -1 })
-      .limit(500);
+      .limit(limit);
 
     const exportTimestamp = new Date().toISOString();
     const rawPayloadToSign = JSON.stringify({
