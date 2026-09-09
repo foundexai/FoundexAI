@@ -17,6 +17,8 @@ import {
   DownloadSimple,
   FileArchive,
   ShieldCheck,
+  Code,
+  Key,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -156,6 +158,25 @@ export default function SettingsPage() {
             <Sparkle className="w-4 h-4 text-yellow-500" weight="fill" />
             <span>Replay Workspace Walkthrough</span>
           </button>
+        </div>
+
+        {/* Developer API Gateway & External Integrations */}
+        <div className="glass-card p-8 rounded-3xl border border-white/60 bg-white/40 shadow-sm dark:bg-zinc-900/60 dark:border-zinc-800">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+            <Code className="w-5 h-5 text-yellow-500" weight="bold" />
+            Developer API Gateway & Webhooks
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+            Generate programmatic secret tokens, subscribe to real-time event webhooks, and manage external connectors for HubSpot, QuickBooks, and Stripe.
+          </p>
+
+          <Link href="/dashboard/settings/developer">
+            <button className="px-5 py-3 bg-yellow-500 hover:bg-yellow-600 text-black text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95">
+              <Key className="w-4 h-4" weight="bold" />
+              <span>Manage API Keys, Webhooks & Integrations</span>
+              <ArrowUpRight className="w-4 h-4" weight="bold" />
+            </button>
+          </Link>
         </div>
 
         {/* Role-specific Section */}
