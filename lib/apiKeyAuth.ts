@@ -34,6 +34,17 @@ export async function generateNewApiKey({
 }): Promise<{ rawKey: string; keyRecord: any }> {
   await connectDB();
 
+  let validatedStartupId = startupId;
+  if (startupId) {
+    const ownedStartup = await Startup.findOne({ _id: startupId, user_id: userId }).lean();
+    if (!ownedStartup) {
+      const error: any = new Error("Forbidden: You do not own or administer the specified startup.");
+      error.statusCode = 403;
+      throw error;
+    }
+    validatedStartupId = ownedStartup._id.toString();
+  }
+
   const randomBytes = crypto.randomBytes(24).toString("hex");
   const rawKey = `fdx_live_${randomBytes}`;
   const keyPrefix = rawKey.substring(0, 16);
@@ -46,7 +57,7 @@ export async function generateNewApiKey({
 
   const keyRecord = await ApiKey.create({
     user_id: userId,
-    startup_id: startupId,
+    startup_id: validatedStartupId,
     name,
     key_prefix: keyPrefix,
     hashed_secret: hashedSecret,
@@ -121,10 +132,26 @@ export async function verifyApiKeyRequest(
       last_used_ip: clientIp,
     }).exec().catch((e) => console.error("Failed to update API key last_used:", e));
 
-    const [user, startup] = await Promise.all([
-      User.findById(apiKey.user_id).select("-password -password_hash").lean(),
-      apiKey.startup_id ? Startup.findById(apiKey.startup_id).lean() : null,
-    ]);
+    const user = await User.findById(apiKey.user_id).select("-password -password_hash").lean();
+    if (!user) {
+      return {
+        success: false,
+        error: "Forbidden: API Key user account no longer exists.",
+        statusCode: 403,
+      };
+    }
+
+    let startup = null;
+    if (apiKey.startup_id) {
+      startup = await Startup.findOne({ _id: apiKey.startup_id, user_id: apiKey.user_id }).lean();
+      if (!startup) {
+        return {
+          success: false,
+          error: "Forbidden: API Key is bound to a startup not owned by this account.",
+          statusCode: 403,
+        };
+      }
+    }
 
     return {
       success: true,

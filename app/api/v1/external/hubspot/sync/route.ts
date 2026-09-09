@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: auth.error }, { status: auth.statusCode || 401 });
   }
 
-  const rateLimit = checkRateLimit(auth.apiKey._id.toString(), auth.apiKey.rate_limit_per_min);
+  const rateLimit = await checkRateLimit(auth.apiKey._id.toString(), auth.apiKey.rate_limit_per_min);
   const headers = createRateLimitHeaders(rateLimit);
 
   if (!rateLimit.allowed) {
@@ -26,15 +26,17 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { contacts = [], deals = [], externalAccountId } = body;
 
-    let targetStartupId = auth.apiKey.startup_id;
-    if (!targetStartupId) {
-      const userStartup = await Startup.findOne({ user_id: auth.user._id });
-      targetStartupId = userStartup?._id;
+    let targetStartup = null;
+    if (auth.apiKey.startup_id) {
+      targetStartup = await Startup.findOne({ _id: auth.apiKey.startup_id, user_id: auth.user._id });
+    } else {
+      targetStartup = await Startup.findOne({ user_id: auth.user._id }).sort({ created_at: 1 });
     }
 
-    if (!targetStartupId) {
-      return NextResponse.json({ error: "Target startup required for sync" }, { status: 400, headers });
+    if (!targetStartup) {
+      return NextResponse.json({ error: "Forbidden: No authorized startup found for this account" }, { status: 403, headers });
     }
+    const targetStartupId = targetStartup._id;
 
     let syncedDealsCount = 0;
     let syncedContactsCount = contacts.length;

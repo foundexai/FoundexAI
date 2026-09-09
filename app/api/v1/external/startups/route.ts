@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: auth.error }, { status: auth.statusCode || 401 });
   }
 
-  const rateLimit = checkRateLimit(auth.apiKey._id.toString(), auth.apiKey.rate_limit_per_min);
+  const rateLimit = await checkRateLimit(auth.apiKey._id.toString(), auth.apiKey.rate_limit_per_min);
   const headers = createRateLimitHeaders(rateLimit);
 
   if (!rateLimit.allowed) {

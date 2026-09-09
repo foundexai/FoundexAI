@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import ApiKey from "@/lib/models/ApiKey";
+import Startup from "@/lib/models/Startup";
 import { generateNewApiKey } from "@/lib/apiKeyAuth";
 
 export async function GET(req: Request) {
@@ -56,6 +57,18 @@ export async function POST(req: Request) {
     }
 
     const userId = decoded.user._id || decoded.user.id;
+
+    if (startupId) {
+      await connectDB();
+      const ownedStartup = await Startup.findOne({ _id: startupId, user_id: userId }).lean();
+      if (!ownedStartup) {
+        return NextResponse.json(
+          { error: "Forbidden: You do not own or administer the specified startup." },
+          { status: 403 }
+        );
+      }
+    }
+
     const { rawKey, keyRecord } = await generateNewApiKey({
       name: name.trim(),
       userId,
@@ -81,7 +94,8 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error("POST /api/developer/keys error:", error);
-    return NextResponse.json({ error: "Failed to generate API key" }, { status: 500 });
+    const status = error.statusCode || 500;
+    return NextResponse.json({ error: error.message || "Failed to generate API key" }, { status });
   }
 }
 

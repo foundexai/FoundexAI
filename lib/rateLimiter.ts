@@ -1,3 +1,5 @@
+import { checkRateLimit as redisCheckRateLimit } from "@/lib/redis";
+
 export interface RateLimitResult {
   allowed: boolean;
   limit: number;
@@ -5,51 +7,65 @@ export interface RateLimitResult {
   reset: number; // unix timestamp in seconds
 }
 
-interface RateLimitBucket {
+interface LocalBucket {
   timestamps: number[];
 }
 
-// In-memory sliding window bucket store
-const rateLimitMap = new Map<string, RateLimitBucket>();
+// Local in-memory sliding window fallback when Redis credentials are not present
+const localRateMap = new Map<string, LocalBucket>();
 
-// Periodic garbage collection every 5 minutes to prevent memory leak
 if (typeof setInterval !== "undefined") {
-  setInterval(() => {
+  const cleanup = setInterval(() => {
     const now = Date.now();
-    for (const [key, bucket] of rateLimitMap.entries()) {
+    for (const [key, bucket] of localRateMap.entries()) {
       bucket.timestamps = bucket.timestamps.filter((ts) => now - ts < 60000);
       if (bucket.timestamps.length === 0) {
-        rateLimitMap.delete(key);
+        localRateMap.delete(key);
       }
     }
-  }, 300000);
+  }, 60000);
+  cleanup.unref?.();
 }
 
 /**
- * Applies a sliding window rate limiter per identifier (API key ID or IP)
- * @param identifier Unique rate limiting key (e.g. key_id, user_id, or IP)
- * @param limitPerMin Max requests allowed in a 60-second window
+ * Distributed rate limiter with Redis sorted-set backing and in-memory fallback.
+ * Uses a 60-second sliding window per identifier.
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   identifier: string,
   limitPerMin: number = 120
-): RateLimitResult {
+): Promise<RateLimitResult> {
   const now = Date.now();
-  const windowStart = now - 60000;
+  const resetUnix = Math.ceil((now + 60000) / 1000);
 
-  let bucket = rateLimitMap.get(identifier);
-  if (!bucket) {
-    bucket = { timestamps: [] };
-    rateLimitMap.set(identifier, bucket);
+  // 1. If Upstash Redis is available, use distributed sorted-set sliding window
+  const isRedisConfigured = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+
+  if (isRedisConfigured) {
+    try {
+      const redisResult = await redisCheckRateLimit(identifier, limitPerMin, 60);
+      return {
+        allowed: redisResult.allowed,
+        limit: limitPerMin,
+        remaining: redisResult.remaining,
+        reset: resetUnix,
+      };
+    } catch (e) {
+      // Graceful fallback to local in-memory window if Redis connection fails
+    }
   }
 
-  // Filter timestamps outside current 60s sliding window
-  bucket.timestamps = bucket.timestamps.filter((ts) => ts > windowStart);
+  // 2. In-memory sliding-window fallback
+  const windowStart = now - 60000;
+  let bucket = localRateMap.get(identifier);
+  if (!bucket) {
+    bucket = { timestamps: [] };
+    localRateMap.set(identifier, bucket);
+  }
 
+  bucket.timestamps = bucket.timestamps.filter((ts) => ts > windowStart);
   const currentCount = bucket.timestamps.length;
   const remaining = Math.max(0, limitPerMin - currentCount - 1);
-  const oldestTimestamp = bucket.timestamps[0] || now;
-  const resetUnix = Math.ceil((oldestTimestamp + 60000) / 1000);
 
   if (currentCount >= limitPerMin) {
     return {
@@ -60,7 +76,6 @@ export function checkRateLimit(
     };
   }
 
-  // Register current request timestamp
   bucket.timestamps.push(now);
 
   return {

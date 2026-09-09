@@ -113,7 +113,7 @@ async function runApiGatewayAndLoadTestSuite() {
 
     const rateStartTime = performance.now();
     for (let req = 0; req < 200; req++) {
-      const result = checkRateLimit(testIdentifier, rateLimitQuota);
+      const result = await checkRateLimit(testIdentifier, rateLimitQuota);
       if (result.allowed) {
         allowedCount++;
       } else {
@@ -234,10 +234,11 @@ async function runApiGatewayAndLoadTestSuite() {
       investor: "Lightspeed Venture Partners",
     };
     const payloadStr = JSON.stringify(testPayload);
-    const signature = generateWebhookSignature(payloadStr, webhookSecret);
+    const testTimestamp = Math.floor(Date.now() / 1000);
+    const signature = generateWebhookSignature(payloadStr, webhookSecret, testTimestamp);
 
-    // Verify signature math
-    const expectedSig = crypto.createHmac("sha256", webhookSecret).update(payloadStr).digest("hex");
+    // Verify signature math with replay prevention timestamp
+    const expectedSig = `t=${testTimestamp},v1=${crypto.createHmac("sha256", webhookSecret).update(`${testTimestamp}.${payloadStr}`).digest("hex")}`;
     if (signature !== expectedSig) {
       throw new Error("Webhook signature mismatch!");
     }

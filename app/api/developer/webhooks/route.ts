@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { connectDB } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import WebhookEndpoint from "@/lib/models/WebhookEndpoint";
+import Startup from "@/lib/models/Startup";
+import { validateWebhookUrl } from "@/lib/ssrfValidator";
 
 export async function GET(req: Request) {
   try {
@@ -47,8 +49,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { url, description, events, startupId } = body;
 
-    if (!url || typeof url !== "string" || !url.startsWith("http")) {
-      return NextResponse.json({ error: "Valid HTTP/HTTPS URL is required" }, { status: 400 });
+    // 1. SSRF and protocol validation
+    const urlValidation = await validateWebhookUrl(url);
+    if (!urlValidation.isValid) {
+      return NextResponse.json({ error: urlValidation.error || "Disallowed webhook URL target" }, { status: 400 });
     }
 
     if (!events || !Array.isArray(events) || events.length === 0) {
@@ -57,12 +61,20 @@ export async function POST(req: Request) {
 
     await connectDB();
     const userId = decoded.user._id || decoded.user.id;
+
+    if (startupId) {
+      const owned = await Startup.findOne({ _id: startupId, user_id: userId }).lean();
+      if (!owned) {
+        return NextResponse.json({ error: "Forbidden: You do not own or administer this startup" }, { status: 403 });
+      }
+    }
+
     const secret = `whsec_${crypto.randomBytes(24).toString("hex")}`;
 
     const endpoint = await WebhookEndpoint.create({
       user_id: userId,
       startup_id: startupId,
-      url: url.trim(),
+      url: urlValidation.sanitizedUrl || url.trim(),
       description: description?.trim(),
       secret,
       events,
