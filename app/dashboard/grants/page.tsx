@@ -23,6 +23,8 @@ import {
   X,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import RDCalculator from "@/components/compliance/RDCalculator";
+import GrantAttachmentModal from "@/components/compliance/GrantAttachmentModal";
 
 interface MatchedGrant {
   _id: string;
@@ -44,6 +46,8 @@ export default function SmartGrantsPage() {
   const [selectedStartupId, setSelectedStartupId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [activeMainTab, setActiveMainTab] = useState<"grants" | "rd_calculator">("grants");
+  const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
 
   // AI Drawer states
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -284,28 +288,55 @@ export default function SmartGrantsPage() {
               </div>
             </div>
 
-            {/* Grid / Table Toggle */}
-            <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-xl border border-gray-200/50 dark:border-zinc-800 w-full md:w-auto shrink-0 justify-center">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
-                  viewMode === "grid"
-                    ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
-                    : "text-gray-500 hover:text-gray-800 dark:text-gray-400"
-                }`}
-              >
-                Grid View
-              </button>
-              <button
-                onClick={() => setViewMode("table")}
-                className={`flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
-                  viewMode === "table"
-                    ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
-                    : "text-gray-500 hover:text-gray-800 dark:text-gray-400"
-                }`}
-              >
-                Table View
-              </button>
+            {/* Segmented Main Navigation (Apple Style) */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-2xl border border-black/5 dark:border-white/5 w-full sm:w-auto">
+                <button
+                  onClick={() => setActiveMainTab("grants")}
+                  className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
+                    activeMainTab === "grants"
+                      ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
+                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
+                  }`}
+                >
+                  Smart Grants
+                </button>
+                <button
+                  onClick={() => setActiveMainTab("rd_calculator")}
+                  className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
+                    activeMainTab === "rd_calculator"
+                      ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
+                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
+                  }`}
+                >
+                  R&D Tax Credit Calculator
+                </button>
+              </div>
+
+              {activeMainTab === "grants" && (
+                <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1 rounded-xl border border-gray-200/50 dark:border-zinc-800 w-full sm:w-auto shrink-0 justify-center">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`flex-1 sm:flex-initial px-3 py-1 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                      viewMode === "grid"
+                        ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
+                        : "text-gray-500 hover:text-gray-800 dark:text-gray-400"
+                    }`}
+                  >
+                    Grid
+                  </button>
+                  <button
+                    onClick={() => setViewMode("table")}
+                    className={`flex-1 sm:flex-initial px-3 py-1 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                      viewMode === "table"
+                        ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-2xs"
+                        : "text-gray-500 hover:text-gray-800 dark:text-gray-400"
+                    }`}
+                  >
+                    Table
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -321,7 +352,13 @@ export default function SmartGrantsPage() {
           )}
 
       <div className="p-4 py-8 lg:p-8 max-w-7xl mx-auto w-full flex-1 flex flex-col">
-        {loading ? (
+        {activeMainTab === "rd_calculator" ? (
+          <RDCalculator
+            startupId={activeStartupId || selectedStartupId || ""}
+            token={token || ""}
+            companyName={userStartups.find((s: any) => String(s._id) === (activeStartupId || selectedStartupId))?.company_name || "Enterprise"}
+          />
+        ) : loading ? (
           <div className="flex items-center justify-center h-64">
             <CircleNotch className="w-8 h-8 text-gray-450 animate-spin" weight="bold" />
           </div>
@@ -580,6 +617,14 @@ export default function SmartGrantsPage() {
                     {!isEditingDraft && (
                       <>
                         <button
+                          onClick={() => setAttachmentModalOpen(true)}
+                          className="px-2.5 py-1 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-zinc-900 rounded-xl transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 text-[10px] font-bold tracking-tight shadow-xs"
+                          title="Generate Grant Form Attachments (SBIR / EIC)"
+                        >
+                          <FileText className="w-3.5 h-3.5" weight="bold" />
+                          <span>Attachments</span>
+                        </button>
+                        <button
                           onClick={handleCopy}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider"
                           title="Copy to Clipboard"
@@ -681,6 +726,18 @@ export default function SmartGrantsPage() {
           )}
         </div>
       </div>
+
+      {/* Grant Attachment Modal */}
+      <GrantAttachmentModal
+        isOpen={attachmentModalOpen}
+        onClose={() => setAttachmentModalOpen(false)}
+        startupId={activeStartupId || selectedStartupId || ""}
+        grantId={selectedGrant?._id}
+        grantTitle={selectedGrant?.title}
+        grantAgency={selectedGrant?.agency}
+        defaultAmount={selectedGrant?.amount || 275000}
+        token={token || ""}
+      />
     </div>
   );
 }

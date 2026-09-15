@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import SecureLink from "@/lib/models/SecureLink";
+import { extractClientIp, extractClientCountry, isIpAllowed, isCountryAllowed } from "@/lib/networkSecurity";
 
 export async function POST(
   req: Request,
@@ -16,6 +17,23 @@ export async function POST(
     const link = await SecureLink.findOne({ share_token: shareToken });
     if (!link) {
       return NextResponse.json({ error: "Link not found or invalid" }, { status: 404 });
+    }
+
+    const clientIp = extractClientIp(req);
+    const clientCountry = extractClientCountry(req);
+
+    // IP Whitelisting
+    if (link.ip_restriction_enabled && link.allowed_ips && link.allowed_ips.length > 0) {
+      if (!isIpAllowed(clientIp, link.allowed_ips)) {
+        return NextResponse.json({ error: `Access denied. IP address (${clientIp}) is not authorized.` }, { status: 403 });
+      }
+    }
+
+    // Geo-Fencing
+    if (link.geofencing_enabled && link.allowed_countries && link.allowed_countries.length > 0) {
+      if (!isCountryAllowed(clientCountry, link.allowed_countries)) {
+        return NextResponse.json({ error: `Access denied. Geographic region (${clientCountry}) is restricted.` }, { status: 403 });
+      }
     }
 
     if (link.is_revoked) {
@@ -67,8 +85,7 @@ export async function POST(
       match.verified = true;
     }
 
-    // Extract client IP and user agent
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
+    // Extract user agent
     const userAgent = req.headers.get("user-agent") || "Browser";
 
     // Increment view count and log access

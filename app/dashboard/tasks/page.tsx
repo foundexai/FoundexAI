@@ -8,7 +8,6 @@ import {
   Circle,
   Trash,
   Plus,
-  Sparkle,
   CheckSquare,
   ShieldCheck,
   CircleNotch,
@@ -417,23 +416,25 @@ export default function TasksPage() {
               Checklist Tasks ({filteredTasks.length})
             </h2>
 
-            {/* Category Filter Tabs */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {["All", "Finance", "Legal", "Operations", "Market"].map(
-                (cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      selectedCategory === cat
-                        ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
-                        : "bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-300"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ),
-              )}
+            {/* Category Filter Tabs (Apple Segmented Control) */}
+            <div className="-mx-1 px-1 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
+              <div className="inline-flex p-1 bg-gray-100 dark:bg-zinc-800 rounded-2xl border border-black/5 dark:border-white/5 w-fit shrink-0">
+                {["All", "Finance", "Legal", "Operations", "Market"].map(
+                  (cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedCategory === cat
+                          ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-xs"
+                          : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ),
+                )}
+              </div>
             </div>
           </div>
 

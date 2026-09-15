@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { 
   X, 
-  Sparkle, 
+  Lightning, 
   CircleNotch, 
   Copy, 
   Check, 

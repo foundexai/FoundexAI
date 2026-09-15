@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import CapTable from "@/lib/models/CapTable";
 import Startup from "@/lib/models/Startup";
+import { convertToUSDSync, convertCurrencySync } from "@/lib/currencyService";
 
 // Helper: Calculate ESOP Vested Shares based on months elapsed and cliff
 function calculateVestedShares(grant: any): number {
@@ -119,6 +120,9 @@ export async function GET(req: Request) {
         share_class: e.share_class,
         share_count: shareCount,
         investment_amount: capital,
+        currency: e.currency || "USD",
+        investment_amount_usd: e.investment_amount_usd || capital,
+        exchange_rate_applied: e.exchange_rate_applied || 1,
         price_per_share: e.price_per_share || (shareCount > 0 && capital > 0 ? capital / shareCount : 0),
         grant_date: e.grant_date,
         esop_vesting: {
@@ -189,6 +193,7 @@ export async function POST(req: Request) {
       shareClass = "Common",
       shareCount,
       investmentAmount = 0,
+      currency = "USD",
       pricePerShare = 0,
       grantDate,
       isVesting = false,
@@ -211,6 +216,10 @@ export async function POST(req: Request) {
       (startupId && userStartups.find((s) => s._id.toString() === startupId)) ||
       userStartups[0];
 
+    const curCode = (currency || "USD").toUpperCase();
+    const invAmountUsd = convertToUSDSync(Number(investmentAmount), curCode);
+    const { exchangeRate } = convertCurrencySync(1, curCode, "USD");
+
     const entry = await CapTable.create({
       startup_id: targetStartup._id,
       shareholder_name: shareholderName,
@@ -219,6 +228,9 @@ export async function POST(req: Request) {
       share_class: shareClass,
       share_count: Number(shareCount),
       investment_amount: Number(investmentAmount),
+      currency: curCode,
+      investment_amount_usd: invAmountUsd,
+      exchange_rate_applied: exchangeRate,
       price_per_share: Number(pricePerShare),
       grant_date: grantDate ? new Date(grantDate) : new Date(),
       esop_vesting: {
@@ -274,6 +286,7 @@ export async function PUT(req: Request) {
       shareClass,
       shareCount,
       investmentAmount,
+      currency,
       pricePerShare,
       grantDate,
       isVesting,
@@ -305,6 +318,7 @@ export async function PUT(req: Request) {
       share_class: entry.share_class,
       share_count: entry.share_count,
       investment_amount: entry.investment_amount,
+      currency: entry.currency,
       price_per_share: entry.price_per_share,
       notes: entry.notes,
     };
@@ -314,7 +328,14 @@ export async function PUT(req: Request) {
     if (email !== undefined) entry.email = email;
     if (shareClass !== undefined) entry.share_class = shareClass;
     if (shareCount !== undefined) entry.share_count = Number(shareCount);
-    if (investmentAmount !== undefined) entry.investment_amount = Number(investmentAmount);
+    if (currency !== undefined) entry.currency = currency.toUpperCase();
+    if (investmentAmount !== undefined) {
+      entry.investment_amount = Number(investmentAmount);
+      const cur = entry.currency || "USD";
+      entry.investment_amount_usd = convertToUSDSync(Number(investmentAmount), cur);
+      const { exchangeRate } = convertCurrencySync(1, cur, "USD");
+      entry.exchange_rate_applied = exchangeRate;
+    }
     if (pricePerShare !== undefined) entry.price_per_share = Number(pricePerShare);
     if (notes !== undefined) entry.notes = notes;
     if (grantDate !== undefined) {

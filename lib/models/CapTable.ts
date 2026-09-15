@@ -22,6 +22,9 @@ const CapTableSchema = new mongoose.Schema({
   },
   share_count: { type: Number, required: true, default: 0 },
   investment_amount: { type: Number, default: 0 },
+  currency: { type: String, default: "USD", uppercase: true },
+  investment_amount_usd: { type: Number, default: 0 },
+  exchange_rate_applied: { type: Number, default: 1 },
   price_per_share: { type: Number, default: 0 },
   grant_date: { type: Date, default: Date.now },
   esop_vesting: {
@@ -32,6 +35,13 @@ const CapTableSchema = new mongoose.Schema({
     vested_shares: { type: Number, default: 0 },
   },
   notes: { type: String },
+  tax_status: {
+    type: String,
+    enum: ["pending", "w9_verified", "w8_verified", "expiring_soon", "expired", "exempt"],
+    default: "pending",
+  },
+  tax_form_id: { type: mongoose.Schema.Types.ObjectId, ref: "TaxComplianceDocument" },
+  tax_residence_country: { type: String, default: "United States" },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });

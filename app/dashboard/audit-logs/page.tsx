@@ -20,6 +20,11 @@ import {
   Trash,
   NotePencil,
   Plus,
+  DownloadSimple,
+  FileCsv,
+  FilePdf,
+  Shield,
+  CaretDown,
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { toast } from "sonner";
@@ -59,6 +64,10 @@ export default function AuditLogsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [entityFilter, setEntityFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
+
+  // Export State
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -155,6 +164,60 @@ export default function AuditLogsPage() {
       localStorage.setItem("activeStartupId", newId);
     }
     fetchAuditLogs(newId, 1);
+  };
+
+  const handleExport = async (format: "csv" | "pdf") => {
+    setExportDropdownOpen(false);
+    setIsExporting(true);
+    const authToken = token || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+    if (!authToken) {
+      toast.error("Authentication required");
+      setIsExporting(false);
+      return;
+    }
+
+    try {
+      const storedId = typeof window !== "undefined" ? localStorage.getItem("activeStartupId") : "";
+      const activeId = activeStartupId || selectedStartupId || storedId || "";
+      const params = new URLSearchParams();
+      params.set("format", format);
+      if (activeId) params.set("startup_id", activeId);
+      if (entityFilter !== "all") params.set("entity", entityFilter);
+      if (actionFilter !== "all") params.set("action", actionFilter);
+
+      const res = await fetch(`/api/audit-logs/export?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to generate export file");
+      }
+
+      const sig = res.headers.get("X-Audit-Signature");
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = format === "csv" 
+        ? `foundex_audit_trail_${new Date().toISOString().split("T")[0]}.csv`
+        : `foundex_soc2_compliance_report_${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      toast.success(
+        `Audit report exported (${format.toUpperCase()})`,
+        {
+          description: sig ? `Signed with SHA-256 HMAC: ${sig.substring(0, 16)}...` : "Digital signature verified.",
+        }
+      );
+    } catch (err: any) {
+      console.error("Export error:", err);
+      toast.error(err.message || "Failed to download audit report");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const displayStartups =
@@ -257,17 +320,64 @@ export default function AuditLogsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => fetchAuditLogs(undefined, currentPage)}
-            disabled={isLoading}
-            className="px-3.5 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-2xs cursor-pointer shrink-0 disabled:opacity-50"
-          >
-            <ArrowClockwise
-              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-              weight="bold"
-            />
-            Refresh Log
-          </button>
+          <div className="flex items-center gap-2.5">
+            {/* Export Security Audit Log Button & Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+                disabled={isExporting}
+                className="px-3.5 py-2 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+              >
+                {isExporting ? (
+                  <CircleNotch className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Shield className="w-4 h-4 text-yellow-400 dark:text-yellow-600" weight="bold" />
+                )}
+                <span>Export Security Audit Log</span>
+                <CaretDown className="w-3 h-3 ml-0.5" />
+              </button>
+
+              {exportDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-3 py-1.5 border-b border-gray-100 dark:border-zinc-800 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    Export Format (Signed)
+                  </div>
+                  <button
+                    onClick={() => handleExport("pdf")}
+                    className="w-full text-left px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-800/60 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  >
+                    <FilePdf className="w-4 h-4 text-red-500 shrink-0" weight="bold" />
+                    <div>
+                      <div className="font-bold">SOC2 PDF Report</div>
+                      <div className="text-[10px] text-gray-400 font-normal">Tamper-evident verification</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleExport("csv")}
+                    className="w-full text-left px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-zinc-800/60 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  >
+                    <FileCsv className="w-4 h-4 text-green-500 shrink-0" weight="bold" />
+                    <div>
+                      <div className="font-bold">Raw Event CSV</div>
+                      <div className="text-[10px] text-gray-400 font-normal">With SHA-256 HMAC header</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => fetchAuditLogs(undefined, currentPage)}
+              disabled={isLoading}
+              className="px-3.5 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-2xs cursor-pointer shrink-0 disabled:opacity-50"
+            >
+              <ArrowClockwise
+                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+                weight="bold"
+              />
+              Refresh Log
+            </button>
+          </div>
         </div>
 
         {/* Executive Summary Cards */}
