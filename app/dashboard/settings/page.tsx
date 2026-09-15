@@ -13,7 +13,7 @@ import {
   CircleNotch,
   RocketLaunch,
   Compass,
-  Sparkle,
+  Lightning,
   DownloadSimple,
   FileArchive,
   ShieldCheck,
@@ -155,7 +155,7 @@ export default function SettingsPage() {
             }}
             className="px-5 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
           >
-            <Sparkle className="w-4 h-4 text-yellow-500" weight="fill" />
+            <Lightning className="w-4 h-4 text-yellow-500" weight="fill" />
             <span>Replay Workspace Walkthrough</span>
           </button>
         </div>

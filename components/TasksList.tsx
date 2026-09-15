@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, Circle, ArrowUpRight, CircleNotch, Sparkle } from "@phosphor-icons/react";
+import { ArrowRight, CheckCircle, Circle, ArrowUpRight, CircleNotch, Lightning } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 
@@ -192,7 +192,7 @@ export default function TasksList({ startupId }: { startupId: string }) {
                     }`}
                   >
                     {task.title.startsWith("SOPHIA TIP:") && (
-                      <Sparkle className="w-4 h-4 text-yellow-500 shrink-0" weight="fill" />
+                      <Lightning className="w-4 h-4 text-yellow-500 shrink-0" weight="fill" />
                     )}
                     {task.title.startsWith("SOPHIA TIP:") 
                       ? task.title.replace("SOPHIA TIP:", "").trim() 

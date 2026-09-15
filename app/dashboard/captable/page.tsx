@@ -27,7 +27,6 @@ import {
   FileText,
   ClockCounterClockwise,
   Scales,
-  Sparkle,
 } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
@@ -35,6 +34,7 @@ import TermSheetAdvisorDrawer from "@/components/captable/TermSheetAdvisorDrawer
 import { SUPPORTED_CURRENCIES, formatMoney } from "@/lib/currencyService";
 import { toast } from "sonner";
 import { runWaterfallSimulation, WaterfallSimulationOutput } from "@/lib/waterfall";
+import TaxComplianceVault from "@/components/compliance/TaxComplianceVault";
 
 interface Shareholder {
   _id: string;
@@ -58,6 +58,8 @@ interface Shareholder {
     unvested_shares: number;
   };
   notes?: string;
+  tax_status?: string;
+  tax_residence_country?: string;
 }
 
 interface SummaryData {
@@ -99,6 +101,7 @@ export default function CapTablePage() {
 
   const [waterfallResult, setWaterfallResult] = useState<WaterfallSimulationOutput | null>(null);
   const [isTermSheetDrawerOpen, setIsTermSheetDrawerOpen] = useState(false);
+  const [activeCapTableTab, setActiveCapTableTab] = useState<"ledger" | "waterfall" | "tax_vault">("ledger");
 
   // Modal Form State
   const [form, setForm] = useState({
@@ -429,6 +432,54 @@ export default function CapTablePage() {
           );
         })()}
 
+        {/* Apple-styled Segmented View Switcher */}
+        <div className="-mx-2 px-2 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
+          <div className="flex bg-zinc-100 dark:bg-zinc-850 p-1 rounded-2xl border border-black/5 dark:border-white/5 w-fit shrink-0">
+            <button
+              onClick={() => setActiveCapTableTab("ledger")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] whitespace-nowrap ${
+                activeCapTableTab === "ledger"
+                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
+                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
+              }`}
+            >
+              Equity Ledger & Summary
+            </button>
+            <button
+              onClick={() => setActiveCapTableTab("waterfall")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] whitespace-nowrap ${
+                activeCapTableTab === "waterfall"
+                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
+                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
+              }`}
+            >
+              Waterfall Simulation
+            </button>
+            <button
+              onClick={() => setActiveCapTableTab("tax_vault")}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] flex items-center gap-2 whitespace-nowrap ${
+                activeCapTableTab === "tax_vault"
+                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
+                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
+              }`}
+            >
+              <span>Tax Compliance Vault</span>
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                W-8 / W-9
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {activeCapTableTab === "tax_vault" ? (
+          <TaxComplianceVault
+            startupId={activeStartupId || selectedStartupId || ""}
+            token={token || ""}
+            shareholders={shareholders}
+            onRefreshCapTable={() => loadCapTable(activeStartupId || selectedStartupId)}
+          />
+        ) : (
+          <>
         {/* Executive Summary Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           
@@ -599,6 +650,7 @@ export default function CapTablePage() {
                   <th className="pb-3 px-2">Shares</th>
                   <th className="pb-3 px-2 hidden sm:table-cell">Ownership %</th>
                   <th className="pb-3 px-2 hidden lg:table-cell">Investment</th>
+                  <th className="pb-3 px-2 hidden xl:table-cell">Tax Form</th>
                   <th className="pb-3 px-2 hidden sm:table-cell">Vesting Status</th>
                   <th className="pb-3 px-1 text-right">Actions</th>
                 </tr>
@@ -660,8 +712,38 @@ export default function CapTablePage() {
                       {s.ownership_pct}%
                     </td>
                     <td className="py-3.5 pr-3 font-mono hidden lg:table-cell">
-                      {s.investment_amount > 0 ? `$${s.investment_amount.toLocaleString()}` : "—"}
+                      {s.investment_amount > 0 ? (
+                        <div className="flex flex-col">
+                          <span className="text-gray-900 dark:text-white font-bold">
+                            {formatMoney(s.investment_amount, s.currency || "USD")}
+                          </span>
+                          {s.currency && s.currency !== "USD" && s.investment_amount_usd ? (
+                            <span className="text-[10px] text-gray-400 font-mono">
+                              ≈ ${s.investment_amount_usd.toLocaleString()} USD
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
                     </td>
+
+                    <td className="py-3.5 pr-3 hidden xl:table-cell">
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold uppercase ${
+                        s.tax_status === "w9_verified"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                          : s.tax_status === "w8_verified"
+                          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                          : s.tax_status === "expiring_soon"
+                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                          : s.tax_status === "expired"
+                          ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                          : "bg-gray-100 text-gray-500 dark:bg-zinc-800 border border-black/5 dark:border-white/5"
+                      }`}>
+                        {s.tax_status ? s.tax_status.replace("_", " ") : "Pending"}
+                      </span>
+                    </td>
+
                     <td className="py-3.5 pr-3 hidden sm:table-cell">
                       {s.esop_vesting?.is_vesting ? (
                         <div className="text-[10px]">
@@ -1008,6 +1090,9 @@ export default function CapTablePage() {
             View Complete Activity History
           </button>
         </div>
+
+          </>
+        )}
 
       </div>
 

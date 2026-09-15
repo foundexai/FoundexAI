@@ -20,8 +20,7 @@ import {
   NotePencil,
   FloppyDiskBack,
   X,
-  MagicWand,
-  Sparkle,
+  Lightning,
   CircleNotch,
   MagnifyingGlass,
   Lock,
@@ -31,6 +30,7 @@ import {
   PaperPlaneTilt,
   Clock,
   ArrowRight,
+  ArrowClockwise,
   Trash,
   Eye,
   ChatCircleDots,
@@ -335,7 +335,7 @@ function DescriptionBlock({
   async function handleAskSophia() {
     if (!is_subscribed && !is_admin) {
       toast.info(
-        "Sophia's Business Description AI is a premium feature. Please upgrade to Pro.",
+        "Smart Suggestions is a premium feature. Please upgrade to Pro.",
       );
       return;
     }
@@ -355,21 +355,21 @@ function DescriptionBlock({
       });
       if (res.status === 429) {
         toast.error(
-          "Sophia is currently handling many requests. Please take a short break and try again in a few moments.",
+          "Service is currently handling many requests. Please take a short break and try again in a few moments.",
         );
         return;
       }
       if (res.ok) {
         const data = await res.json();
         setAiSuggestion(data.improved);
-        toast.success("Sophia has a suggestion for you!");
+        toast.success("New suggestion generated!");
       } else {
         toast.error(
-          "Sophia is temporarily unavailable. Please try again later.",
+          "Suggestion service is temporarily unavailable. Please try again later.",
         );
       }
     } catch (e) {
-      toast.error("Error connecting to AI");
+      toast.error("Error connecting to suggestion service");
     } finally {
       setImproving(false);
     }
@@ -478,9 +478,9 @@ function DescriptionBlock({
                   {aiSuggestion ? (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex items-center gap-2 text-yellow-500">
-                        <Sparkle weight="fill" className="w-5 h-5" />
+                        <Lightning weight="fill" className="w-5 h-5" />
                         <span className="text-xs font-black uppercase tracking-widest">
-                          Sophia's Suggestion
+                          Smart Suggestion
                         </span>
                       </div>
                       <p className="text-lg text-gray-300 leading-relaxed font-medium italic">
@@ -499,7 +499,7 @@ function DescriptionBlock({
                           disabled={improving}
                           className="flex-1 bg-white/5 hover:bg-white/10 text-white text-xs font-black px-4 py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-white/10"
                         >
-                          <MagicWand
+                          <ArrowClockwise
                             className={`w-4 h-4 ${improving ? "animate-spin" : ""}`}
                           />
                           Regenerate
@@ -521,14 +521,14 @@ function DescriptionBlock({
                       )}
 
                       <div className="w-16 h-16 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
-                        <Sparkle className="w-8 h-8 text-yellow-500" />
+                        <Lightning className="w-8 h-8 text-yellow-500" weight="fill" />
                       </div>
                       <h4 className="text-white font-black text-xl tracking-tight">
                         Need a professional polish?
                       </h4>
                       <p className="text-gray-500 text-sm max-w-xs mx-auto leading-relaxed">
-                        Sophia can analyze your draft and generate a compelling,
-                        investor-ready business description for you.
+                        Generate a compelling, investor-ready business description
+                        tailored to your startup's positioning.
                       </p>
                       <button
                         onClick={handleAskSophia}
@@ -540,10 +540,10 @@ function DescriptionBlock({
                         ) : improving ? (
                           <CircleNotch className="w-5 h-5 animate-spin" />
                         ) : (
-                          <MagicWand className="w-5 h-5" />
+                          <Lightning className="w-5 h-5" weight="fill" />
                         )}
                         {improving
-                          ? "Sophia is thinking..."
+                          ? "Polishing your draft..."
                           : "Generate Suggestion"}
                       </button>
                     </div>

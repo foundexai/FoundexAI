@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MagicWand, CircleNotch, Plus, X, FloppyDiskBack, NotePencil, Lock } from "@phosphor-icons/react";
+import { ArrowClockwise, CircleNotch, Plus, X, FloppyDiskBack, NotePencil, Lock, Lightning } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useSubscription } from "@/context/SubscriptionContext";
 
@@ -136,7 +136,7 @@ export default function BusinessModelCard({
 
         {isEditing ? (
           <div className="space-y-4">
-            {/* Sophia AI Card */}
+            {/* Smart Suggestions Card */}
             <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 dark:bg-black/80 dark:border-zinc-800 relative overflow-hidden group mb-4">
               {aiSuggestions && (
                 <div className="flex justify-end items-center mb-3">
@@ -152,9 +152,7 @@ export default function BusinessModelCard({
                       onClick={handleSuggest}
                       className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
                     >
-                      <div className={`w-3.5 h-3.5 ${isSuggesting ? "animate-spin" : ""}`}>
-                        <MagicWand weight="bold" />
-                      </div>
+                      <ArrowClockwise className={`w-3.5 h-3.5 ${isSuggesting ? "animate-spin" : ""}`} weight="bold" />
                       Regenerate
                     </button>
                   </div>
@@ -172,7 +170,7 @@ export default function BusinessModelCard({
               ) : (
                 <div className="text-center py-4 relative group/ai">
                   <p className="text-gray-500 text-xs mb-3">
-                    Not sure which models fit? Sophia can suggest types based on your industry.
+                    Not sure which models fit? Get tailored recommendations based on your industry.
                   </p>
                   
                   {(!is_subscribed && !is_admin) && (

@@ -14,7 +14,6 @@ import {
   Copy,
   Check,
   CircleNotch,
-  Sparkle,
   GlobeHemisphereWest,
   MapPin,
   HardDrives,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MagicWand, CircleNotch, Check, NotePencil, X, FloppyDiskBack, Lock } from "@phosphor-icons/react";
+import { ArrowClockwise, CircleNotch, Check, NotePencil, X, FloppyDiskBack, Lock } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useSubscription } from "@/context/SubscriptionContext";
 
@@ -122,7 +122,7 @@ export default function LegalStructureCard({
               placeholder="Detail your legal structure here..."
             />
 
-            {/* Sophia AI Card */}
+            {/* Smart Suggestions Card */}
             <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 dark:bg-black/80 dark:border-zinc-800 relative overflow-hidden group">
               {aiSuggestion && (
                 <div className="flex justify-end items-center mb-3">
@@ -138,9 +138,7 @@ export default function LegalStructureCard({
                       onClick={handleDraft}
                       className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
                     >
-                      <div className={`w-3.5 h-3.5 ${isDrafting ? "animate-spin" : ""}`}>
-                        <MagicWand weight="bold" />
-                      </div>
+                      <ArrowClockwise className={`w-3.5 h-3.5 ${isDrafting ? "animate-spin" : ""}`} weight="bold" />
                       Regenerate
                     </button>
                   </div>
@@ -154,7 +152,7 @@ export default function LegalStructureCard({
               ) : (
                 <div className="text-center py-4 relative group/ai">
                   <p className="text-gray-500 text-xs mb-3">
-                    Need help drafting your legal structure? Sophia can generate a professional recommendation for you.
+                    Need help drafting your legal structure? Generate a professional recommendation instantly.
                   </p>
                   
                   {(!is_subscribed && !is_admin) && (

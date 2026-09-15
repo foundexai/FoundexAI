@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   X,
-  Sparkle,
+  Lightning,
   CircleNotch,
   Copy,
   Download,
@@ -192,7 +192,7 @@ export default function GenerateBoardDeckDrawer({
               {isGenerating ? (
                 <CircleNotch className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Sparkle className="w-3.5 h-3.5" weight="fill" />
+                <Lightning className="w-3.5 h-3.5" weight="fill" />
               )}
               <span>{deck ? "Re-Synthesize Deck" : "Synthesize Deck"}</span>
             </button>
