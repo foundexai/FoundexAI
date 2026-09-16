@@ -6,7 +6,6 @@ import {
   Microphone,
   MicrophoneSlash,
   PaperPlaneTilt,
-  Sparkle,
   CircleNotch,
   ArrowCounterClockwise,
   CheckCircle,
@@ -370,18 +369,18 @@ export default function PitchStudioPage() {
           </div>
         </div>
 
-        <button
-          onClick={handleStartSession}
-          disabled={isLoadingQuestion}
-          className="px-5 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-black rounded-2xl transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-50 w-full sm:w-auto shrink-0"
-        >
-          {isLoadingQuestion ? (
-            <CircleNotch className="w-4 h-4 animate-spin" />
-          ) : (
-            <Sparkle className="w-4 h-4 text-yellow-400 dark:text-yellow-600" weight="fill" />
-          )}
-          <span>{turns.length > 0 || currentTurn ? "Restart Pitch Session" : "Start Pitch Session"}</span>
-        </button>
+          <button
+            onClick={handleStartSession}
+            disabled={isLoadingQuestion}
+            className="px-5 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-black rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-50 w-full sm:w-auto shrink-0"
+          >
+            {isLoadingQuestion ? (
+              <CircleNotch className="w-4 h-4 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4" weight="fill" />
+            )}
+            <span>{turns.length > 0 || currentTurn ? "Restart Pitch Session" : "Start Pitch Session"}</span>
+          </button>
       </div>
 
       {/* VC Persona & Topic Selection */}
@@ -467,9 +466,9 @@ export default function PitchStudioPage() {
           </div>
           <button
             onClick={handleStartSession}
-            className="px-8 py-3.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-black rounded-2xl transition-all inline-flex items-center gap-2 shadow-lg cursor-pointer hover:scale-105 active:scale-95"
+            className="px-8 py-3.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-black rounded-2xl transition-all active:scale-[0.98] inline-flex items-center gap-2 shadow-lg cursor-pointer"
           >
-            <Sparkle className="w-4 h-4 text-yellow-400 dark:text-yellow-600" weight="fill" />
+            <Play className="w-4 h-4" weight="fill" />
             <span>Launch Pitch Drill</span>
           </button>
         </div>
@@ -778,8 +777,8 @@ export default function PitchStudioPage() {
               {/* Top 1% Founder Golden Rebuttal Script */}
               <div className="p-6 bg-yellow-50/40 dark:bg-yellow-950/20 border border-yellow-200/80 dark:border-yellow-900/50 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black text-yellow-900 dark:text-yellow-300 uppercase tracking-wider flex items-center gap-2">
-                    <Sparkle className="w-4 h-4 text-yellow-500" weight="fill" />
+                  <h4 className="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                    <Target className="w-4 h-4 text-amber-600 dark:text-amber-400" weight="bold" />
                     How a Top 1% Founder Would Answer:
                   </h4>
                   <button

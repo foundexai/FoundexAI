@@ -24,6 +24,7 @@ import {
   maskTaxId,
   auditTaxDocumentExpirations,
   generate1099K1PreparationCsv,
+  generateCpaTaxAuditPackage,
 } from "../lib/taxComplianceService";
 
 async function runWeek22TestSuite() {
@@ -217,16 +218,34 @@ async function runWeek22TestSuite() {
   });
 
   // Create 3 synthetic tax documents:
-  // 1. Active W-9 (US)
-  await TaxComplianceDocument.create({
+  // 1. Active W-9 (US) with sensitive SSN/EIN
+  const rawPlainTIN = "98-7654321";
+  const w9Doc = await TaxComplianceDocument.create({
     startup_id: testStartup._id,
     shareholder_name: "US Seed Syndicate LLC",
     form_type: "W-9",
-    tax_id_number: "98-7654321",
+    tax_id_number: rawPlainTIN,
     country_of_tax_residence: "United States",
     status: "verified",
     date_signed: new Date(),
   });
+
+  // Verify AES-256-GCM encryption at rest in MongoDB
+  const rawDbDoc = await TaxComplianceDocument.findById(w9Doc._id).lean();
+  if (!rawDbDoc?.tax_id_number || rawDbDoc.tax_id_number === rawPlainTIN) {
+    throw new Error("Expected tax_id_number to be encrypted at rest, but raw plaintext was found in database");
+  }
+  const cipherParts = rawDbDoc.tax_id_number.split(":");
+  if (cipherParts.length !== 3) {
+    throw new Error(`Expected AES-256-GCM ciphertext format iv:authTag:cipher, got ${rawDbDoc.tax_id_number}`);
+  }
+  if (w9Doc.getDecryptedTaxId() !== rawPlainTIN) {
+    throw new Error(`Expected getDecryptedTaxId() to return '${rawPlainTIN}', got '${w9Doc.getDecryptedTaxId()}'`);
+  }
+  if (w9Doc.getMaskedTaxId() !== "••-•••4321") {
+    throw new Error(`Expected getMaskedTaxId() to return '••-•••4321', got '${w9Doc.getMaskedTaxId()}'`);
+  }
+  console.log(`   ✅ AES-256-GCM Encryption At Rest Verified: Raw TIN '${rawPlainTIN}' stored as ciphertext '${rawDbDoc.tax_id_number.slice(0, 24)}...' and securely decrypted.`);
 
   // 2. W-8BEN Expiring in 30 days (<90 days threshold)
   const expiringDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -292,7 +311,27 @@ async function runWeek22TestSuite() {
   if (!csvOutput.includes("Shareholder Legal Name") || !csvOutput.includes("Lord Alistair Sterling") || !csvOutput.includes("Zurich Alpine Angels")) {
     throw new Error("1099/K-1 Prep CSV export missing required investor records");
   }
-  console.log(`   ✅ 1099/K-1 CPA Prep CSV generated (${csvOutput.split("\n").length} rows formatted).\n`);
+  console.log(`   ✅ 1099/K-1 CPA Prep CSV generated (${csvOutput.split("\n").length} rows formatted).`);
+
+  // Test 5C: Exportable CPA Tax Audit Package & Cryptographic HMAC Attestation
+  const auditPackage = await generateCpaTaxAuditPackage(testStartup._id.toString(), "cpa@globalventures.com");
+  if (!auditPackage.metadata.package_id.startsWith("CPA-AUDIT-")) {
+    throw new Error(`Invalid CPA audit package ID: ${auditPackage.metadata.package_id}`);
+  }
+  if (auditPackage.compliance_summary.total_shareholders !== 3) {
+    throw new Error(`Expected 3 total shareholders in CPA audit package, got ${auditPackage.compliance_summary.total_shareholders}`);
+  }
+  if (auditPackage.tamper_evident_integrity.algorithm !== "HMAC-SHA256" || !auditPackage.tamper_evident_integrity.digest_signature) {
+    throw new Error("CPA audit package missing valid HMAC-SHA256 cryptographic signature");
+  }
+  // Ensure unmasked sensitive TINs are never exposed in investor schedule
+  for (const item of auditPackage.investor_tax_schedule) {
+    if (item.tax_id_masked.includes("98-7654321") || (item.tax_id_masked !== "Not Provided" && !item.tax_id_masked.startsWith("••-•••"))) {
+      throw new Error(`Unmasked sensitive tax ID detected in audit package: ${item.tax_id_masked}`);
+    }
+  }
+  console.log(`   ✅ CPA Audit Package Dossier Verified: Package ID ${auditPackage.metadata.package_id}`);
+  console.log(`   ✅ Tamper-Evident Attestation Verified: HMAC-SHA256 Signature '${auditPackage.tamper_evident_integrity.digest_signature.slice(0, 24)}...'\n`);
 
   // Cleanup synthetic test records
   console.log("🧹 Tearing down test records...");

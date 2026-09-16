@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Lightning, Rocket, Crown, ArrowLeft, Sparkle } from "@phosphor-icons/react";
+import { Check, Lightning, Rocket, Crown, ArrowLeft, TrendUp } from "@phosphor-icons/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -13,45 +13,44 @@ const PLANS = [
     id: "starter",
     target: "Explorers",
     priceText: "$0",
-    billingText: "Free forever",
-    description: "Browse the ecosystem and discover fundamental market opportunities.",
+    billingText: "/mo (Free forever)",
+    description: "Essential tools to explore the platform and begin searching investors.",
     features: [
-      "Limited Investor Profiles",
-      "Limited Startup Profiles",
-      "Basic Search & Filters",
-      "Save 3 Profiles",
-      "No Connect Access",
+      "Access to basic Investor Directory",
+      "5 Investor Connects / month",
+      "Standard Profile Visibility",
+      "Community Support",
     ],
     cta: "Current Plan",
-    icon: Rocket,
+    icon: Lightning,
     highlight: false,
-    connectType: "locked",
-    roles: ["founder"]
+    connectType: "free",
+    roles: ["founder", "investor"]
   },
   {
     name: "Founder",
     id: "founder",
-    target: "Early-stage founders",
-    priceText: "$20",
+    target: "Fundraising Startups",
+    priceText: "$35",
     billingText: "/mo (Billed annually)",
-    description: "Essential tools for active fundraising and relationship building.",
+    description: "Accelerate your raise with higher connection volume and pipeline tools.",
     features: [
-      "Everything in Starter",
-      "Expanded Investor Deep-dives",
-      "Expanded Startup Data",
-      "5–10 Connect Requests /mo",
-      "Save & Track Unlimited Profiles",
+      "Full Investor Directory Access",
+      "30 Connect Requests / month",
+      "Investor Pipeline CRM",
+      "Pitch Deck Storage & Viewer Analytics",
+      "Direct Founder Messaging",
     ],
     cta: "Upgrade to Founder",
-    icon: Lightning,
+    icon: Rocket,
     highlight: false,
-    connectType: "limited",
-    roles: ["founder", "institution"]
+    connectType: "growth",
+    roles: ["founder"]
   },
   {
     name: "Pro",
     id: "pro",
-    target: "Active fundraisers",
+    target: "Active Fundraisers",
     priceText: "$80",
     billingText: "/mo (Billed annually)",
     description: "Unrestricted access to the global investor network and advanced tools.",
@@ -63,7 +62,7 @@ const PLANS = [
       "Advanced Search & Filters",
     ],
     cta: "Go Pro",
-    icon: Sparkle,
+    icon: TrendUp,
     highlight: true,
     connectType: "unlimited",
     roles: ["founder", "institution"]

@@ -63,8 +63,15 @@ export async function GET(req: Request) {
     const w9Count = documents.filter((d) => d.form_type === "W-9").length;
     const w8Count = documents.filter((d) => d.form_type.startsWith("W-8")).length;
 
+    // Mask tax ID before sending over the wire for security
+    const sanitizedDocuments = documents.map((doc) => {
+      const obj = doc.toObject();
+      obj.tax_id_number = doc.getMaskedTaxId ? doc.getMaskedTaxId() : "••-••••";
+      return obj;
+    });
+
     return NextResponse.json({
-      documents,
+      documents: sanitizedDocuments,
       metrics: {
         total_documents: totalCount,
         verified_count: verifiedCount,
@@ -157,7 +164,9 @@ export async function POST(req: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, document: doc });
+    const sanitizedDoc = doc.toObject();
+    sanitizedDoc.tax_id_number = doc.getMaskedTaxId ? doc.getMaskedTaxId() : "••-••••";
+    return NextResponse.json({ success: true, document: sanitizedDoc });
   } catch (error: any) {
     console.error("POST /api/compliance/tax-vault error:", error);
     return NextResponse.json({ error: error.message || "Failed to create tax document" }, { status: 500 });
@@ -222,7 +231,9 @@ export async function PATCH(req: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, document: doc });
+    const sanitizedDoc = doc.toObject();
+    sanitizedDoc.tax_id_number = doc.getMaskedTaxId ? doc.getMaskedTaxId() : "••-••••";
+    return NextResponse.json({ success: true, document: sanitizedDoc });
   } catch (error: any) {
     console.error("PATCH /api/compliance/tax-vault error:", error);
     return NextResponse.json({ error: error.message || "Failed to update tax document" }, { status: 500 });

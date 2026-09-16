@@ -151,6 +151,35 @@ export default function TaxComplianceVault({
     }
   };
 
+  const [exportingPackage, setExportingPackage] = useState(false);
+
+  const handleExportCpaAuditPackage = async (format: "pdf" | "json" = "pdf") => {
+    setExportingPackage(true);
+    try {
+      const res = await fetch(`/api/compliance/tax-vault/audit-package?startup_id=${startupId}&format=${format}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `cpa_tax_compliance_audit_package_${Date.now()}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast.success(`CPA Audit Package (${format.toUpperCase()}) exported successfully!`);
+      } else {
+        toast.error("Failed to generate CPA audit package");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Error downloading CPA audit package");
+    } finally {
+      setExportingPackage(false);
+    }
+  };
+
   const handleOpenAddModal = (shareholder?: any) => {
     setEditingDocId(null);
     if (shareholder) {
@@ -282,6 +311,16 @@ export default function TaxComplianceVault({
           >
             {exporting ? <CircleNotch className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
             <span>Export 1099/K-1 Prep CSV</span>
+          </button>
+
+          <button
+            onClick={() => handleExportCpaAuditPackage("pdf")}
+            disabled={exportingPackage}
+            className="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-xs font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+            title="Download full institutional CPA audit package dossier (PDF) with digital integrity signatures"
+          >
+            {exportingPackage ? <CircleNotch className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" weight="bold" />}
+            <span>Export CPA Audit Package</span>
           </button>
 
           <button
