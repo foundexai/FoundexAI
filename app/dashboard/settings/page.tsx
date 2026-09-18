@@ -368,10 +368,10 @@ export default function SettingsPage() {
                   </div>
                   <Link href="/dashboard/pricing" className="w-full">
                     <button
-                      className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`w-full py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.98] ${
                         isCurrentPlan
                           ? "bg-gray-50 text-gray-400 dark:bg-white/5 dark:text-zinc-650 cursor-default"
-                          : "bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-md"
+                          : "bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-xs hover:shadow-md cursor-pointer"
                       }`}
                     >
                       {isCurrentPlan ? "Current Plan" : "Upgrade / Change"}
@@ -411,7 +411,7 @@ export default function SettingsPage() {
             <button
               onClick={handleDownloadArchive}
               disabled={downloadingArchive}
-              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95 disabled:opacity-50 shrink-0"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-xs hover:shadow-md active:scale-[0.98] disabled:opacity-50 shrink-0"
             >
               {downloadingArchive ? (
                 <>
@@ -465,7 +465,7 @@ export default function SettingsPage() {
               window.location.href = "/";
             }}
             disabled={loggingOut}
-            className="flex items-center gap-2 text-red-600 font-bold hover:text-red-700 transition-colors px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+            className="flex items-center gap-2 text-red-600 font-bold hover:text-red-700 transition-all active:scale-[0.98] px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 cursor-pointer"
           >
             {loggingOut ? (
               <CircleNotch className="w-5 h-5 animate-spin" weight="bold" />

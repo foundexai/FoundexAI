@@ -237,7 +237,7 @@ export default function TasksPage() {
 
   return (
     <main className="w-full flex-1 p-6 md:p-8 bg-gray-50 dark:bg-transparent">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Top Header */}
         {(() => {
           const displayStartups =
@@ -313,8 +313,8 @@ export default function TasksPage() {
               <div className="space-y-1">
                 <h3 className="text-sm font-extrabold text-gray-900 dark:text-white flex flex-wrap items-center gap-2">
                   <span>Automatic Due Diligence Checklist</span>
-                  <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-mono font-bold rounded-md">
-                    AI Checklist Engine
+                  <span className="px-2.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 text-[10px] font-mono font-bold rounded-lg border border-yellow-200/50 dark:border-yellow-700/40">
+                    Automated Stage Audit
                   </span>
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -338,7 +338,7 @@ export default function TasksPage() {
               <button
                 onClick={handleGenerateDueDiligence}
                 disabled={isGenerating}
-                className="flex-1 md:flex-initial px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                className="flex-1 md:flex-initial px-4 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all active:scale-[0.98] shadow-xs hover:shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 whitespace-nowrap"
               >
                 {isGenerating && (
                   <CircleNotch className="w-4 h-4 animate-spin" />
@@ -400,7 +400,7 @@ export default function TasksPage() {
 
               <button
                 type="submit"
-                className="w-full sm:w-auto px-5 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                className="w-full sm:w-auto px-5 py-2.5 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all active:scale-[0.98] shadow-xs hover:shadow-md flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" weight="bold" />
                 Add Task
@@ -410,7 +410,7 @@ export default function TasksPage() {
         </div>
 
         {/* Task List Section */}
-        <div className="bg-white dark:bg-zinc-900/60 p-6 rounded-3xl border border-gray-200/80 dark:border-zinc-800 space-y-6">
+        <div className="bg-white dark:bg-zinc-900/60 p-6 rounded-3xl border border-gray-200/80 dark:border-zinc-800 space-y-6 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
               Checklist Tasks ({filteredTasks.length})
@@ -418,13 +418,13 @@ export default function TasksPage() {
 
             {/* Category Filter Tabs (Apple Segmented Control) */}
             <div className="-mx-1 px-1 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
-              <div className="inline-flex p-1 bg-gray-100 dark:bg-zinc-800 rounded-2xl border border-black/5 dark:border-white/5 w-fit shrink-0">
+              <div className="inline-flex p-1 bg-gray-100 dark:bg-zinc-800 rounded-2xl border border-black/5 dark:border-white/5 w-fit shrink-0 gap-1">
                 {["All", "Finance", "Legal", "Operations", "Market"].map(
                   (cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap ${
                         selectedCategory === cat
                           ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-xs"
                           : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white"
@@ -446,12 +446,13 @@ export default function TasksPage() {
               >
                 <div className="flex items-start gap-3">
                   <button
-                    className={`mt-0.5 transition-colors cursor-pointer ${
+                    className={`mt-0.5 transition-transform active:scale-90 cursor-pointer ${
                       task.status === "completed"
                         ? "text-green-500"
                         : "text-gray-300 hover:text-green-500 dark:text-zinc-600"
                     }`}
                     onClick={() => toggleTask(task._id, task.status)}
+                    aria-label={task.status === "completed" ? "Mark incomplete" : "Mark complete"}
                   >
                     {task.status === "completed" ? (
                       <CheckCircle size={22} weight="fill" />
@@ -499,9 +500,10 @@ export default function TasksPage() {
                 </div>
 
                 <button
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-80 md:opacity-0 md:group-hover:opacity-100 active:scale-[0.95] cursor-pointer shrink-0"
                   onClick={() => deleteTask(task._id)}
                   title="Delete Task"
+                  aria-label="Delete Task"
                 >
                   <Trash size={16} weight="bold" />
                 </button>
