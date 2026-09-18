@@ -8,7 +8,6 @@ import {
   FadersHorizontal,
   CircleNotch,
   Plus,
-  Sparkle,
   Lock,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
@@ -161,7 +160,7 @@ export default function InvestorsPage() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-yellow-500/20 active:scale-95 w-full md:w-auto shrink-0 cursor-pointer"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold transition-all shadow-xs hover:shadow-md hover:shadow-yellow-500/20 active:scale-[0.98] w-full md:w-auto shrink-0 cursor-pointer"
           >
             <Plus className="w-5 h-5" weight="bold" />
             <span className="hidden sm:inline">Add New Investor</span>
@@ -214,16 +213,16 @@ export default function InvestorsPage() {
               setIsMatchModalOpen(true);
             }}
             className={cn(
-              "flex items-center gap-2 px-6 py-2 rounded-xl font-black text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0",
-              (subLoading || isLoading) 
-                ? "bg-gray-100 text-gray-400" 
-                : (is_subscribed || is_admin) 
-                  ? "bg-black text-yellow-400 hover:bg-zinc-900" 
+              "flex items-center gap-2 px-4 sm:px-6 py-2 rounded-xl font-black text-xs sm:text-sm transition-all shadow-xs active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap",
+              (subLoading || isLoading)
+                ? "bg-gray-100 text-gray-400"
+                : (is_subscribed || is_admin)
+                  ? "bg-black text-yellow-400 hover:bg-zinc-900"
                   : "bg-gray-100 text-gray-400 cursor-not-allowed"
             )}
             disabled={subLoading || isLoading}
           >
-            Match Me {!subLoading && !isLoading && !is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
+            <span>Match Me</span> {!subLoading && !isLoading && !is_subscribed && !is_admin && <Lock weight="bold" className="w-3 h-3" />}
           </button>
           
           <button 
@@ -234,7 +233,7 @@ export default function InvestorsPage() {
               }
               setIsFilterModalOpen(true);
             }}
-            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0 cursor-pointer disabled:opacity-50"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-xs sm:text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0 cursor-pointer disabled:opacity-50 whitespace-nowrap"
             disabled={subLoading || isLoading}
           >
             <FadersHorizontal className="w-4 h-4" weight="bold" />
@@ -244,7 +243,7 @@ export default function InvestorsPage() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-yellow-500/20 hover:shadow-lg hover:scale-105 cursor-pointer shrink-0"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xs shadow-yellow-500/20 hover:shadow-md cursor-pointer shrink-0 whitespace-nowrap active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" weight="bold" />
             <span className="hidden lg:inline">Investor</span>

@@ -327,7 +327,7 @@ function DocumentsPageContent() {
         </div>
       </div>
 
-      <div className="p-4 py-8 lg:p-8 max-w-7xl mx-auto w-full">
+      <div className="p-4 py-8 lg:p-8 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Apple Segmented Navigation Bar */}
         <div className="p-1.5 bg-zinc-200/60 dark:bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-black/[0.04] dark:border-white/[0.04] mb-8 flex flex-wrap gap-1">
           <button
@@ -391,20 +391,22 @@ function DocumentsPageContent() {
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-black focus:outline-none dark:bg-zinc-900 dark:border-zinc-800 dark:text-white"
                 />
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
-                {["all", "deck", "financials", "legal", "memo", "other"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setFilterType(type)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold capitalize whitespace-nowrap border transition-all ${
-                      filterType === type
-                        ? "bg-black text-white border-black dark:bg-white dark:text-black"
-                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800 dark:text-gray-400 dark:hover:bg-zinc-800"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
+              <div className="-mx-1 px-1 sm:mx-0 sm:px-0 w-full md:w-auto overflow-x-auto no-scrollbar">
+                <div className="inline-flex p-1 bg-gray-100 dark:bg-zinc-800 rounded-2xl border border-black/5 dark:border-white/5 gap-1 w-fit shrink-0">
+                  {["all", "deck", "financials", "legal", "memo", "other"].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setFilterType(type)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize whitespace-nowrap transition-all cursor-pointer ${
+                        filterType === type
+                          ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-xs"
+                          : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
