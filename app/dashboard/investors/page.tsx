@@ -284,7 +284,7 @@ export default function InvestorsPage() {
                       You've reached the limit for the free tier. Upgrade to Pro to access our full global database and AI matching tools.
                     </p>
                     <Link href="/dashboard/pricing" className="mt-6 inline-block">
-                      <button className="px-8 py-3 bg-yellow-400 text-black rounded-xl font-black text-sm hover:bg-yellow-500 transition-all hover:-translate-y-0.5 shadow-lg shadow-yellow-400/20">
+                      <button className="px-8 py-3 bg-yellow-400 text-black rounded-xl font-black text-sm hover:bg-yellow-500 transition-all  shadow-lg shadow-yellow-400/20">
                         View Pricing
                       </button>
                     </Link>

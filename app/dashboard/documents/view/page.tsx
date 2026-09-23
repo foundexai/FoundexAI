@@ -334,7 +334,7 @@ function DocumentViewerContent() {
         <div className="flex items-center gap-3.5">
           <Link
             href="/dashboard/documents"
-            className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all active:scale-95 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+            className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all active:scale-[0.98] text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
             title="Back to Documents"
           >
             <CaretLeft className="w-5 h-5" weight="bold" />
@@ -358,7 +358,7 @@ function DocumentViewerContent() {
           {/* Comments & Heatmap Drawer Toggle */}
           <button
             onClick={() => setShowComments(!showComments)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer border ${
+            className={`px-3 py-1.5 text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer border ${
               showComments
                 ? "bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-black dark:border-white shadow-xs"
                 : "bg-white/70 dark:bg-zinc-900/70 text-zinc-600 dark:text-zinc-300 border-black/5 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -377,7 +377,7 @@ function DocumentViewerContent() {
               setShareMessage(`Hi, please find our ${name || "Document"} shared. We would love to arrange a brief introductory call to discuss our milestones.`);
               setIsShareModalOpen(true);
             }}
-            className="px-3.5 py-1.5 text-xs font-semibold bg-yellow-500 hover:bg-yellow-450 text-black rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm shadow-yellow-500/20"
+            className="px-3.5 py-1.5 text-xs font-semibold bg-yellow-500 hover:bg-yellow-450 text-black rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-sm shadow-yellow-500/20"
           >
             <PaperPlaneTilt className="w-3.5 h-3.5" weight="bold" />
             <span>Share</span>
@@ -388,7 +388,7 @@ function DocumentViewerContent() {
             href={url}
             download
             target="_blank"
-            className="px-3 py-1.5 text-xs font-medium bg-white/70 dark:bg-zinc-900/70 border border-black/5 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl flex items-center gap-1.5 transition-all active:scale-95"
+            className="px-3 py-1.5 text-xs font-medium bg-white/70 dark:bg-zinc-900/70 border border-black/5 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.98]"
           >
             <DownloadSimple className="w-3.5 h-3.5" weight="bold" />
             <span className="hidden sm:inline">Download</span>
@@ -397,7 +397,7 @@ function DocumentViewerContent() {
           <a
             href={url}
             target="_blank"
-            className="hidden md:flex px-3 py-1.5 text-xs font-medium bg-white/70 dark:bg-zinc-900/70 border border-black/5 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl items-center gap-1.5 transition-all active:scale-95"
+            className="hidden md:flex px-3 py-1.5 text-xs font-medium bg-white/70 dark:bg-zinc-900/70 border border-black/5 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl items-center gap-1.5 transition-all active:scale-[0.98]"
           >
             <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
             <span>Original</span>
@@ -629,7 +629,7 @@ function DocumentViewerContent() {
                   <button
                     type="submit"
                     disabled={submittingComment || !commentText.trim()}
-                    className="p-2.5 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-black rounded-xl transition-all active:scale-95 cursor-pointer disabled:opacity-40 shrink-0 shadow-xs"
+                    className="p-2.5 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-black rounded-xl transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 shrink-0 shadow-xs"
                   >
                     {submittingComment ? (
                       <CircleNotch className="w-4 h-4 animate-spin" />
@@ -724,7 +724,7 @@ function DocumentViewerContent() {
                         setIsCommittingVersion(false);
                       }
                     }}
-                    className="w-full py-2 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl transition-all active:scale-95 cursor-pointer disabled:opacity-50 shadow-xs"
+                    className="w-full py-2 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 shadow-xs"
                   >
                     {isCommittingVersion ? "Committing..." : "Commit Version Upgrade"}
                   </button>
@@ -807,7 +807,7 @@ function DocumentViewerContent() {
                         setIsPostingRedline(false);
                       }
                     }}
-                    className="w-full py-2 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-black text-xs font-semibold rounded-xl transition-all active:scale-95 cursor-pointer disabled:opacity-50 shadow-xs"
+                    className="w-full py-2 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-black text-xs font-semibold rounded-xl transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 shadow-xs"
                   >
                     {isPostingRedline ? "Posting..." : "Register Redline Comment"}
                   </button>
@@ -890,7 +890,7 @@ function DocumentViewerContent() {
             <button
               onClick={handleShareSubmit}
               disabled={sharing || !selectedInvestorId || !shareMessage}
-              className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm shadow-yellow-500/20"
+              className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm shadow-yellow-500/20"
             >
               {sharing ? <CircleNotch className="w-4 h-4 animate-spin" /> : <PaperPlaneTilt className="w-4 h-4" weight="bold" />}
               <span>Send Document Memo</span>

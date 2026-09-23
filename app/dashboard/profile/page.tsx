@@ -19,6 +19,7 @@ import {
   RocketLaunch,
   Star,
   ArrowRight,
+  CaretDown,
 } from "@phosphor-icons/react";
 import { InvestorCard, Investor } from "@/components/InvestorCard";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -337,7 +338,7 @@ export default function ProfilePage() {
                       <User className="w-12 h-12 text-gray-300 dark:text-white/20" weight="bold" />
                     </div>
                   )}
-                  <label className="absolute -bottom-2 -right-2 cursor-pointer bg-white text-gray-800 p-2 rounded-xl shadow-lg border border-gray-100 hover:bg-gray-50 transition-all dark:bg-zinc-800 dark:text-white dark:border-zinc-700">
+                  <label className="absolute -bottom-2 -right-2 cursor-pointer bg-white text-gray-800 p-2.5 rounded-xl shadow-xs hover:shadow-md border border-gray-100 hover:bg-gray-50 active:scale-[0.98] transition-all dark:bg-zinc-800 dark:text-white dark:border-zinc-700">
                     <CloudArrowUp className="h-5 w-5 text-yellow-500" weight="bold" />
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
                   </label>
@@ -356,7 +357,7 @@ export default function ProfilePage() {
                     <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Display Name</label>
                     <input
                       type="text"
-                      className="w-full bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
+                      className="w-full bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400/40 focus:border-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white dark:focus:ring-yellow-400/30"
                       value={basicInfo.full_name}
                       onChange={(e) => setBasicInfo({...basicInfo, full_name: e.target.value})}
                       placeholder="e.g. John Doe"
@@ -366,21 +367,21 @@ export default function ProfilePage() {
                     <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">I am a...</label>
                     <div className="relative">
                       <select
-                        className="w-full appearance-none bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
+                        className="w-full appearance-none bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400/40 focus:border-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white dark:focus:ring-yellow-400/30 pr-10"
                         value={basicInfo.user_type}
                         onChange={(e) => setBasicInfo({...basicInfo, user_type: e.target.value})}
                       >
                         <option value="founder">Founder / Startup</option>
                         <option value="investor">Investor / VC</option>
                       </select>
-                      <Plus className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none h-4 w-4" />
+                      <CaretDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none h-4 w-4" weight="bold" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">LinkedIn URL</label>
                     <input
                       type="url"
-                      className="w-full bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white"
+                      className="w-full bg-white/50 border border-white/60 rounded-xl px-4 py-3 font-bold focus:ring-2 focus:ring-yellow-400/40 focus:border-yellow-400 transition-all dark:bg-white/5 dark:border-white/10 dark:text-white dark:focus:ring-yellow-400/30"
                       value={basicInfo.linkedin_url}
                       onChange={(e) => setBasicInfo({...basicInfo, linkedin_url: e.target.value})}
                       placeholder="linkedin.com/in/..."
@@ -392,7 +393,7 @@ export default function ProfilePage() {
                     <button
                         onClick={handleSaveMetadata}
                         disabled={savingIdentity}
-                        className="bg-zinc-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-zinc-700 transition-all shadow-lg hover:-translate-y-1 active:scale-95 text-sm dark:bg-white dark:text-black dark:hover:bg-zinc-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        className="bg-zinc-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-zinc-800 active:scale-[0.98] transition-all shadow-xs hover:shadow-md text-sm dark:bg-white dark:text-black dark:hover:bg-zinc-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {savingIdentity ? (
                           <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
@@ -498,9 +499,9 @@ export default function ProfilePage() {
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleSave}
-                  className="bg-yellow-400 text-gray-900 font-black py-3 px-8 rounded-xl hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-400/20 flex items-center gap-2"
+                  className="bg-yellow-400 text-gray-900 font-bold py-3 px-8 rounded-xl hover:bg-yellow-500 active:scale-[0.98] transition-all shadow-xs hover:shadow-md flex items-center gap-2 text-sm"
                 >
-                  <FloppyDiskBack className="h-5 w-5" weight="bold" />
+                  <FloppyDiskBack className="h-4 w-4" weight="bold" />
                   Save Thesis
                 </button>
               </div>
@@ -516,7 +517,7 @@ export default function ProfilePage() {
               </p>
               <Link
                 href="/dashboard/startups"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg text-sm"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-black active:scale-[0.98] transition-all shadow-xs hover:shadow-md text-sm dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               >
                 Browse Startup Directory
                 <ArrowRight className="w-4 h-4" weight="bold" />
@@ -539,9 +540,9 @@ export default function ProfilePage() {
                   </p>
                   <button
                     onClick={() => setShowAddForm(true)}
-                    className="bg-yellow-500 text-white px-8 py-4 rounded-xl hover:bg-yellow-600 flex items-center gap-3 mx-auto transition-all duration-300 ease-in-out transform hover:scale-105 shadow-xl shadow-yellow-500/30 font-bold"
+                    className="bg-yellow-400 text-gray-900 px-8 py-3.5 rounded-xl hover:bg-yellow-500 active:scale-[0.98] flex items-center gap-3 mx-auto transition-all shadow-xs hover:shadow-md font-bold text-sm"
                   >
-                    <Plus className="h-6 w-6" weight="bold" />
+                    <Plus className="h-5 w-5" weight="bold" />
                     Create Startup Profile
                   </button>
                 </div>
@@ -552,7 +553,7 @@ export default function ProfilePage() {
                     {/* Add Startup Card */}
                     <button
                       onClick={() => setShowAddForm(true)}
-                      className="glass-card border-2 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-600 transition-all cursor-pointer min-h-[280px] dark:border-white/10 dark:hover:border-yellow-500/50"
+                      className="glass-card border-2 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-600 active:scale-[0.98] transition-all cursor-pointer min-h-[280px] dark:border-white/10 dark:hover:border-yellow-500/50"
                     >
                       <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 dark:bg-white/5">
                         <Plus className="h-8 w-8" weight="bold" />
@@ -581,14 +582,14 @@ export default function ProfilePage() {
                           <div className="flex gap-2 lg:opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => setEditingStartup(startup)}
-                              className="text-gray-400 hover:text-yellow-600 p-2 rounded-lg hover:bg-yellow-50 transition-colors dark:hover:bg-yellow-500/10 dark:hover:text-yellow-500"
+                              className="text-gray-400 hover:text-yellow-600 p-2 rounded-xl hover:bg-yellow-50 active:scale-[0.98] transition-all dark:hover:bg-yellow-500/10 dark:hover:text-yellow-500"
                               title="Edit Startup"
                             >
                               <NotePencil className="h-5 w-5" weight="bold" />
                             </button>
                             <button
                               onClick={() => handleDeleteStartup(startup._id)}
-                              className="text-gray-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-colors dark:hover:bg-red-500/10 dark:hover:text-red-500"
+                              className="text-gray-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 active:scale-[0.98] transition-all dark:hover:bg-red-500/10 dark:hover:text-red-500"
                               title="Delete Startup"
                             >
                               <Trash className="h-5 w-5" weight="bold" />

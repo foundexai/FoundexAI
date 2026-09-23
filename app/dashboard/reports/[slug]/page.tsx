@@ -217,7 +217,7 @@ export default function DetailedReportPage({ params }: { params: Promise<{ slug:
                  </ul>
             </div>
             
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-black py-4 rounded-[1.5rem] transition-all transform active:scale-95 shadow-[0_15px_30px_rgba(234,179,8,0.15)] flex items-center justify-center gap-2 group">
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-black py-4 rounded-[1.5rem] transition-all transform active:scale-[0.98] shadow-[0_15px_30px_rgba(234,179,8,0.15)] flex items-center justify-center gap-2 group">
                 <span className="uppercase tracking-widest text-[11px]">Download Full PDF</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" weight="bold" />
             </button>

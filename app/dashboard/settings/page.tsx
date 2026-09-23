@@ -153,7 +153,7 @@ export default function SettingsPage() {
               toast.success("Restarting onboarding tour...");
               router.push("/dashboard");
             }}
-            className="px-5 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
+            className="px-5 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <Lightning className="w-4 h-4 text-yellow-500" weight="fill" />
             <span>Replay Workspace Walkthrough</span>
@@ -171,7 +171,7 @@ export default function SettingsPage() {
           </p>
 
           <Link href="/dashboard/settings/developer">
-            <button className="px-5 py-3 bg-yellow-500 hover:bg-yellow-600 text-black text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95">
+            <button className="px-5 py-3 bg-yellow-500 hover:bg-yellow-600 text-black text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-[0.98]">
               <Key className="w-4 h-4" weight="bold" />
               <span>Manage API Keys, Webhooks & Integrations</span>
               <ArrowUpRight className="w-4 h-4" weight="bold" />

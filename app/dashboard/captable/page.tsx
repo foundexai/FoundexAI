@@ -414,7 +414,7 @@ export default function CapTablePage() {
 
                 <button
                   onClick={() => setIsTermSheetDrawerOpen(true)}
-                  className="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer w-full sm:w-auto hover:scale-105 active:scale-95"
+                  className="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer w-full sm:w-auto hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Scales className="w-4 h-4" weight="bold" />
                   <span>AI Term Sheet Advisor</span>

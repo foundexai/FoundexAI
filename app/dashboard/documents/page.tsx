@@ -332,7 +332,7 @@ function DocumentsPageContent() {
         <div className="p-1.5 bg-zinc-200/60 dark:bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-black/[0.04] dark:border-white/[0.04] mb-8 flex flex-wrap gap-1">
           <button
             onClick={() => setActiveTab("documents")}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
               activeTab === "documents"
                 ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
@@ -343,7 +343,7 @@ function DocumentsPageContent() {
           </button>
           <button
             onClick={() => setActiveTab("investor_updates")}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
               activeTab === "investor_updates"
                 ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
@@ -354,7 +354,7 @@ function DocumentsPageContent() {
           </button>
           <button
             onClick={() => setActiveTab("secure_links")}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
               activeTab === "secure_links"
                 ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"
@@ -365,7 +365,7 @@ function DocumentsPageContent() {
           </button>
           <button
             onClick={() => setActiveTab("signatures")}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+            className={`flex-1 min-w-[140px] py-2.5 px-4 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
               activeTab === "signatures"
                 ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"

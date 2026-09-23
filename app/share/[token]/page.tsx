@@ -332,7 +332,7 @@ export default function SecureSharePage({ params }: PageProps) {
             <div className="flex items-center bg-zinc-800/80 border border-white/10 rounded-xl px-2 py-1 backdrop-blur-md">
               <button
                 onClick={() => setZoomLevel((z) => Math.max(70, z - 10))}
-                className="p-1 hover:bg-white/10 rounded-lg text-zinc-300 transition-all active:scale-95 cursor-pointer"
+                className="p-1 hover:bg-white/10 rounded-lg text-zinc-300 transition-all active:scale-[0.98] cursor-pointer"
                 title="Zoom Out"
               >
                 <MagnifyingGlassMinus className="w-3.5 h-3.5" />
@@ -340,7 +340,7 @@ export default function SecureSharePage({ params }: PageProps) {
               <span className="text-xs font-mono font-semibold px-2 text-zinc-200">{zoomLevel}%</span>
               <button
                 onClick={() => setZoomLevel((z) => Math.min(150, z + 10))}
-                className="p-1 hover:bg-white/10 rounded-lg text-zinc-300 transition-all active:scale-95 cursor-pointer"
+                className="p-1 hover:bg-white/10 rounded-lg text-zinc-300 transition-all active:scale-[0.98] cursor-pointer"
                 title="Zoom In"
               >
                 <MagnifyingGlassPlus className="w-3.5 h-3.5" />
@@ -353,7 +353,7 @@ export default function SecureSharePage({ params }: PageProps) {
                 href={docContent.docUrl}
                 download
                 target="_blank"
-                className="px-3.5 py-1.5 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm shadow-yellow-500/20"
+                className="px-3.5 py-1.5 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-sm shadow-yellow-500/20"
               >
                 <DownloadSimple className="w-3.5 h-3.5" weight="bold" />
                 <span>Download</span>
@@ -402,7 +402,7 @@ export default function SecureSharePage({ params }: PageProps) {
                   <button
                     type="submit"
                     disabled={verifying || !passcode}
-                    className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
+                    className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
                   >
                     {verifying ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" weight="bold" />}
                     <span>Unlock & View Document</span>
@@ -431,7 +431,7 @@ export default function SecureSharePage({ params }: PageProps) {
                       <button
                         type="submit"
                         disabled={sendingOtp || !email}
-                        className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
+                        className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
                       >
                         {sendingOtp ? <CircleNotch className="w-4 h-4 animate-spin" /> : <EnvelopeSimple className="w-4 h-4" weight="bold" />}
                         <span>Send 6-Digit Passcode</span>
@@ -469,7 +469,7 @@ export default function SecureSharePage({ params }: PageProps) {
                       <button
                         type="submit"
                         disabled={verifying || otpCode.length < 6}
-                        className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
+                        className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm shadow-yellow-500/20"
                       >
                         {verifying ? <CircleNotch className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" weight="bold" />}
                         <span>Verify & Unlock</span>

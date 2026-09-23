@@ -188,7 +188,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => dismissAnomaly(anomaly._id)}
-                className="px-3.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+                className="px-3.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] whitespace-nowrap"
               >
                 Dismiss Warning
               </button>
@@ -213,7 +213,7 @@ export default function Dashboard() {
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => setIsBoardDeckOpen(true)}
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-black text-xs transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95"
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-yellow-500 hover:bg-yellow-400 text-black rounded-xl font-black text-xs transition-all shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <Presentation className="w-4 h-4" weight="bold" />
                     <span>Generate AI Board Deck</span>
@@ -533,7 +533,7 @@ function DescriptionBlock({
                       <button
                         onClick={handleAskSophia}
                         disabled={improving}
-                        className="bg-yellow-500 text-white font-black text-sm px-8 py-4 rounded-2xl hover:bg-yellow-600 hover:shadow-xl hover:scale-105 transition-all flex items-center gap-3 mx-auto disabled:opacity-50 shadow-lg shadow-yellow-500/30"
+                        className="bg-yellow-500 text-white font-black text-sm px-8 py-4 rounded-2xl hover:bg-yellow-600 hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-3 mx-auto disabled:opacity-50 shadow-lg shadow-yellow-500/30"
                       >
                         {!is_subscribed && !is_admin ? (
                           <Lock className="w-5 h-5" weight="bold" />

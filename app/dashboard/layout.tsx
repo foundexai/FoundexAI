@@ -25,6 +25,7 @@ import {
   EnvelopeSimple,
   Microphone,
   CreditCard,
+  Buildings,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -70,6 +71,7 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
     items: [
       { name: "Investors", href: "/dashboard/investors", icon: Compass },
       { name: "Startups", href: "/dashboard/startups", icon: RocketLaunch },
+      { name: "Accelerators", href: "/dashboard/accelerator", icon: Buildings },
     ],
   },
   {
@@ -108,7 +110,10 @@ const INVESTOR_NAV_GROUPS: NavGroup[] = [
   },
   {
     title: "Network",
-    items: [{ name: "Investors", href: "/dashboard/investors", icon: Compass }],
+    items: [
+      { name: "Investors", href: "/dashboard/investors", icon: Compass },
+      { name: "Accelerators", href: "/dashboard/accelerator", icon: Buildings },
+    ],
   },
   {
     title: "Account",
@@ -440,7 +445,7 @@ export default function DashboardLayout({
           {/* Toggle Button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3 top-24 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-full p-1.5 shadow-md z-50 transition-all hover:scale-110 active:scale-95 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer"
+            className="absolute -right-3 top-24 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-full p-1.5 shadow-md z-50 transition-all hover:scale-110 active:scale-[0.98] text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer"
           >
             {isCollapsed ? (
               <CaretRight weight="bold" size={14} />

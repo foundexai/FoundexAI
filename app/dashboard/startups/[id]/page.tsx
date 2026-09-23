@@ -150,7 +150,7 @@ export default function StartupDetailsPage() {
                   Visit Website
                 </a>
               )}
-              <button className="inline-flex items-center px-6 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+              <button className="inline-flex items-center px-6 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl  dark:bg-white dark:text-black dark:hover:bg-gray-200">
                 <EnvelopeSimple className="w-4 h-4 mr-2" weight="bold" />
                 Connect
               </button>

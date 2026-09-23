@@ -807,7 +807,7 @@ export default function PitchStudioPage() {
                 <button
                   onClick={() => fetchNextQuestion()}
                   disabled={isLoadingQuestion}
-                  className="px-6 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-black rounded-2xl transition-all flex items-center gap-2 shadow-lg cursor-pointer hover:scale-105 active:scale-95"
+                  className="px-6 py-3 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-black rounded-2xl transition-all flex items-center gap-2 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span>Next VC Challenge</span>
                   <CaretRight className="w-4 h-4" weight="bold" />

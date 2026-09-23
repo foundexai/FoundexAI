@@ -891,7 +891,7 @@ export default function AdminPage() {
                                     <button
                                       onClick={() => approveMutation.mutate({ id: startup._id, type: "startup" })}
                                       disabled={!!processingId}
-                                      className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                                      className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50"
                                     >
                                       <Check className="w-3.5 h-3.5" weight="bold" />
                                       Approve
@@ -906,7 +906,7 @@ export default function AdminPage() {
                                           isDestructive: true
                                         });
                                       }}
-                                      className="p-2 bg-gray-100 hover:bg-red-500 hover:text-white text-gray-500 dark:bg-zinc-850 dark:text-gray-400 rounded-xl font-bold transition-all cursor-pointer active:scale-95"
+                                      className="p-2 bg-gray-100 hover:bg-red-500 hover:text-white text-gray-500 dark:bg-zinc-850 dark:text-gray-400 rounded-xl font-bold transition-all cursor-pointer active:scale-[0.98]"
                                     >
                                       <X className="w-4 h-4" weight="bold" />
                                     </button>
@@ -1012,7 +1012,7 @@ export default function AdminPage() {
                                     <button
                                       onClick={() => approveMutation.mutate({ id: inv.id, type: "investor" })}
                                       disabled={!!processingId}
-                                      className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                                      className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50"
                                     >
                                       <Check className="w-3.5 h-3.5" weight="bold" />
                                       Approve
@@ -1027,7 +1027,7 @@ export default function AdminPage() {
                                           isDestructive: true
                                         });
                                       }}
-                                      className="p-2 bg-gray-100 hover:bg-red-500 hover:text-white text-gray-500 dark:bg-zinc-850 dark:text-gray-400 rounded-xl font-bold transition-all cursor-pointer active:scale-95"
+                                      className="p-2 bg-gray-100 hover:bg-red-500 hover:text-white text-gray-500 dark:bg-zinc-850 dark:text-gray-400 rounded-xl font-bold transition-all cursor-pointer active:scale-[0.98]"
                                     >
                                       <X className="w-4 h-4" weight="bold" />
                                     </button>
@@ -1151,7 +1151,7 @@ export default function AdminPage() {
                                 setSelectedStartup(mapped);
                                 setIsEditStartupOpen(true);
                               }}
-                              className="flex-1 py-2 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                              className="flex-1 py-2 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                             >
                               <PencilSimple className="w-3.5 h-3.5" weight="bold" />
                               Edit Details
@@ -1167,7 +1167,7 @@ export default function AdminPage() {
                                   isDestructive: true
                                 });
                               }}
-                              className="p-2 bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 text-red-500 rounded-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center"
+                              className="p-2 bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 text-red-500 rounded-xl transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center"
                               title="Take Down Permanently"
                             >
                               <Trash className="w-4 h-4" weight="bold" />
@@ -1188,7 +1188,7 @@ export default function AdminPage() {
                      </div>
                      <button 
                          onClick={() => setIsCreateUserOpen(true)}
-                         className="px-5 py-2.5 bg-zinc-900 dark:bg-white dark:text-black text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-xs active:scale-95 cursor-pointer"
+                         className="px-5 py-2.5 bg-zinc-900 dark:bg-white dark:text-black text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-all shadow-xs active:scale-[0.98] cursor-pointer"
                      >
                          <UserPlus weight="bold" className="w-4 h-4" />
                          Create New User
@@ -1307,7 +1307,7 @@ export default function AdminPage() {
                                          <button 
                                              disabled={usersPage === 1}
                                              onClick={() => setUsersPage(prev => Math.max(1, prev - 1))}
-                                             className="p-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all cursor-pointer active:scale-95"
+                                             className="p-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all cursor-pointer active:scale-[0.98]"
                                          >
                                              <CaretLeft weight="bold" className="w-3.5 h-3.5" />
                                          </button>
@@ -1317,7 +1317,7 @@ export default function AdminPage() {
                                                      key={i}
                                                      onClick={() => setUsersPage(i + 1)}
                                                      className={cn(
-                                                         "w-8 h-8 flex items-center justify-center rounded-lg text-[10px] font-black transition-all cursor-pointer shrink-0 active:scale-95",
+                                                         "w-8 h-8 flex items-center justify-center rounded-lg text-[10px] font-black transition-all cursor-pointer shrink-0 active:scale-[0.98]",
                                                          usersPage === i + 1 
                                                          ? "bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm" 
                                                          : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400"
@@ -1330,7 +1330,7 @@ export default function AdminPage() {
                                          <button 
                                              disabled={usersPage === usersPagination.totalPages}
                                              onClick={() => setUsersPage(prev => Math.min(usersPagination.totalPages, prev + 1))}
-                                             className="p-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all cursor-pointer active:scale-95"
+                                             className="p-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all cursor-pointer active:scale-[0.98]"
                                          >
                                              <CaretRight weight="bold" className="w-3.5 h-3.5" />
                                          </button>
@@ -1598,7 +1598,7 @@ export default function AdminPage() {
                             handleToggleFeatured(inv);
                           }}
                           className={cn(
-                            "p-2 rounded-xl font-bold transition-all border cursor-pointer active:scale-95 shrink-0 flex items-center justify-center",
+                            "p-2 rounded-xl font-bold transition-all border cursor-pointer active:scale-[0.98] shrink-0 flex items-center justify-center",
                             inv.isFeatured 
                               ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-600 dark:text-yellow-400" 
                               : "bg-gray-50 border-gray-100 text-gray-400 hover:text-gray-900 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:text-white"
@@ -1613,7 +1613,7 @@ export default function AdminPage() {
                             setSelectedInvestor(inv);
                             setIsEditOpen(true);
                           }}
-                          className="flex-1 py-2 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                          className="flex-1 py-2 bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                         >
                           <PencilSimple className="w-3.5 h-3.5" weight="bold" />
                           Edit Details
