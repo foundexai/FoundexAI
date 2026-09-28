@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Trash } from "@phosphor-icons/react";
+import { Trash, NotePencil, Plus, CircleNotch, BookOpen } from "@phosphor-icons/react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
+import { toast } from "sonner";
 
 interface Note {
   _id: string;
@@ -27,6 +28,7 @@ export default function NotesPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -62,7 +64,8 @@ export default function NotesPage() {
   async function addNote(e: any) {
     e.preventDefault();
     if (!activeStartupId || !token) return;
-    
+
+    setSubmitting(true);
     try {
         await fetch("/api/notes", {
         method: "POST",
@@ -76,9 +79,13 @@ export default function NotesPage() {
         }),
         });
         setNewNote({ title: "", content: "", tags: [] });
+        toast.success("Note saved");
         loadNotes();
     } catch (e) {
+        toast.error("Failed to save note");
         console.error("Failed to add note", e);
+    } finally {
+        setSubmitting(false);
     }
   }
 
@@ -88,7 +95,7 @@ export default function NotesPage() {
 
   async function confirmDeleteNote() {
     if (!deleteNoteId || !token) return;
-    
+
     try {
         await fetch(`/api/notes/${deleteNoteId}`, {
         method: "DELETE",
@@ -96,8 +103,10 @@ export default function NotesPage() {
             Authorization: `Bearer ${token}`,
         },
         });
+        toast.success("Note deleted");
         loadNotes();
     } catch (e) {
+        toast.error("Failed to delete note");
         console.error("Failed to delete note", e);
     }
     setDeleteNoteId(null);
@@ -114,60 +123,79 @@ export default function NotesPage() {
 
   if (loading || isLoading) {
     return (
-      <main className="w-full flex-1 p-8 bg-gray-50 dark:bg-transparent">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <Skeleton className="h-10 w-48 bg-gray-200 dark:bg-zinc-800" />
-          <div className="glass-card p-6 rounded-2xl border border-white/50 h-64 dark:border-zinc-800"></div>
-          <div className="glass-card p-6 rounded-2xl border border-white/50 h-96 dark:border-zinc-800"></div>
-        </div>
-      </main>
+      <div className="max-w-4xl mx-auto space-y-8">
+        <Skeleton className="h-10 w-48 bg-gray-200 dark:bg-zinc-800" />
+        <div className="bg-white p-6 rounded-3xl border border-gray-200/80 h-64 dark:bg-zinc-900 dark:border-zinc-800"></div>
+        <div className="bg-white p-6 rounded-3xl border border-gray-200/80 h-96 dark:bg-zinc-900 dark:border-zinc-800"></div>
+      </div>
     );
   }
 
   return (
-    <main className="w-full flex-1 p-8 bg-gray-50 dark:bg-transparent">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight dark:text-white">
-          Notes
-        </h1>
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center shrink-0 shadow-xs">
+          <BookOpen className="w-6 h-6" weight="bold" />
+        </div>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight dark:text-white">
+            Notes
+          </h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            Capture investor meeting notes, weekly updates, and product ideas.
+          </p>
+        </div>
+      </div>
 
-        <div className="glass-card p-8 rounded-3xl border border-white/50 mb-8 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 dark:text-white">
+      {/* Add New Note Card */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200/80 dark:bg-zinc-900 dark:border-zinc-800 shadow-xs space-y-5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center shrink-0">
+            <NotePencil className="w-4 h-4" weight="bold" />
+          </div>
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">
             Add New Note
           </h2>
-          <form onSubmit={addNote}>
-            <input
-              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800 dark:bg-zinc-900/50 dark:border-zinc-700 dark:text-white dark:placeholder:text-gray-500"
-              placeholder="Note Title"
-              value={newNote.title}
-              onChange={(e) =>
-                setNewNote({ ...newNote, title: e.target.value })
-              }
-              required
-            />
-            <textarea
-              className="border border-gray-200 bg-white/50 p-4 w-full mb-4 rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-gray-800 dark:bg-zinc-900/50 dark:border-zinc-700 dark:text-white dark:placeholder:text-gray-500"
-              placeholder="Content"
-              value={newNote.content}
-              onChange={(e) =>
-                setNewNote({ ...newNote, content: e.target.value })
-              }
-              required
-            />
-            <div className="mb-6">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">
-                Tags
-              </h3>
-              <div className="flex flex-wrap gap-2">
+        </div>
+
+        <form onSubmit={addNote} className="space-y-4">
+          <input
+            className="border border-gray-200 bg-gray-50/50 p-3.5 w-full rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-sm font-semibold text-gray-800 dark:bg-zinc-800/50 dark:border-zinc-700 dark:text-white dark:placeholder:text-gray-500 outline-none"
+            placeholder="Note title"
+            value={newNote.title}
+            onChange={(e) =>
+              setNewNote({ ...newNote, title: e.target.value })
+            }
+            required
+          />
+          <textarea
+            rows={4}
+            className="border border-gray-200 bg-gray-50/50 p-3.5 w-full rounded-xl focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all placeholder:text-gray-400 text-sm text-gray-800 dark:bg-zinc-800/50 dark:border-zinc-700 dark:text-white dark:placeholder:text-gray-500 outline-none resize-none"
+            placeholder="Write your note content..."
+            value={newNote.content}
+            onChange={(e) =>
+              setNewNote({ ...newNote, content: e.target.value })
+            }
+            required
+          />
+
+          <div>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2.5">
+              Tags
+            </h3>
+            {/* Apple Segmented Tag Selector */}
+            <div className="-mx-1 px-1 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
+              <div className="inline-flex p-1 bg-gray-100 dark:bg-zinc-800 rounded-2xl border border-black/5 dark:border-white/5 gap-1 w-fit shrink-0 flex-wrap sm:flex-nowrap">
                 {availableTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => handleTaggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                       newNote.tags.includes(tag)
-                        ? "bg-yellow-400 text-white shadow-md shadow-yellow-400/30 dark:text-black"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-400 dark:hover:bg-zinc-700"
+                        ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-xs"
+                        : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white"
                     }`}
                   >
                     {tag}
@@ -175,66 +203,100 @@ export default function NotesPage() {
                 ))}
               </div>
             </div>
-            <button
-              className="w-full bg-yellow-500 text-white p-4 rounded-xl hover:bg-yellow-600 transition-all font-bold shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/40 dark:text-black"
-              type="submit"
-            >
-              Add Note
-            </button>
-          </form>
-        </div>
+          </div>
 
-        <div className="glass-card p-8 rounded-3xl border border-white/50 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 dark:text-white">
+          <div className="flex justify-end pt-2 border-t border-gray-100 dark:border-zinc-800">
+            <button
+              className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 text-xs font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50 shadow-xs active:scale-[0.98]"
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />
+              ) : (
+                <Plus className="w-4 h-4" weight="bold" />
+              )}
+              <span>{submitting ? "Saving..." : "Save Note"}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Notes List */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200/80 dark:bg-zinc-900 dark:border-zinc-800 shadow-xs space-y-5">
+        <div className="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-4">
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">
             Note List
           </h2>
-          <ul className="space-y-4">
+          <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase">
+            {notes.length} {notes.length === 1 ? "Note" : "Notes"}
+          </span>
+        </div>
+
+        {notes.length === 0 ? (
+          <div className="text-center py-12 space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
+              <NotePencil className="w-6 h-6" weight="bold" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">
+                No notes yet
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto mt-1 leading-relaxed">
+                Your saved notes will appear here. Use them to track investor
+                conversations, weekly product reviews, and team updates.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <ul className="space-y-3">
             {notes.map((note) => (
               <li
                 key={note._id}
-                className="p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/60 hover:border-yellow-500/30 transition-all group dark:bg-zinc-900/40 dark:border-zinc-800"
+                className="p-5 bg-gray-50/50 dark:bg-zinc-800/40 rounded-2xl border border-gray-200/60 dark:border-zinc-700/60 hover:border-yellow-500/40 dark:hover:border-yellow-500/40 transition-all group"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-2 dark:text-white">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-base text-gray-900 mb-2 dark:text-white truncate">
                       {note.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed dark:text-gray-300">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap break-words">
                       {note.content}
                     </p>
                   </div>
                   <button
-                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-red-900/20"
+                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:text-zinc-600 dark:hover:bg-red-900/30 hover:text-red-400 rounded-lg transition-all opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
                     onClick={() => deleteNote(note._id)}
+                    aria-label="Delete note"
                   >
-                    <Trash size={18} weight="bold" />
+                    <Trash size={16} weight="bold" />
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {note.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gray-100/80 text-gray-600 border border-gray-200 dark:bg-zinc-800 dark:text-gray-400 dark:border-zinc-700"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 font-medium dark:text-gray-600">
+
+                {note.tags && note.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {note.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gray-200/80 dark:bg-zinc-700 text-gray-700 dark:text-gray-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-[10px] font-mono text-gray-400 dark:text-gray-500 mt-2.5 uppercase tracking-wider">
                   {new Date(note.created_at).toLocaleDateString(undefined, {
                     dateStyle: "long",
                   })}
                 </p>
               </li>
             ))}
-            {notes.length === 0 && (
-              <div className="text-center py-10 text-gray-400 dark:text-gray-500">
-                No notes found.
-              </div>
-            )}
           </ul>
-        </div>
+        )}
       </div>
+
       <ConfirmationModal
         isOpen={!!deleteNoteId}
         onClose={() => setDeleteNoteId(null)}
@@ -244,6 +306,6 @@ export default function NotesPage() {
         confirmLabel="Delete"
         isDestructive
       />
-    </main>
+    </div>
   );
 }

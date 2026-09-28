@@ -99,7 +99,7 @@ export default function PortfolioPage() {
   // Color mapping based on cash runway health
   const getRunwayColor = (months: number) => {
     if (months >= 18) return "text-green-500 dark:text-green-400";
-    if (months >= 12) return "text-yellow-600 dark:text-yellow-450";
+    if (months >= 12) return "text-yellow-600 dark:text-yellow-400";
     if (months >= 6) return "text-orange-500";
     return "text-red-500 font-bold animate-pulse";
   };
@@ -127,7 +127,7 @@ export default function PortfolioPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-xl shadow-xs">
+          <div className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-xs">
             <Funnel className="w-4 h-4 text-zinc-400" />
             <select
               value={filterSector}
@@ -145,10 +145,10 @@ export default function PortfolioPage() {
       </div>
 
       {/* Executive Key Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
         {/* Card 1: Total Portfolio ARR */}
         <div className="glass-card p-6 rounded-3xl border border-white/60 bg-white/40 dark:bg-zinc-900/60 dark:border-white/10 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-450 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center shrink-0">
             <CurrencyDollar className="w-6 h-6" weight="bold" />
           </div>
           <div>
@@ -199,7 +199,7 @@ export default function PortfolioPage() {
 
       {/* Visual Analytics Charts Row */}
       {filteredStartups.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {/* Chart 1: MRR Comparison */}
           <div className="glass-card p-6 rounded-3xl border border-white/60 bg-white/40 dark:bg-zinc-900/60 dark:border-white/10 shadow-xs space-y-4">
             <span className="text-[10px] font-black uppercase tracking-widest text-gray-450 block">Monthly Revenue (MRR) Benchmark</span>
@@ -251,7 +251,7 @@ export default function PortfolioPage() {
 
       {/* Startups detailed list grid / table */}
       <div className="glass-card rounded-3xl border border-white/60 bg-white/40 dark:bg-zinc-900/60 dark:border-white/10 shadow-xs overflow-hidden">
-        <div className="p-6 border-b border-gray-150 dark:border-zinc-800 flex justify-between items-center bg-white/20 dark:bg-zinc-950/20">
+        <div className="p-6 border-b border-gray-200 dark:border-zinc-800 flex justify-between items-center bg-white/20 dark:bg-zinc-950/20">
           <span className="text-[10px] font-black uppercase tracking-widest text-gray-450">Holding Startups Ledger</span>
           <span className="text-xs text-zinc-500 font-mono">Count: {filteredStartups.length}</span>
         </div>
@@ -272,7 +272,7 @@ export default function PortfolioPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-gray-150/60 dark:border-zinc-800/80 text-[10px] uppercase tracking-wider text-zinc-400 font-black">
+                <tr className="border-b border-gray-200/60 dark:border-zinc-800/80 text-[10px] uppercase tracking-wider text-zinc-400 font-black">
                   <th className="py-4 px-6">Startup</th>
                   <th className="py-4 px-6">Sector & Stage</th>
                   <th className="py-4 px-6 text-right">ARR (MRR)</th>

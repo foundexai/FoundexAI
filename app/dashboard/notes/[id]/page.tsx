@@ -113,7 +113,7 @@ export default function NoteEditorPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-yellow-500/20 hover:-translate-y-0.5 disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-yellow-500/20  disabled:opacity-50"
           >
             {saving ? (
               <CircleNotch className="w-4 h-4 animate-spin" weight="bold" />

@@ -8,7 +8,6 @@ import {
   CheckCircle,
   ChatCircleDots,
   PaperPlaneTilt,
-  Sparkle,
   Calendar,
   CurrencyDollar,
   Note,

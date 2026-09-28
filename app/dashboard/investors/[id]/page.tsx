@@ -8,7 +8,6 @@ import {
   CheckCircle,
   EnvelopeSimple,
   CircleNotch,
-  Sparkle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -219,7 +218,7 @@ export default function InvestorDetailsPage() {
                   href={`https://${investor.website.replace(/^https?:\/\//, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm dark:bg-white/5 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10 cursor-pointer"
+                  className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] shadow-xs dark:bg-white/5 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10 cursor-pointer"
                 >
                   <GlobeSimple className="w-4 h-4 mr-2 text-yellow-500" weight="bold" />
                   Website
@@ -227,7 +226,7 @@ export default function InvestorDetailsPage() {
               )}
               <Link 
                 href="/dashboard/pricing"
-                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 dark:bg-white dark:text-black dark:hover:bg-gray-200 cursor-pointer"
+                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all active:scale-[0.98] shadow-xs hover:shadow-md dark:bg-white dark:text-black dark:hover:bg-gray-200 cursor-pointer"
               >
                 <EnvelopeSimple className="w-4 h-4 mr-2 text-yellow-500" weight="bold" />
                 Get connected with investors
@@ -236,7 +235,7 @@ export default function InvestorDetailsPage() {
                 <button
                   type="button"
                   onClick={() => setIsCopilotOpen(true)}
-                  className="inline-flex items-center px-5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all cursor-pointer"
+                  className="inline-flex items-center px-5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-sm font-bold active:scale-[0.98] shadow-xs hover:shadow-md transition-all cursor-pointer"
                 >
                   Outreach Copilot
                 </button>

@@ -141,22 +141,22 @@ export default function StartupsPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 px-4 sm:px-6 lg:px-10 pb-10">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 sm:px-6 lg:px-10 pb-10">
       {/* Header Area */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex-1">
-            <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2 dark:text-white">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight mb-2 dark:text-white">
               Startup Directory
             </h1>
-            <p className="text-gray-500 max-w-xl text-lg dark:text-gray-400">
+            <p className="text-gray-500 max-w-xl text-sm md:text-base dark:text-gray-400">
               Discover the most innovative companies building the future of Africa.
             </p>
           </div>
 
           <button
             onClick={() => setShowSubmitModal(true)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-xl font-bold transition-all shadow-lg hover:shadow-yellow-400/20 active:scale-95 w-full md:w-auto shrink-0"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-xl font-bold transition-all shadow-xs hover:shadow-md hover:shadow-yellow-400/20 active:scale-[0.98] w-full md:w-auto shrink-0 cursor-pointer"
           >
             <Plus className="w-5 h-5" weight="bold" />
             <span className="hidden sm:inline">Add New Startup</span>
@@ -164,23 +164,24 @@ export default function StartupsPage() {
           </button>
         </div>
 
-        <div className="bg-white/50 backdrop-blur-md border border-white/60 p-1.5 rounded-2xl shadow-sm dark:bg-white/5 dark:border-white/10 overflow-hidden w-full">
-          <div className="flex gap-1 overflow-x-auto thin-scrollbar pb-1 px-1">
-             <div className="px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap text-gray-500 dark:text-gray-400 flex items-center gap-2 border-r border-gray-100 dark:border-white/5 mr-1 shrink-0">
-                <Funnel weight="bold" />
-                Filter
-              </div>
+        {/* Apple Segmented Filter Bar */}
+        <div className="overflow-x-auto no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0">
+          <div className="p-1 bg-gray-100 dark:bg-zinc-800/80 rounded-2xl border border-black/5 dark:border-white/5 inline-flex items-center gap-1 w-fit shrink-0">
+            <div className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap text-gray-400 dark:text-gray-500 flex items-center gap-1.5 border-r border-gray-200 dark:border-zinc-700 mr-1 shrink-0">
+              <Funnel weight="bold" className="w-3.5 h-3.5" />
+              <span>Filter</span>
+            </div>
             {sectors.map((type) => (
               <button
                 key={type}
                 onClick={() =>
                   setSelectedSector(type === "All" ? null : type)
                 }
-                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-[0.98] whitespace-nowrap cursor-pointer ${
                   (type === "All" && !selectedSector) ||
                   selectedSector === type
-                    ? "bg-white shadow-sm text-gray-900 dark:bg-white/10 dark:text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
+                    ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white shadow-xs"
+                    : "text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-white"
                 }`}
               >
                 {type}
@@ -192,7 +193,7 @@ export default function StartupsPage() {
 
       {/* Search Bar */}
       <div className="sticky top-20 z-30">
-        <div className="glass-card p-2 rounded-2xl border border-white/60 shadow-lg flex items-center bg-white/70 backdrop-blur-xl dark:bg-black/40 dark:border-white/10 gap-2 outline-none">
+        <div className="p-2 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-xs flex items-center bg-white/80 backdrop-blur-xl dark:bg-zinc-900/80 dark:border-zinc-800 gap-2 outline-none">
           <div className="pl-4 text-gray-400">
             <MagnifyingGlass className="w-5 h-5" weight="bold" />
           </div>
@@ -201,11 +202,11 @@ export default function StartupsPage() {
             placeholder="Search startups by name, sector, or keywords..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-12 dark:text-white outline-none min-w-0"
+            className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 font-medium h-10 md:h-12 text-sm dark:text-white outline-none min-w-0"
           />
           <button 
             onClick={() => toast.info("Advanced filters coming soon!")}
-            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-sm transition-colors dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0"
+            className="hidden md:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-semibold text-xs sm:text-sm transition-colors active:scale-[0.98] dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20 shrink-0 cursor-pointer"
           >
             <FadersHorizontal className="w-4 h-4" weight="bold" />
             <span className="hidden lg:inline">Filters</span>
@@ -395,7 +396,7 @@ export default function StartupsPage() {
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="w-full mt-8 py-4 bg-yellow-400 text-gray-900 font-black rounded-xl hover:bg-yellow-500 transition-all shadow-xl shadow-yellow-400/20 disabled:opacity-50"
+                className="w-full mt-8 py-3.5 bg-yellow-400 text-gray-900 font-black rounded-xl hover:bg-yellow-500 transition-all active:scale-[0.98] shadow-xs hover:shadow-md hover:shadow-yellow-400/20 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Join Waitlist"}
               </button>

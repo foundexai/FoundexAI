@@ -160,7 +160,7 @@ export default function PublicSigningPage({ params }: PageProps) {
                 href={request.signed_doc_url}
                 target="_blank"
                 rel="noreferrer"
-                className="px-3.5 py-1.5 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl shadow-sm shadow-yellow-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="px-3.5 py-1.5 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl shadow-sm shadow-yellow-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
               >
                 <DownloadSimple className="w-3.5 h-3.5" weight="bold" />
                 <span>Download Certified PDF</span>
@@ -211,7 +211,7 @@ export default function PublicSigningPage({ params }: PageProps) {
                 <button
                   type="submit"
                   disabled={isVerifyingEmail}
-                  className="w-full py-2.5 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-black rounded-xl text-xs font-semibold transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                  className="w-full py-2.5 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:text-black rounded-xl text-xs font-semibold transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
                 >
                   {isVerifyingEmail ? <CircleNotch className="w-4 h-4 animate-spin" /> : "Verify Identity"}
                 </button>
@@ -243,7 +243,7 @@ export default function PublicSigningPage({ params }: PageProps) {
                 ) : (
                   <button
                     onClick={() => setIsSignModalOpen(true)}
-                    className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl shadow-sm shadow-yellow-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                    className="w-full py-3 bg-yellow-500 hover:bg-yellow-450 text-black text-xs font-semibold rounded-xl shadow-sm shadow-yellow-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                   >
                     <Signature className="w-4 h-4" weight="bold" />
                     Sign This Document

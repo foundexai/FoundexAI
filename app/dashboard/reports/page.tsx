@@ -18,7 +18,7 @@ import {
   Lock,
   ChartPieSlice,
   NavigationArrow,
-  Sparkle
+  ShieldCheck
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -173,8 +173,8 @@ export default function ReportsPage() {
         
         <div className="flex items-center gap-4 relative">
           {is_trial_active && (
-            <div className="hidden lg:flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 px-4 py-2 rounded-2xl animate-pulse">
-              <Sparkle className="w-4 h-4 text-yellow-500" weight="fill" />
+            <div className="hidden lg:flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 px-4 py-2 rounded-2xl">
+              <ShieldCheck className="w-4 h-4 text-yellow-500" weight="bold" />
               <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500">
                 Trial Active: {trial_days_remaining} Days Left
               </p>
@@ -461,7 +461,7 @@ export default function ReportsPage() {
                    <button 
                      onClick={() => handleDownloadReport(report)}
                      className={cn(
-                       "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer mt-auto",
+                       "w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer mt-auto",
                        user?.plan_type === "license" 
                           ? "bg-white text-black hover:bg-yellow-400" 
                           : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
@@ -480,7 +480,7 @@ export default function ReportsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10">
            {[
              { label: "Institutional Capital", value: "$4.1B", icon: Handshake },
-             { label: "Active Investors", value: "614", icon: Sparkle },
+             { label: "Active Investors", value: "614", icon: Users },
              { label: "Venture Deals (2024)", value: "487", icon: NavigationArrow },
              { label: "Sectors Covered", value: "4", icon: GlobeSimple },
            ].map((stat, i) => (

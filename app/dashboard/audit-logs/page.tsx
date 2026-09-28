@@ -273,21 +273,21 @@ export default function AuditLogsPage() {
 
   return (
     <main className="w-full flex-1 p-6 md:p-8 bg-gray-50 dark:bg-transparent">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
                 <ClockCounterClockwise
-                  className="w-7 h-7 text-[#E5C158]"
+                  className="w-7 h-7 text-yellow-500"
                   weight="bold"
                 />
                 Audit Logs
               </h1>
 
               {displayStartups.length > 1 ? (
-                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl shadow-2xs">
+                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl shadow-xs">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
                     Company:
                   </span>
@@ -308,7 +308,7 @@ export default function AuditLogsPage() {
                   </select>
                 </div>
               ) : displayStartups.length === 1 ? (
-                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300">
+                <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-1.5 rounded-xl text-xs font-extrabold text-gray-700 dark:text-gray-300 shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                   {displayStartups[0]?.company_name || displayStartups[0]?.name}
                 </div>
@@ -326,7 +326,7 @@ export default function AuditLogsPage() {
               <button
                 onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
                 disabled={isExporting}
-                className="px-3.5 py-2 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+                className="px-3.5 py-2 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 text-xs font-bold rounded-xl transition-all active:scale-[0.98] flex items-center gap-2 shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
               >
                 {isExporting ? (
                   <CircleNotch className="w-4 h-4 animate-spin" />
@@ -338,7 +338,7 @@ export default function AuditLogsPage() {
               </button>
 
               {exportDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 mt-2 w-56 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-gray-200/80 dark:border-zinc-800 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                   <div className="px-3 py-1.5 border-b border-gray-100 dark:border-zinc-800 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                     Export Format (Signed)
                   </div>
@@ -369,7 +369,7 @@ export default function AuditLogsPage() {
             <button
               onClick={() => fetchAuditLogs(undefined, currentPage)}
               disabled={isLoading}
-              className="px-3.5 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-2xs cursor-pointer shrink-0 disabled:opacity-50"
+              className="px-3.5 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98] flex items-center gap-2 shadow-xs hover:shadow-md cursor-pointer shrink-0 disabled:opacity-50"
             >
               <ArrowClockwise
                 className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
@@ -382,12 +382,12 @@ export default function AuditLogsPage() {
 
         {/* Executive Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-zinc-900/60 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white dark:bg-zinc-900/60 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                 Total Audit Events
               </span>
-              <div className="w-8 h-8 rounded-xl bg-[#E5C158]/10 text-[#E5C158] flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center font-bold">
                 <ClockCounterClockwise className="w-4 h-4" weight="bold" />
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function AuditLogsPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900/60 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white dark:bg-zinc-900/60 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                 Security Audit Status
@@ -418,7 +418,7 @@ export default function AuditLogsPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900/60 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white dark:bg-zinc-900/60 p-5 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                 Latest Event Timestamp
@@ -441,7 +441,7 @@ export default function AuditLogsPage() {
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="bg-white dark:bg-zinc-900/60 p-4 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-2xs space-y-3">
+        <div className="bg-white dark:bg-zinc-900/60 p-4 rounded-2xl border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-3">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
@@ -451,7 +451,7 @@ export default function AuditLogsPage() {
                 placeholder="Search action, entity, or shareholder name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700/80 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#E5C158] dark:text-white"
+                className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700/80 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-yellow-400 dark:text-white"
               />
             </div>
 
@@ -496,7 +496,7 @@ export default function AuditLogsPage() {
         </div>
 
         {/* Audit Log Feed Table */}
-        <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-gray-200/80 dark:border-zinc-800 shadow-2xs overflow-hidden">
+        <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-gray-200/80 dark:border-zinc-800 shadow-xs overflow-hidden">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full text-left text-xs min-w-[700px]">
               <thead>
@@ -522,15 +522,20 @@ export default function AuditLogsPage() {
                         )}`}
                       >
                         {getActionIcon(log.action)}
-                        {log.action}
+                        <span>{log.action}</span>
                       </span>
                     </td>
 
                     {/* Entity */}
                     <td className="py-4 px-3 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 font-mono">
+                      <span className="font-bold text-gray-900 dark:text-white">
                         {log.entity}
                       </span>
+                      {log.entity_id && (
+                        <span className="block font-mono text-[9px] text-gray-400">
+                          {log.entity_id.slice(-6)}
+                        </span>
+                      )}
                     </td>
 
                     {/* Log Details */}
@@ -564,8 +569,8 @@ export default function AuditLogsPage() {
                           )}
 
                           {!log.details.shareholder_name && (
-                            <span className="font-mono text-[11px] text-gray-500">
-                              {JSON.stringify(log.details)}
+                            <span className="font-mono text-[11px] text-gray-500 line-clamp-2">
+                              {typeof log.details === "string" ? log.details : JSON.stringify(log.details)}
                             </span>
                           )}
                         </div>
@@ -578,14 +583,12 @@ export default function AuditLogsPage() {
 
                     {/* Performed By */}
                     <td className="py-4 px-4 whitespace-nowrap">
-                      <div>
-                        <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
-                          {log.user_id?.name ||
-                            log.user_id?.email ||
-                            "System Admin"}
-                        </p>
-                        {log.user_id?.email && log.user_id.name && (
-                          <p className="text-[10px] font-normal text-gray-400">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {log.user_id?.name || "System Automated"}
+                        </span>
+                        {log.user_id?.email && (
+                          <p className="text-[10px] text-gray-400 font-mono">
                             {log.user_id.email}
                           </p>
                         )}
@@ -626,7 +629,7 @@ export default function AuditLogsPage() {
                     fetchAuditLogs(undefined, Math.max(1, currentPage - 1))
                   }
                   disabled={currentPage === 1 || isLoading}
-                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 font-bold"
+                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition-all active:scale-[0.98] shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 font-bold cursor-pointer"
                 >
                   <CaretLeft className="w-4 h-4" /> Previous
                 </button>
@@ -638,7 +641,7 @@ export default function AuditLogsPage() {
                     )
                   }
                   disabled={currentPage === totalPages || isLoading}
-                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 font-bold"
+                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 transition-all active:scale-[0.98] shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 font-bold cursor-pointer"
                 >
                   Next <CaretRight className="w-4 h-4" />
                 </button>
