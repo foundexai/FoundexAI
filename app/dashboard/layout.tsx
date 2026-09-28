@@ -26,6 +26,7 @@ import {
   Microphone,
   CreditCard,
   Buildings,
+  BookOpen,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -80,6 +81,7 @@ const FOUNDER_NAV_GROUPS: NavGroup[] = [
       { name: "Subscriptions", href: "/dashboard/pricing", icon: CreditCard },
       { name: "Profile", href: "/dashboard/profile", icon: UserCircle },
       { name: "Settings", href: "/dashboard/settings", icon: Gear },
+      { name: "Documentation", href: "/docs", icon: BookOpen },
     ],
   },
 ];
@@ -121,6 +123,7 @@ const INVESTOR_NAV_GROUPS: NavGroup[] = [
       { name: "Subscriptions", href: "/dashboard/pricing", icon: CreditCard },
       { name: "Profile", href: "/dashboard/profile", icon: UserCircle },
       { name: "Settings", href: "/dashboard/settings", icon: Gear },
+      { name: "Documentation", href: "/docs", icon: BookOpen },
     ],
   },
 ];
